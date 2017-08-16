@@ -66,6 +66,7 @@ This plugin is developing now, may cause some crush problem.
         }
     ]
     ```
+    
     Use this [method](https://github.com/aholstenson/miio/blob/master/docs/protocol.md#) to get you AC's IR signal.Then fill into the customize tag(If we don't support you ac brand and preset yet).
     
     
