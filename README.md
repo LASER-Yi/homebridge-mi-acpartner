@@ -3,7 +3,7 @@
 
 A homebridge plugin for xiaomi AC Partner.
 
-Basic on [takatost's project]("https://github.com/takatost/homebridge-mi-ac-partner") and [miio]("https://github.com/aholstenson/miio"),**thanks**.
+Basic on [takatost's project](https://github.com/takatost/homebridge-mi-ac-partner) and [miio](https://github.com/aholstenson/miio),**thanks**.
 
 This plugin is developing now, may cause some crush problem. 
 
@@ -66,7 +66,7 @@ This plugin is developing now, may cause some crush problem.
         }
     ]
     ```
-    Use this [method]("https://github.com/aholstenson/miio/blob/master/docs/protocol.md") to get you AC's IR signal.Then fill into the customize tag(If we don't support you ac brand and preset yet).
+    Use this [method](https://github.com/aholstenson/miio/blob/master/docs/protocol.md#) to get you AC's IR signal.Then fill into the customize tag(If we don't support you ac brand and preset yet).
     
     
  4. Restart Homebridge.
