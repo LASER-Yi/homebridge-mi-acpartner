@@ -1,0 +1,36 @@
+{
+    "bridge": {
+        "name": "Homebridge",
+        "username": "CC:22:3D:E3:CE:30",
+        "port": 51826,
+        "pin": "123-45-568"
+    },
+    "accessories": [
+        {
+            "accessory": "XiaoMiAcPartner",
+            "token": "token-as-hex",
+            "name": "AcPartner",
+            "brand": "media",
+            "preset_no": "1"
+        },
+        {
+            "accessory": "XiaoMiAcPartner",
+            "token": "token-as-hex",
+            "name": "AcPartner",
+            "ip": "",
+            "customize": {
+                "off":"You IR Signal Here",
+                "heat":{
+                    "30": "",
+                    "29": "",
+                    "17": ""
+                },
+                "cool":{
+                    "30": "",
+                    "29": "",
+                    "17": ""
+                }
+            }
+        }
+    ]
+}
