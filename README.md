@@ -7,7 +7,7 @@ Basic on [takatost's project]("https://github.com/takatost/homebridge-mi-ac-part
 
 This plugin is developing now, may cause some crush problem. 
 
-# Feature
+### Feature
 
 * Switch on / off.
 
