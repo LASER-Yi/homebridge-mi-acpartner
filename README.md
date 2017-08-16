@@ -25,11 +25,14 @@ This plugin is developing now, may cause some crush problem.
    npm install -g homebridge-mi-acpartner miio
    ```
    
+   
 2. Follow this [Document](https://github.com/aholstenson/miio/blob/master/docs/management.md#getting-the-token-of-a-device) to get your token of AC Partner.
    
    If you are using Android, you can get token of AC Partner by using MIJIA app.
    
+   
 4. In you router, change the IP of AC Partner to static(If miio can easily regonize your device,this step is no longer need) 
+   
    
 3. Add following line to your `config.json` file
   
@@ -63,5 +66,6 @@ This plugin is developing now, may cause some crush problem.
         }
     ]
     ```
+    
     
  4. Restart Homebridge.
