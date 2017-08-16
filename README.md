@@ -49,7 +49,7 @@ This plugin is developing now, may cause some crush problem.
             "accessory": "XiaoMiAcPartner",
             "token": "token-as-hex",
             "name": "AcPartner",
-            "ip": "your_ac_partner_ip_address",
+            "ip": "your_ac_partner_ip_address(if miio can't regonize your device,use this method)",
             "customize": {
                 "off":"You IR Signal Here",
                 "heat":{
@@ -66,6 +66,7 @@ This plugin is developing now, may cause some crush problem.
         }
     ]
     ```
+    Use this [method]("https://github.com/aholstenson/miio/blob/master/docs/protocol.md") to get you AC's IR signal.Then fill into the customize tag(If we don't support you ac brand and preset yet).
     
     
  4. Restart Homebridge.
