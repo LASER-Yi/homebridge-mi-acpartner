@@ -1,4 +1,4 @@
-# homebridge-mi-acPartner
+# homebridge-mi-acpartner
 [![npm version](https://badge.fury.io/js/homebridge-mi-acpartner.svg)](https://badge.fury.io/js/homebridge-mi-acpartner)
 
 A homebridge plugin for xiaomi AC Partner.
@@ -71,3 +71,11 @@ Use this [method](https://github.com/aholstenson/miio/blob/master/docs/protocol.
  
  
  4. Restart Homebridge.
+ 
+ 
+### Changelog
+  0.0.2
+  Change Package.json to make Homebridge can run the plugin.
+  
+  0.0.1
+  ADD Basic File.
