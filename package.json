@@ -1,45 +1,29 @@
 {
-  "_from": "homebridge-mi-acPartner",
-  "_id": "homebridge-mi-acPartner@0.0.1",
-  "_inBundle": false,
-  "_location": "/homebridge-mi-acPartner",
-  "_phantomChildren": {},
-  "_requested": {
-    "type": "tag",
-    "registry": true,
-    "raw": "homebridge-mi-acPartner",
-    "name": "homebridge-mi-acPartner",
-    "escapedName": "homebridge-mi-acPartner",
-    "rawSpec": "",
-    "saveSpec": null,
-    "fetchSpec": "latest"
+  "name": "homebridge-mi-acpartner",
+  "version": "0.0.2",
+  "description": "homebridge plugin for Xiaomi AC Partner",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "_requiredBy": [
-    "#USER",
-    "/"
-  ],
-  "bugs": {
-    "url": "https://github.com/LASER-Yi/homebridge-mi-acPartner/issues"
-  },
-  "bundleDependencies": false,
-  "deprecated": false,
-  "description": "Xiaomi Mi acPartner plugin for Homebridge.",
-  "engines": {
-    "homebridge": ">=0.2.0",
-    "miio": ">=0.12.0",
-    "node": ">=0.12.0"
-  },
-  "homepage": "https://github.com/LASER-Yi/homebridge-mi-acPartner",
-  "keywords": [
-    "homebridge-plugin",
-    "xiaomi",
-    "ac partner"
-  ],
-  "license": "MIT",
-  "name": "homebridge-Mi-acPartner",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/LASER-Yi/homebridge-mi-acPartner.git"
   },
-  "version": "0.0.1"
+  "keywords": [
+    "homebridge-plugin",
+    "homebridge",
+    "xiaomi"
+  ],
+  "author": "LASER_",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/LASER-Yi/homebridge-mi-acPartner/issues"
+  },
+  "homepage": "https://github.com/LASER-Yi/homebridge-mi-acPartner#readme",
+  "engines": {
+    "node": ">=0.12.0",
+    "homebridge": ">=0.4.1",
+    "miio": ">= 0.12.0"
+  }
 }
