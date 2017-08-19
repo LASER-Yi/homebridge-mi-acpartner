@@ -18,8 +18,7 @@ function XiaoMiAcPartner(log, config) {
     this.ip = config.ip;
 
     this.TargetHeatingCoolingState = Characteristic.TargetHeatingCoolingState.OFF;
-    this.UserCustomized = config.customize;
-    if (this.UserCustomized == 'undefined') {
+    if (config.customize == null) {
         customi = false;
         this.log("[XiaoMiAcParner][INFO] Using presets...");
         var presets = require('./presets.json');
@@ -29,6 +28,7 @@ function XiaoMiAcPartner(log, config) {
                 this.codeTpl = presets[config.brand][config.preset_no];
             }        
     }else{
+        this.UserCustomized = config.customize;
         this.log("[XiaoMiAcParner][INFO] Using user customized IR signal...");
         if(!this.UserCustomized.off){
             this.log("[XiaoMiAcParner][WARN] Cannot find off IR signal!!!");

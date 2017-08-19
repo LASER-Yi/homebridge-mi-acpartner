@@ -21,9 +21,9 @@ This plugin is developing now, may cause some crush problem.
 
 1. Install required packages(include miio).
 
-   ```
+```
    npm install -g homebridge-mi-acpartner miio
-   ```
+```
    
    
 2. Follow this [Document](https://github.com/aholstenson/miio/blob/master/docs/management.md#getting-the-token-of-a-device) to get your token of AC Partner.
@@ -36,6 +36,8 @@ This plugin is developing now, may cause some crush problem.
    
 3. Add following line to your `config.json` file
 
+   Using Miio to discover your device and using perset AC command.
+   Support `media` no.1 and `gree` no.1 and no.8.
 
 ```"accessories": [
         {
@@ -44,7 +46,11 @@ This plugin is developing now, may cause some crush problem.
             "name": "AcPartner",
             "brand": "media",
             "preset_no": "1"
-        },
+        }
+    ]
+```
+   Using IP address to discover your device and using customize AC command.
+```"accessories": [
         {
             "accessory": "XiaoMiAcPartner",
             "token": "token-as-hex",
@@ -67,13 +73,16 @@ This plugin is developing now, may cause some crush problem.
     ]
 ```
 
-Use this [method](https://github.com/aholstenson/miio/blob/master/docs/protocol.md#) to get you AC's signal.Then fill into the customize tag(If we don't support you ac brand and preset yet).
+Use this [method](https://github.com/aholstenson/miio/blob/master/docs/protocol.md#) to get you AC's command.Then fill into the customize tag.
  
  
  4. Restart Homebridge.
  
  
 ### Changelog
+  0.0.3
+  Fix a problem that user cannot use presets.
+
   0.0.2
   Change Package.json to make Homebridge can run the plugin.
   
