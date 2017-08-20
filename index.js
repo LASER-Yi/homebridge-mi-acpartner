@@ -247,7 +247,7 @@ XiaoMiAcPartner.prototype = {
             return;
         }
 
-        if (customi = false) {
+        if (customi == false) {
             if (!this.codeTpl) {
                 this.log.error('[XiaoMiAcPartner][WARN] Command code invalid, brand or preset_no not set right?')
                 return;
@@ -256,7 +256,7 @@ XiaoMiAcPartner.prototype = {
             var code = this.codeTpl
                     .replace("p", ((this.TargetHeatingCoolingState != Characteristic.TargetHeatingCoolingState.OFF) ? "1" : "0"))    // Power
                     .replace("m", ((this.TargetHeatingCoolingState != Characteristic.TargetHeatingCoolingState.OFF) ? this.stateMaps[this.TargetHeatingCoolingState] : "2"))
-                    .replace("tt", this.tempMaps[this.TargetTemperature]);            
+                    .replace("tt", this.tempMaps[this.TargetTemperature]);
         }else{
             if (this.TargetHeatingCoolingState != Characteristic.TargetHeatingCoolingState.OFF) {
                 if (this.TargetHeatingCoolingState == 1) {

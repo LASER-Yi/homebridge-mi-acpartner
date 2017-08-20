@@ -84,6 +84,9 @@ Use this [method](https://github.com/aholstenson/miio/blob/master/docs/protocol.
 
 
 ### Changelog
+  0.0.5
+  Fix a problem that cannot send preset signal.
+
   0.0.4
   Fix a problem that customize signal cannot work.
 
