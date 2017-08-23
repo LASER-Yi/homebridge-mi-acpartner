@@ -86,7 +86,7 @@ Use this [method](https://github.com/aholstenson/miio/blob/master/docs/protocol.
 
 
 ### Changelog
-  0.1.1
+  0.1.2
   Fix gree no.1 preset cannot work.
 
   0.0.9

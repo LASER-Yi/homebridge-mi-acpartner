@@ -203,10 +203,10 @@ XiaoMiAcPartner.prototype = {
         /*this.device.call('get_model_and_state', [])
             .then(function(nowState){
 
-            }*/
-        var test = 30;
-        this.log("[XiaoMiAcPartner][INFO] CurrentTemperature %s", test);
-        callback(null, parseFloat(test));
+            }
+        var test = 30;*/
+        this.log("[XiaoMiAcPartner][INFO] CurrentTemperature %s", this.TargetTemperature);
+        callback(null, parseFloat(this.TargetTemperature));
     },
 
     identify: function(callback) {
@@ -273,9 +273,9 @@ XiaoMiAcPartner.prototype = {
         }
 
         this.log.debug("[XiaoMiAcPartner][DEBUG] Sending code: " + code);
-        /*this.device.call('send_cmd', [code])
+        this.device.call('send_cmd', [code])
             .then(function(returnVal){
                 
-            })*/
+            })
     }
 };
