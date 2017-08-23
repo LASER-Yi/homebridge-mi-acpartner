@@ -88,12 +88,10 @@ XiaoMiAcPartner.prototype = {
         var accessory = this;
         var log = this.log;
         var token = this.token;
-
         log.debug('[XiaoMiAcPartner][INFO] Searching AC Partner...');
         // Discover device in the network
 
         if (!this.ip) {
-
             log.debug('[XiaoMiAcPartner][DEBUG] Using miio...');
             var browser = miio.browse();
             
@@ -117,7 +115,6 @@ XiaoMiAcPartner.prototype = {
     
                         devices[reg.id] = device;
                         accessory.device = device;
-                        this.isConnect = true;
                         log.debug('[XiaoMiAcPartner][INFO] Discovered "%s" (ID: %s) on %s:%s.', reg.hostname, device.id, device.address, device.port);
                     }).catch(function(e) {
                         if (devices.length > 0) {
@@ -127,7 +124,7 @@ XiaoMiAcPartner.prototype = {
                         log.error('[XiaoMiAcPartner][WARN] Device "%s" (ID: %s) register failed: %s (Maybe invalid token?)', reg.hostname, reg.id, e.message);
                     });
             }); 
-    
+
             browser.on('unavailable', function(reg){
                 if(reg.model != 'lumi.acpartner.v1' && reg.model != 'lumi.acpartner.v2') {
                     return;
@@ -143,16 +140,14 @@ XiaoMiAcPartner.prototype = {
                 delete devices[reg.id];
             });
         }else{
-            log.debug('[XiaoMiAcPartner][DEBUG] Using IP adrress...');
-            accessory.device = "3";
+            this.log.debug('[XiaoMiAcPartner][DEBUG] Using IP adrress...');
+            accessory.device;
             miio.device({ address: this.ip, token: this.token })
                 .then(function(device){
                     accessory.device = device;
-                    this.isConnect = true;
-                    log.debug('[XiaoMiAcPartner][INFO] Discovered "%s" (ID: %s) on %s:%s.', device.hostname, device.id, device.address, device.port);
+                    log('[XiaoMiAcPartner][INFO] Discovered "%s" (ID: %s) on %s:%s.', device.hostname, device.id, device.address, device.port);
                 })
                 .catch(log.error('[XiaoMiAcPartner][WARN] Cannot reach your AC Partner (Maybe invalid ip?)'));
-                
         }
 
     },
@@ -275,10 +270,6 @@ XiaoMiAcPartner.prototype = {
         }
 
         this.log.debug("[XiaoMiAcPartner][DEBUG] Sending code: " + code);
-        if (this.isConnect) {
-            this.device.call('send_cmd', [code]);   
-        }else{
-            this.log.error('[XiaoMiAcPartner][WARN] Cannot send! AC Partner not connected');
-        }
+        this.device.call('send_cmd', [code]);
     }
 };
