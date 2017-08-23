@@ -86,6 +86,9 @@ Use this [method](https://github.com/aholstenson/miio/blob/master/docs/protocol.
 
 
 ### Changelog
+  0.1.0
+  Fix gree no.1 preset cannot work.
+
   0.0.9
   Add auto mode support, code structure reconstruction, presets reconstruction.
 

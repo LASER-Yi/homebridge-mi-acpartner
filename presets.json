@@ -40,11 +40,12 @@
     },
     "gree": {
         "1": {
-            "main": "0180222221pm311tt02",
+            "main": "0180222221pm301tt02",
             "VALUE": ["m","p","tt"],
             "m":{
                 "cooler": "1",
-                "heater": "0"
+                "heater": "0",
+                "auto": "2"
             },
             "p":{
                 "des": "switch",
