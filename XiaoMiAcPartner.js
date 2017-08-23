@@ -1,84 +1,46 @@
 var miio = require('miio');
-var Accessory, PlatformAccessory, Service, Characteristic, UUIDGen;
+var outputSignal = require("./packages/acSignal_handle");
+var Accessory, Service, Characteristic;
 
 module.exports = function(homebridge) {
-    //Init
-    Accessory = homebridge.hap.Accessory;
-    PlatformAccessory = homebridge.platformAccessory;
+    Accessory = homebridge.platformAccessory;
     Service = homebridge.hap.Service;
     Characteristic = homebridge.hap.Characteristic;
-    UUIDGen = homebridge.hap.uuid;
-
-    //Register
-    homebridge.registerPlatform('homebridge-mi-acpartner', 'XiaoMiAcPartner', XiaoMiAcPartner, true);
+    homebridge.registerAccessory('homebridge-mi-acpartner', 'XiaoMiAcPartner', XiaoMiAcPartner);
 }
 
 function XiaoMiAcPartner(log, config) {
-    //init
-    log.debug("[XiaoMiAcParner][DEBUG] Init");
+    if(null == config) {
+        this.log.error('[XiaoMiAcPartner][WARN] Cannot find config for AC Partner');
+        return;
+    }
+
     this.log = log;
-    this.name = config.name || 'AcPartner';
+    //this.log.debug("[XiaoMiAcPartner][DEBUG] Init");
+    this.name = config.name;
     this.token = config.token;
     this.TargetTemperature = config.defaultTemp || 26;
     this.ip = config.ip;
-
     this.TargetHeatingCoolingState = Characteristic.TargetHeatingCoolingState.OFF;
-    this.UserCustomized = config.customize;
-    if (this.UserCustomized == 'undefined') {
-        //customi = false;
-        this.log("[XiaoMiAcParner][INFO] Using presets...");
+    if (config.customize == null) {
+        this.config = config;
+        this.customi = false;
+        this.data = JSON;
+        this.log("[XiaoMiAcPartner][INFO] Using presets...");
         var presets = require('./presets.json');
             if (!presets[config.brand] || !presets[config.brand][config.preset_no]) {
-                log.error('Brand or preset_no invalid');
+                this.log.error('[XiaoMiAcPartner][WARN] Brand or preset_no invalid');
             } else {
-                this.codeTpl = presets[config.brand][config.preset_no];
+                this.data.model = this.config.brand;
+                this.data.preset_no = this.config.preset_no;
+                this.data.defaultState = Characteristic.TargetHeatingCoolingState;
             }        
     }else{
-        this.log("[XiaoMiAcParner][INFO] Using user customized IR signal...");
-        if(!this.UserCustomized.off){
-            this.log("[XiaoMiAcParner][WARN] Cannot find off IR signal!!!");
-        }else{
-            this.offSignal = this.UserCustomized.off;
-        }
-        if(!this.UserCustomized.cool){
-            this.log("[XiaoMiAcParner][WARN] Cannot find cool mode IR signal!");
-        }else{
-            this.coolSignal = new Array();
-            coolSignal = this.UserCustomized.cool;
-        }
-        if(!this.UserCustomized.heat){
-            this.log("[XiaoMiAcParner][WARN] Cannot find heat mode IR signal!");
-        }else{
-            this.heatSigal = new Array();
-            heatSignal = this.UserCustomized.heat;
-        }
+        this.customi = config.customize;
+        this.log("[XiaoMiAcPartner][INFO] Using customized AC signal...");
     }
 
     this.services = [];
-
-    this.stateMaps = {
-        4: "3",
-        3: "2",
-        2: "1",
-        1: "0",
-    };
-
-    this.tempMaps = {
-        30: "1e",
-        29: "1d",
-        28: "1c",
-        27: "1b",
-        26: "1a",
-        25: "19",
-        24: "18",
-        23: "17",
-        22: "16",
-        21: "15",
-        20: "14",
-        19: "13",
-        18: "12",
-        17: "11"
-    };
 
     //Register as Thermostat
     this.acPartnerService = new Service.Thermostat(this.name);
@@ -113,7 +75,7 @@ function XiaoMiAcPartner(log, config) {
 
     this.serviceInfo
         .setCharacteristic(Characteristic.Manufacturer, 'XiaoMi')
-        .setCharacteristic(Characteristic.Model, 'AcPartner');
+        .setCharacteristic(Characteristic.Model, 'AC Partner');
     
     this.services.push(this.serviceInfo);
 
@@ -126,12 +88,12 @@ XiaoMiAcPartner.prototype = {
         var log = this.log;
         var token = this.token;
 
-        log.debug('[XiaoMiAcParner][INFO] Discovering Mi AC Partner devices...');
+        log.debug('[XiaoMiAcPartner][INFO] Searching AC Partner...');
         // Discover device in the network
 
         if (!this.ip) {
 
-            log.debug('[XiaoMiAcParner][DEBUG] Using miio...');
+            log.debug('[XiaoMiAcPartner][DEBUG] Using miio...');
             var browser = miio.browse();
             
             browser.on('available', function(reg){
@@ -155,13 +117,13 @@ XiaoMiAcPartner.prototype = {
                         devices[reg.id] = device;
                         accessory.device = device;
     
-                        log.debug('Discovered "%s" (ID: %s) on %s:%s.', reg.hostname, device.id, device.address, device.port);
+                        log.debug('[XiaoMiAcPartner][INFO] Discovered "%s" (ID: %s) on %s:%s.', reg.hostname, device.id, device.address, device.port);
                     }).catch(function(e) {
                         if (devices.length > 0) {
                             return;
                         }
                         
-                        log.error('Device "%s" (ID: %s) register failed: %s (Maybe invalid token?)', reg.hostname, reg.id, e.message);
+                        log.error('[XiaoMiAcPartner][WARN] Device "%s" (ID: %s) register failed: %s (Maybe invalid token?)', reg.hostname, reg.id, e.message);
                     });
             }); 
     
@@ -180,14 +142,14 @@ XiaoMiAcPartner.prototype = {
                 delete devices[reg.id];
             });
         }else{
-            log.debug('[XiaoMiAcParner][DEBUG] Using IP adrress...');
+            log.debug('[XiaoMiAcPartner][DEBUG] Using IP adrress...');
             accessory.device = "3";
             miio.device({ address: this.ip, token: this.token })
                 .then(function(device){
                     accessory.device = device;
-                    log.debug('[XiaoMiAcParner][INFO] Discovered "%s" (ID: %s) on %s:%s.', device.hostname, device.id, device.address, device.port);
+                    log.debug('[XiaoMiAcPartner][INFO] Discovered "%s" (ID: %s) on %s:%s.', device.hostname, device.id, device.address, device.port);
                 })
-                .catch(console.error);
+                .catch(log.error('[XiaoMiAcPartner][WARN] Cannot reach your AC Partner (Maybe invalid ip?)'));
                 
         }
 
@@ -201,9 +163,9 @@ XiaoMiAcPartner.prototype = {
         if(context !== 'fromSetValue') {
             this.TargetHeatingCoolingState = TargetHeatingCoolingState;
             if (this.TargetHeatingCoolingState == Characteristic.TargetHeatingCoolingState.OFF) {
-                this.log.debug('[XiaoMiAcParner][INFO] AC Power off');
-            } else {
-                this.log.debug('Set TargetHeatingCoolingState: ' + this.TargetHeatingCoolingState);
+                this.log("[XiaoMiAcPartner][INFO] AC turned off");
+            }else{
+                this.log.debug('[XiaoMiAcPartner][INFO] Set TargetHeatingCoolingState: ' + this.TargetHeatingCoolingState);
             }
 
             this.SendCmd();
@@ -219,7 +181,9 @@ XiaoMiAcPartner.prototype = {
         if(context !== 'fromSetValue') {
               this.TargetTemperature = TargetTemperature;
               if (this.TargetHeatingCoolingState == Characteristic.TargetHeatingCoolingState.OFF) {
-                  this.TargetHeatingCoolingState = Characteristic.TargetHeatingCoolingState.AUTO;
+                this.TargetHeatingCoolingState = Characteristic.TargetHeatingCoolingState.AUTO;
+                this.acPartnerService.getCharacteristic(Characteristic.TargetHeatingCoolingState)
+                    .updateValue(Characteristic.TargetHeatingCoolingState.AUTO)
               }
 
             // Update current temperature
@@ -227,7 +191,7 @@ XiaoMiAcPartner.prototype = {
                 .getCharacteristic(Characteristic.CurrentTemperature)
                 .updateValue(parseFloat(TargetTemperature));
 
-            this.log.debug('Set temperature: ' + TargetTemperature);
+            this.log.debug('[XiaoMiAcPartner][DEBUG] Set temperature: ' + TargetTemperature);
             this.SendCmd();
         }
 
@@ -235,8 +199,14 @@ XiaoMiAcPartner.prototype = {
     },
 
     getCurrentTemperature: function(callback) {
-        this.log("[XiaoMiAcParner][INFO] CurrentTemperature %s", this.TargetTemperature);
-        callback(null, parseFloat(this.TargetTemperature));
+
+        /*this.device.call('get_model_and_state', [])
+            .then(function(nowState){
+
+            }*/
+        var test = 30;
+        this.log("[XiaoMiAcPartner][INFO] CurrentTemperature %s", test);
+        callback(null, parseFloat(test));
     },
 
     identify: function(callback) {
@@ -249,41 +219,63 @@ XiaoMiAcPartner.prototype = {
 
     SendCmd: function() {
         if (!this.device) {
-            this.log.error('[XiaoMiAcParner][WARN] Device not exists!');
+            this.log.error('[XiaoMiAcPartner][WARN] Device not exists!');
             return;
         }
 
-        if (customi = false) {
-            if (!this.codeTpl) {
-                this.log.error('[XiaoMiAcParner][WARN] Command code invalid, brand or preset_no not set right?')
+        this.log.debug("[XiaoMiAcPartner][DEBUG] Current TargetHeatingCoolingState: " + this.TargetHeatingCoolingState);
+        if (!this.customi) {
+            this.data.CurrentTemperature = this.CurrentTemperature;
+            this.data.TargetTemperature = this.TargetTemperature;
+            this.data.TargetHeatingCoolingState = this.TargetHeatingCoolingState;
+            var retCode = outputSignal(this.data);
+            if (!retCode) {
+                this.log.error('[XiaoMiAcPartner][WARN] Command code invalid, brand or preset_no not set right?')
                 return;
             }
-    
-            var code = this.codeTpl
-                    .replace("p", ((this.TargetHeatingCoolingState != Characteristic.TargetHeatingCoolingState.OFF) ? "1" : "0"))    // Power
-                    .replace("m", ((this.TargetHeatingCoolingState != Characteristic.TargetHeatingCoolingState.OFF) ? this.stateMaps[this.TargetHeatingCoolingState] : "2"))
-                    .replace("tt", this.tempMaps[this.TargetTemperature]);            
+            //this.log.debug("[XiaoMiAcPartner][DEBUG] Get code: " + retCode.data);
+            var code = retCode.data;
+            delete retCode;
+
         }else{
             if (this.TargetHeatingCoolingState != Characteristic.TargetHeatingCoolingState.OFF) {
-                if (this.TargetHeatingCoolingState == 1) {
-                    if (!heatSignal[this.TargetTemperature]&&coolSignal[this.TargetTemperature] == "") {
-                        this.log.error('[XiaoMiAcParner][WARN] Signal not define!');
+                if (this.TargetHeatingCoolingState == Characteristic.TargetHeatingCoolingState.HEAT) {
+                    if (!this.customi||!this.customi.heat[this.TargetTemperature]) {
+                        this.log.error('[XiaoMiAcPartner][WARN] HEAT Signal not define!');
                         return;
                     }
-                    var code = heatSignal[this.TargetTemperature];
+                    var code = this.customi.heat[this.TargetTemperature];
+                }else if (this.TargetHeatingCoolingState == Characteristic.TargetHeatingCoolingState.COOL){
+                    if (!this.customi||!this.customi.cool[this.TargetTemperature]) {
+                        this.log.error('[XiaoMiAcPartner][WARN] COOL Signal not define!');
+                        return;
+                    }
+                    var code = this.customi.cool[this.TargetTemperature];
                 }else{
-                    if (!coolSignal[this.TargetTemperature]&&coolSignal[this.TargetTemperature] == "") {
-                        this.log.error('[XiaoMiAcParner][WARN] Signal not define!');
-                        return;
+                    if (!this.customi||!this.customi.auto) {
+                        this.log.error('[XiaoMiAcPartner][WARN] AUTO Signal not define! Will send COOL signal instead');
+                        if (!this.customi||!this.customi.cool[this.TargetTemperature]) {
+                            this.log.error('[XiaoMiAcPartner][WARN] COOL Signal not define!');
+                            return;
+                        }
+                        var code = this.customi.cool[this.TargetTemperature];
+                    }else{
+                        var code = this.customi.auto;
                     }
-                    var code = coolSignal[this.TargetTemperature];
                 }
             }else{
-                var code = this.offSignal;
+                if (!this.customi||!this.customi.off) {
+                    this.log.error('[XiaoMiAcPartner][WARN] OFF Signal not define!');
+                    return;
+                }
+                var code = this.customi.off;
             }
         }
 
-        this.log.debug("[XiaoMiAcParner][DEBUG]code: " + code);
-        this.device.call('send_cmd', [code]);
+        this.log.debug("[XiaoMiAcPartner][DEBUG] Sending code: " + code);
+        /*this.device.call('send_cmd', [code])
+            .then(function(returnVal){
+                
+            })*/
     }
 };

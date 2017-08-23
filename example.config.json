@@ -17,9 +17,10 @@
             "accessory": "XiaoMiAcPartner",
             "token": "token-as-hex",
             "name": "AcPartner",
-            "ip": "",
+            "ip": "192.168.1.1",
             "customize": {
-                "off":"You IR Signal Here",
+                "off": "You_AC_Signal_Here",
+                "auto": "",
                 "heat":{
                     "30": "",
                     "29": "",

@@ -5,7 +5,7 @@ A homebridge plugin for xiaomi AC Partner.
 
 Basic on [takatost's project](https://github.com/takatost/homebridge-mi-ac-partner) and [miio](https://github.com/aholstenson/miio),**thanks**.
 
-This plugin is developing now, may cause some crush problem. 
+This plugin is developing now, may cause some crash problem. 
 
 ### Feature
 
@@ -13,7 +13,8 @@ This plugin is developing now, may cause some crush problem.
 
 * Control modes:
 
-  - Lift ac partner temperature between 17 - 30. 
+  - Change temperature between 17 - 30.
+  - HEAT mode, COOL mode, AUTO mode support. 
 
 * Customize your AC's Signal
 
@@ -61,7 +62,8 @@ Using IP address to discover your device and using customize AC command.
             "name": "AcPartner",
             "ip": "your_ac_partner_ip_address",
             "customize": {
-                "off":"You_AC_Signal_Here",
+                "off": "You_AC_Signal_Here",
+                "auto: "If no define, send cool signal instead",
                 "heat":{
                     "30": "",
                     "29": "",
@@ -84,6 +86,9 @@ Use this [method](https://github.com/aholstenson/miio/blob/master/docs/protocol.
 
 
 ### Changelog
+  0.0.9
+  Add auto mode support, code structure reconstruction, presets reconstruction.
+
   0.0.5
   Fix a problem that cannot send preset signal.
 

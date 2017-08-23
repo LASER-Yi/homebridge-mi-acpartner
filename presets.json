@@ -1,9 +1,91 @@
 {
+    "description":{
+        "main": "Main AC signal",
+        "VALUE": ["p", "tt", "..."],
+        "p": {
+            "des": "switch / trigger",
+            "on": "on signal",
+            "off": "off signal"
+        },
+        "tt": "signal of temp in 17 degree",
+        "m":{
+            "auto": "auto mode",
+            "cooler": "cool mode",
+            "heater": "heat mode",
+            "airSup": "air supply mode",
+            "dehum": "dehumidify mode"
+        },
+        "w": {
+            "auto": "auto wind level",
+            "level": "wind level number",
+            "1": "level 1",
+            "3": "level 3"
+        }
+    },
     "media": {
-        "1": "0180111111pm30tt02"
+        "1":{
+            "main": "0180111111pm301tt02",
+            "VALUE": ["m","p","tt"],
+            "m":{
+                "cooler": "1",
+                "heater": "0"
+            },
+            "p":{
+                "des": "switch",
+                "on": "1",
+                "off": "0"
+            },
+            "tt": "1"
+        }
     },
     "gree": {
-    	"1": "0180222221pm31tt02",
-    	"8": "0100004795pm31tt0100090900005002"
+        "1": {
+            "main": "0180222221pm311tt02",
+            "VALUE": ["m","p","tt"],
+            "m":{
+                "cooler": "1",
+                "heater": "0"
+            },
+            "p":{
+                "des": "switch",
+                "on": "1",
+                "off": "0"
+            },
+            "tt": "1"
+        },
+        "2": {
+            "main": "0100010727pm301tt1100190tt205002102000t6t0190tt2070020000wt4wt0",
+            "VALUE": ["m","p","tt","t6t","w","t4wt"],
+            "m":{
+                "auto": "2",
+                "cooler": "1",
+                "heater": "0",
+                "airSup": "4",
+                "dehum": "3"
+            },
+            "p":{
+                "des": "switch",
+                "on": "1",
+                "off": "0"
+            },
+            "tt": "1",
+            "t6t": "7",
+            "w": "00",
+            "t4wt": "4"
+        },
+        "8": {
+            "main": "0100004795pm311tt0100090900005002",
+            "VALUE": ["m","p","tt"],
+            "m":{
+                "cooler": "1",
+                "heater": "0"
+            },
+            "p":{
+                "des": "switch",
+                "on": "1",
+                "off": "0"
+            },
+            "tt": "1"
+        }
     }
 }
