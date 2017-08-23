@@ -88,7 +88,7 @@ XiaoMiAcPartner.prototype = {
         var accessory = this;
         var log = this.log;
         var token = this.token;
-        log.debug('[XiaoMiAcPartner][INFO] Searching AC Partner...');
+        this.log('[XiaoMiAcPartner][INFO] Searching AC Partner...');
         // Discover device in the network
 
         if (!this.ip) {
@@ -97,7 +97,7 @@ XiaoMiAcPartner.prototype = {
             
             browser.on('available', function(reg){
                 if (!token) {
-                    log.debug('token is invalid');
+                    log.error('[XiaoMiAcPartner][WARN] token is invalid');
                     return;
                 }
     
@@ -145,9 +145,9 @@ XiaoMiAcPartner.prototype = {
             miio.device({ address: this.ip, token: this.token })
                 .then(function(device){
                     accessory.device = device;
-                    log('[XiaoMiAcPartner][INFO] Discovered "%s" (ID: %s) on %s:%s.', device.hostname, device.id, device.address, device.port);
+                    log.debug('[XiaoMiAcPartner][INFO] Discovered "%s" (ID: %s) on %s:%s.', device.hostname, device.id, device.address, device.port);
                 })
-                .catch(log.error('[XiaoMiAcPartner][WARN] Cannot reach your AC Partner (Maybe invalid ip?)'));
+                .catch(log.error('[XiaoMiAcPartner][WARN] Cannot connect your AC Partner (Maybe invalid ip?)'));
         }
 
     },

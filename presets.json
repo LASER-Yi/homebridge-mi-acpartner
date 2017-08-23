@@ -1,92 +1,54 @@
 {
-    "description":{
-        "main": "Main AC signal",
-        "VALUE": ["p", "tt", "..."],
-        "p": {
-            "des": "switch / trigger",
-            "on": "on signal",
-            "off": "off signal"
+    "default":{
+        "description": "The Default Replacement of AC Partner",
+        "defaultMain": "AC model(10)+po+mo+wi+sw+1+tt",
+        "VALUE": ["po","mo","wi","sw","tt","li"],
+        "po": {
+            "type": "switch",
+            "on": "1",
+            "off": "0"
         },
-        "tt": "signal of temp in 17 degree",
-        "m":{
-            "auto": "auto mode",
-            "cooler": "cool mode",
-            "heater": "heat mode",
-            "airSup": "air supply mode",
-            "dehum": "dehumidify mode"
+        "mo":{
+            "heater": "0",
+            "cooler": "1",
+            "auto": "2",
+            "dehum": "3",
+            "airSup": "4"
         },
-        "w": {
-            "auto": "auto wind level",
-            "1": "level 1",
-            "2": "level 2",
-            "3": "level 3"
+        "wi":{
+            "auto": "3",
+            "1": "0",
+            "2": "1",
+            "3": "2"
+        },
+        "sw": {
+            "on": "0",
+            "off": "1"
+        },
+        "tt": "1",
+        "li": {
+            "on": "02",
+            "off": "a0"
         }
+
     },
     "media": {
         "1":{
-            "main": "0180111111pm301tt02",
-            "VALUE": ["m","p","tt"],
-            "m":{
-                "cooler": "1",
-                "heater": "0"
-            },
-            "p":{
-                "des": "switch",
-                "on": "1",
-                "off": "0"
-            },
-            "tt": "1"
+            "main": "0180111111pomowisw1tt02"
         }
     },
     "gree": {
         "1": {
-            "main": "0180222221pm301tt02",
-            "VALUE": ["m","p","tt"],
-            "m":{
-                "cooler": "1",
-                "heater": "0",
-                "auto": "2"
-            },
-            "p":{
-                "des": "switch",
-                "on": "1",
-                "off": "0"
-            },
-            "tt": "1"
+            "main": "0180222221pomowisw1tt02"
         },
         "2": {
-            "main": "0100010727pm301tt1100190tt205002102000t6t0190tt2070020000wt4wt0",
-            "VALUE": ["m","p","tt","t6t","w","t4wt"],
-            "m":{
-                "auto": "2",
-                "cooler": "1",
-                "heater": "0",
-                "airSup": "4",
-                "dehum": "3"
-            },
-            "p":{
-                "des": "switch",
-                "on": "1",
-                "off": "0"
-            },
-            "tt": "1",
+            "main": "0100010727pomowisw1tt1100190tt205002102000t6t0190tt2070020000wit4wt0",
+            "VALUE": ["t6t","t4wt"],
             "t6t": "7",
-            "w": "00",
             "t4wt": "4"
         },
         "8": {
-            "main": "0100004795pm311tt0100090900005002",
-            "VALUE": ["m","p","tt"],
-            "m":{
-                "cooler": "1",
-                "heater": "0"
-            },
-            "p":{
-                "des": "switch",
-                "on": "1",
-                "off": "0"
-            },
-            "tt": "1"
+            "main": "0100004795pomowisw1tt0100090900005002"
         }
     }
 }

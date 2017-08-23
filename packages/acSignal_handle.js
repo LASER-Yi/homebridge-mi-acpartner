@@ -16,32 +16,38 @@ module.exports = function(data){
   }
 
   var mainCode = presets[data.model][data.preset_no].main;
-  var codeConfig = presets[data.model][data.preset_no];
-  var valueCont = presets[data.model][data.preset_no].VALUE;
+  var codeConfig = presets.default;
+  var valueCont = presets.default.VALUE;
   for (var index = 0; index < valueCont.length; index++) {
-    var tep = valueCont[index];
+    var tep = valueCont[index];//default replacement
     if (tep == "tt") {
       var temp = (parseInt(codeConfig.tt) + parseInt(data.TargetTemperature) - 17)%16;
       mainCode = mainCode.replace(/tt/g, temp.toString(16));
-    }else if (tep == "p") {
-      mainCode = mainCode.replace(/p/g, ((data.TargetHeatingCoolingState != data.defaultState.OFF) ? codeConfig.p.on : codeConfig.p.off));
-    }else if (tep == "m") {
+    }else if (tep == "po") {
+      mainCode = mainCode.replace(/po/g, ((data.TargetHeatingCoolingState != data.defaultState.OFF) ? codeConfig.po.on : codeConfig.po.off));
+    }else if (tep == "mo") {
       var mode;
       if(data.TargetHeatingCoolingState == data.defaultState.AUTO){
-        if(codeConfig.m.auto){
-          mode = codeConfig.m.auto;
-        }else{
-          mode = codeConfig.m.cooler;
-        }
+        mode = codeConfig.mo.auto;
       }else if(data.TargetHeatingCoolingState == data.defaultState.HEAT){
-        mode = codeConfig.m.heater;
+        mode = codeConfig.mo.heater;
       }else{
-        mode = codeConfig.m.cooler;
+        mode = codeConfig.mo.cooler;
       }
-      mainCode = mainCode.replace(/m/g, mode);
-    }else if (tep == "w") {
-      //uncomplete
-      mainCode = mainCode.replace(/w/g, codeConfig.w);
+      mainCode = mainCode.replace(/mo/g, mode);
+    }else if (tep == "wi") {
+      mainCode = mainCode.replace(/wi/g, codeConfig.wi.auto);
+    }else if (tep == "sw") {
+      mainCode = mainCode.replace(/sw/g, codeConfig.sw.on);
+    }else if (tep == "li") {
+      mainCode = mainCode.replace(/li/g, codeConfig.li.on);
+    }
+    if (presets[data.model][data.preset_no].VALUE) {
+      codeConfig = presets[data.model][data.preset_no];
+      valueCont = presets[data.model][data.preset_no].VALUE;
+      for (var index = 0; index < valueCont.length; index++) {
+
+      }
     }
   }
 

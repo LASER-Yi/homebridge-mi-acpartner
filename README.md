@@ -14,7 +14,7 @@ This plugin is developing now, may cause some crash problem.
 * Control modes:
 
   - Change temperature between 17 - 30.
-  - HEAT mode, COOL mode, AUTO mode support. 
+  - HEAT mode, COOL mode, AUTO mode support.
 
 * Customize your AC's Signal
 
@@ -30,11 +30,9 @@ npm install -g homebridge-mi-acpartner miio
 
    If you are using Android, you can get token of AC Partner by using MIJIA app.
 
-3. In you router, change the IP of AC Partner to static(If miio can easily regonize your device,this step is no longer need) 
+3. Add following line to your config.json file
 
-4. Add following line to your config.json file
-
-   Using Miio to discover your device and using perset AC command.
+   Using Miio to discover your device and using preset AC command.
 
    Supported:
    - media: 1 
@@ -82,10 +80,13 @@ Using IP address to discover your device and using customize AC command.
 Use this [method](https://github.com/aholstenson/miio/blob/master/docs/protocol.md#) to get you AC's command.Then fill into the customize tag.
 
 
- 4. Restart Homebridge.
+4. Restart Homebridge.
 
 
 ### Changelog
+  0.1.5
+  Presets reconstruction. 
+  
   0.1.2
   Fix gree no.1 preset cannot work.
 
