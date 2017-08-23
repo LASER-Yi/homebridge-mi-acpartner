@@ -17,8 +17,8 @@
         },
         "w": {
             "auto": "auto wind level",
-            "level": "wind level number",
             "1": "level 1",
+            "2": "level 2",
             "3": "level 3"
         }
     },

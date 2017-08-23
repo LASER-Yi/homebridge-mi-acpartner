@@ -22,6 +22,7 @@ function XiaoMiAcPartner(log, config) {
     this.TargetTemperature = config.defaultTemp || 26;
     this.ip = config.ip;
     this.TargetHeatingCoolingState = Characteristic.TargetHeatingCoolingState.OFF;
+    this.isConnect = false;
     if (config.customize == null) {
         this.config = config;
         this.customi = false;
@@ -116,7 +117,7 @@ XiaoMiAcPartner.prototype = {
     
                         devices[reg.id] = device;
                         accessory.device = device;
-    
+                        this.isConnect = true;
                         log.debug('[XiaoMiAcPartner][INFO] Discovered "%s" (ID: %s) on %s:%s.', reg.hostname, device.id, device.address, device.port);
                     }).catch(function(e) {
                         if (devices.length > 0) {
@@ -147,6 +148,7 @@ XiaoMiAcPartner.prototype = {
             miio.device({ address: this.ip, token: this.token })
                 .then(function(device){
                     accessory.device = device;
+                    this.isConnect = true;
                     log.debug('[XiaoMiAcPartner][INFO] Discovered "%s" (ID: %s) on %s:%s.', device.hostname, device.id, device.address, device.port);
                 })
                 .catch(log.error('[XiaoMiAcPartner][WARN] Cannot reach your AC Partner (Maybe invalid ip?)'));
@@ -273,9 +275,10 @@ XiaoMiAcPartner.prototype = {
         }
 
         this.log.debug("[XiaoMiAcPartner][DEBUG] Sending code: " + code);
-        this.device.call('send_cmd', [code])
-            .then(function(returnVal){
-                
-            })
+        if (this.isConnect) {
+            this.device.call('send_cmd', [code]);   
+        }else{
+            this.log.error('[XiaoMiAcPartner][WARN] Cannot send! AC Partner not connected');
+        }
     }
 };
