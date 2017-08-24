@@ -4,6 +4,7 @@ var presets = require('../presets.json');
 "data":{
   "model": "config_model",
   "preset_no": "config_num",
+  "LastHeatingCoolingState": "this.LastHeatingCoolingState"
   "CurrentTemperature": "Characteristic",
   "TargetTemperature": "Characteristic",
   "TargetHeatingCoolingState": "Characteristic.TargetHeatingCoolingState.OFF@example",
@@ -42,14 +43,26 @@ module.exports = function(data){
     }else if (tep == "li") {
       mainCode = mainCode.replace(/li/g, codeConfig.li.on);
     }
-    if (presets[data.model][data.preset_no].VALUE) {
-      codeConfig = presets[data.model][data.preset_no];
-      valueCont = presets[data.model][data.preset_no].VALUE;
-      for (var index = 0; index < valueCont.length; index++) {
+  }
 
+  if (presets[data.model][data.preset_no].EXTRA_VALUE) {
+    codeConfig = presets[data.model][data.preset_no];
+    valueCont = presets[data.model][data.preset_no].EXTRA_VALUE;
+    for (var index = 0; index < valueCont.length; index++) {
+      var tep = valueCont[index];//extra replacement
+      if (tep == "t6t") {
+        var temp = (parseInt(codeConfig.t6t) + parseInt(data.TargetTemperature) - 17)%16;
+        mainCode = mainCode.replace(/t6t/g, temp.toString(16));
+      }else if (tep == "t4wt") {
+        var temp = (parseInt(codeConfig.t4wt) + parseInt(data.TargetTemperature) - 17)%16;
+        mainCode = mainCode.replace(/t4wt/g, temp.toString(16));
       }
     }
   }
+
+  /* RETURN_DATA
+  data: "AC Code"
+  */
 
   return {
     data: mainCode

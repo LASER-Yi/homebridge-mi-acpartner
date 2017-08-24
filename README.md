@@ -1,11 +1,9 @@
 # homebridge-mi-acpartner
 [![npm version](https://badge.fury.io/js/homebridge-mi-acpartner.svg)](https://badge.fury.io/js/homebridge-mi-acpartner)
 
-A homebridge plugin for xiaomi AC Partner.
+XiaoMi AC Partner plugins for HomeBridge.
 
-Basic on [takatost's project](https://github.com/takatost/homebridge-mi-ac-partner) and [miio](https://github.com/aholstenson/miio),**thanks**.
-
-This plugin is developing now, may cause some crash problem. 
+Thanks for [takatost's project](https://github.com/takatost/homebridge-mi-ac-partner),  [miio](https://github.com/aholstenson/miio) and all other developer and testers.
 
 ### Feature
 
@@ -15,6 +13,10 @@ This plugin is developing now, may cause some crash problem.
 
   - Change temperature between 17 - 30.
   - HEAT mode, COOL mode, AUTO mode support.
+  - Sync AC State bewteen AC Partner and Home App.(Coming soon)
+  - Wind force, Wind Swept support.(Coming sooooon)
+  - Auto get your AC model.(may not work for all AC)
+  - Customize IR Signal Support.(Coming sooooooooon)
 
 * Customize your AC's Signal
 
@@ -36,7 +38,7 @@ npm install -g homebridge-mi-acpartner miio
 
    Supported:
    - media: 1 
-   - gree: 1,8
+   - gree: 1,8,2(testing)
 
 ```
 "accessories": [
@@ -61,7 +63,8 @@ Using IP address to discover your device and using customize AC command.
             "ip": "your_ac_partner_ip_address",
             "customize": {
                 "off": "You_AC_Signal_Here",
-                "auto: "If no define, send cool signal instead",
+                "on": "Some_AC_need_this",
+                "auto": "If no define, send cool signal instead",
                 "heat":{
                     "30": "",
                     "29": "",
@@ -86,7 +89,7 @@ Use this [method](https://github.com/aholstenson/miio/blob/master/docs/protocol.
 ### Changelog
   0.1.5
   Presets reconstruction. 
-  
+
   0.1.2
   Fix gree no.1 preset cannot work.
 
