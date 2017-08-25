@@ -61,7 +61,7 @@ npm install -g homebridge-mi-acpartner miio
 
     1. "brand": "Your AC brand",
 
-      "preset_no": "Preset No. in MIJIA App"
+    "preset_no": "Preset No. in MIJIA App"
 
         Support:
 
