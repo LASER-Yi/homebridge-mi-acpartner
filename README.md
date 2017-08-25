@@ -7,7 +7,7 @@ Thanks for [takatost's project](https://github.com/takatost/homebridge-mi-ac-par
 
 **Note: I don't have much time to get AC command for presets. You can commit your customize setting to [issues](https://github.com/LASER-Yi/homebridge-mi-acpartner/issues) or ly0007@yeah.net. I will write a Commit Format later.**
 
-**WARN: This plugin will not support Miio Auto Discover feature after 0.2.1. Please add your ac partner's ip address to config.json as quick as possible, Thanks.**
+**WARN: This plugin will not support Miio Auto Discover feature after 0.2.2. Please add your ac partner's ip address to config.json as quick as possible, Thanks.**
 
 ### Feature
 
@@ -15,7 +15,7 @@ Thanks for [takatost's project](https://github.com/takatost/homebridge-mi-ac-par
 
 * Control modes:
 
-  - Change temperature between 17 - 30.
+  - Change temperature between 17 - 30(default).
   - HEAT mode, COOL mode, AUTO mode support.
   - Wind Force, Wind Sweep control support.(Basic on iOS 11, Coming sooooon)
   - Customize IR Signal Support.(Coming sooooooooon)
@@ -139,28 +139,16 @@ Using customize AC command.
 
 ### Changelog
   0.2.0
+
   Sync State between hk and AC Partner. maxTemp & minTemp Support. Add gree 2 preset for testing.
 
   0.1.5
-  Presets reconstruction. 
 
-  0.1.2
-  Fix gree no.1 preset cannot work.
+  Presets reconstruction.
 
   0.0.9
-  Add auto mode support, code structure reconstruction, presets reconstruction.
 
-  0.0.5
-  Fix a problem that cannot send preset signal.
-
-  0.0.4
-  Fix a problem that customize signal cannot work.
-
-  0.0.3
-  Fix a problem that user cannot use presets.
-
-  0.0.2
-  Change Package.json to make Homebridge can run the plugin.
+  Auto mode support, "on" signal support, code reconstruction, presets reconstruction.
 
   0.0.1
   ADD Basic File.
