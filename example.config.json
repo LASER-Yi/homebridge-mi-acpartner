@@ -9,14 +9,17 @@
         {
             "accessory": "XiaoMiAcPartner",
             "token": "token-as-hex",
-            "name": "AcPartner",
+            "name": "AcPartner_1",
+            "ip": "192.168.1.1",
             "brand": "media",
             "preset_no": "1"
         },
         {
             "accessory": "XiaoMiAcPartner",
             "token": "token-as-hex",
-            "name": "AcPartner",
+            "name": "AcPartner_2",
+            "maxTemp": "30",
+            "minTemp": "17",
             "ip": "192.168.1.1",
             "customize": {
                 "off": "You_AC_Signal_Here",

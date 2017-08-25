@@ -1,7 +1,7 @@
 {
     "default":{
         "description": "The Default Replacement of AC Partner",
-        "defaultMain": "AC model(10)+po+mo+wi+sw+1+tt",
+        "defaultMain": "AC model(10)+po+mo+wi+sw+tt",
         "VALUE": ["po","mo","wi","sw","tt","li"],
         "po": {
             "type": "switch",
@@ -34,21 +34,21 @@
     },
     "media": {
         "1":{
-            "main": "0180111111pomowisw1tt02"
+            "main": "0180111111pomowiswtt02"
         }
     },
     "gree": {
         "1": {
-            "main": "0180222221pomowisw1tt02"
+            "main": "0180222221pomowiswtt02"
         },
         "2": {
-            "main": "0100010727pomowisw1tt1100190tt205002102000t6t0190tt207002000000t4wt0",
+            "main": "0100010727pomowiswtt1100190tt205002102000t6t0190tt207002000000t4wt0",
             "EXTRA_VALUE": ["t6t","t4wt"],
             "t6t": "7",
             "t4wt": "4"
         },
         "8": {
-            "main": "0100004795pomowisw1tt0100090900005002"
+            "main": "0100004795pomowiswtt0100090900005002"
         }
     }
 }

@@ -2,6 +2,7 @@ var presets = require('../presets.json');
 
 /* INPUT_DATA
 "data":{
+  "autoModel": "when model == auto",
   "model": "config_model",
   "preset_no": "config_num",
   "LastHeatingCoolingState": "this.LastHeatingCoolingState"
@@ -12,18 +13,22 @@ var presets = require('../presets.json');
 }*/
 
 module.exports = function(data){
-  if (!data.model||!data.preset_no) {
+  if (!data.model && !data.preset_no) {
     return;
   }
 
-  var mainCode = presets[data.model][data.preset_no].main;
+  if (data.autoModel) {
+    var mainCode = data.autoModel+"pomowiswtt02"
+  }else{
+    var mainCode = presets[data.model][data.preset_no].main;
+  }
   var codeConfig = presets.default;
   var valueCont = presets.default.VALUE;
   for (var index = 0; index < valueCont.length; index++) {
     var tep = valueCont[index];//default replacement
     if (tep == "tt") {
-      var temp = (parseInt(codeConfig.tt) + parseInt(data.TargetTemperature) - 17)%16;
-      mainCode = mainCode.replace(/tt/g, temp.toString(16));
+      var temp = parseInt(data.TargetTemperature).toString(16);
+      mainCode = mainCode.replace(/tt/g, temp);
     }else if (tep == "po") {
       mainCode = mainCode.replace(/po/g, ((data.TargetHeatingCoolingState != data.defaultState.OFF) ? codeConfig.po.on : codeConfig.po.off));
     }else if (tep == "mo") {
@@ -45,17 +50,17 @@ module.exports = function(data){
     }
   }
 
-  if (presets[data.model][data.preset_no].EXTRA_VALUE) {
+  if (!data.autoModel && presets[data.model][data.preset_no].EXTRA_VALUE) {
     codeConfig = presets[data.model][data.preset_no];
     valueCont = presets[data.model][data.preset_no].EXTRA_VALUE;
     for (var index = 0; index < valueCont.length; index++) {
       var tep = valueCont[index];//extra replacement
       if (tep == "t6t") {
-        var temp = (parseInt(codeConfig.t6t) + parseInt(data.TargetTemperature) - 17)%16;
-        mainCode = mainCode.replace(/t6t/g, temp.toString(16));
+        var temp = (parseInt(codeConfig.t6t) + parseInt(data.TargetTemperature)).toString(16);
+        mainCode = mainCode.replace(/t6t/g, temp);
       }else if (tep == "t4wt") {
-        var temp = (parseInt(codeConfig.t4wt) + parseInt(data.TargetTemperature) - 17)%16;
-        mainCode = mainCode.replace(/t4wt/g, temp.toString(16));
+        var temp = (parseInt(codeConfig.t4wt) + parseInt(data.TargetTemperature)).toString(16);
+        mainCode = mainCode.replace(/t4wt/g, temp);
       }
     }
   }

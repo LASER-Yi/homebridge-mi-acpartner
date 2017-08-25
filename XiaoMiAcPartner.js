@@ -2,6 +2,7 @@ var miio = require('miio');
 var outputSignal = require("./packages/acSignal_handle");
 var Accessory, Service, Characteristic;
 
+
 module.exports = function(homebridge) {
     Accessory = homebridge.platformAccessory;
     Service = homebridge.hap.Service;
@@ -11,18 +12,31 @@ module.exports = function(homebridge) {
 
 function XiaoMiAcPartner(log, config) {
     if(null == config) {
-        this.log.error('[XiaoMiAcPartner][WARN] Cannot find config for AC Partner');
+        this.log.error('[XiaoMiAcPartner][WARN] Cannot find config');
         return;
     }
 
+    //Init
+    var that = this;
     this.log = log;
-    //this.log.debug("[XiaoMiAcPartner][DEBUG] Init");
     this.name = config.name;
     this.token = config.token;
-    this.TargetTemperature = config.defaultTemp || 26;
     this.ip = config.ip;
-    this.TargetHeatingCoolingState = Characteristic.TargetHeatingCoolingState.OFF;
-    this.LastHeatingCoolingState = this.TargetHeatingCoolingState;
+    this.maxTemp = parseInt(config.maxTemp) || 30;
+    this.minTemp = parseInt(config.minTemp) || 17;
+    this.LastHeatingCoolingState = Characteristic.TargetHeatingCoolingState.OFF;
+    //this.TargetHeatingCoolingState = Characteristic.TargetHeatingCoolingState.OFF;
+    //this.TargetTemperature = 26;
+
+    this.PartnerState = JSON;
+    this.PartnerState.power;
+    this.PartnerState.mode;
+    this.PartnerState.wind_force;
+    this.PartnerState.sweep;
+    this.PartnerState.temp;
+    this.PartnerState.acModel;
+    this.PartnerState.rtPower;
+
     if (config.customize == null) {
         this.config = config;
         this.customi = false;
@@ -54,8 +68,8 @@ function XiaoMiAcPartner(log, config) {
     this.acPartnerService
         .getCharacteristic(Characteristic.TargetTemperature)
         .setProps({
-            maxValue: 30,
-            minValue: 17,
+            maxValue: that.maxTemp,
+            minValue: that.minTemp,
             minStep: 1
         })
         .on('set', this.setTargetTemperature.bind(this))
@@ -81,6 +95,7 @@ function XiaoMiAcPartner(log, config) {
     this.services.push(this.serviceInfo);
 
     this.discover();
+    this.getACState(false);
 }
 
 XiaoMiAcPartner.prototype = {
@@ -141,7 +156,7 @@ XiaoMiAcPartner.prototype = {
             });
         }else{
             this.log.debug('[XiaoMiAcPartner][DEBUG] Using IP adrress...');
-            accessory.device = "3";
+            accessory.device;
             miio.device({ address: this.ip, token: this.token })
                 .then(function(device){
                     accessory.device = device;
@@ -149,7 +164,6 @@ XiaoMiAcPartner.prototype = {
                 })
                 .catch(log.error('[XiaoMiAcPartner][WARN] Cannot connect your AC Partner (Maybe invalid ip?)'));
         }
-
     },
 
     getTargetHeatingCoolingState: function(callback) {
@@ -171,6 +185,7 @@ XiaoMiAcPartner.prototype = {
     },
 
     getTargetTemperature: function(callback) {
+        this.getACState(true);
         callback(null, this.TargetTemperature);
     },
 
@@ -180,7 +195,7 @@ XiaoMiAcPartner.prototype = {
               if (this.TargetHeatingCoolingState == Characteristic.TargetHeatingCoolingState.OFF) {
                 this.TargetHeatingCoolingState = Characteristic.TargetHeatingCoolingState.AUTO;
                 this.acPartnerService.getCharacteristic(Characteristic.TargetHeatingCoolingState)
-                    .updateValue(Characteristic.TargetHeatingCoolingState.AUTO)
+                    .updateValue(this.TargetHeatingCoolingState);
               }
 
             // Update current temperature
@@ -196,12 +211,6 @@ XiaoMiAcPartner.prototype = {
     },
 
     getCurrentTemperature: function(callback) {
-
-        /*this.device.call('get_model_and_state', [])
-            .then(function(nowState){
-
-            }
-        var test = 30;*/
         this.log("[XiaoMiAcPartner][INFO] CurrentTemperature %s", this.TargetTemperature);
         callback(null, parseFloat(this.TargetTemperature));
     },
@@ -216,9 +225,11 @@ XiaoMiAcPartner.prototype = {
 
     SendCmd: function() {
         if (!this.device) {
-            this.log.error('[XiaoMiAcPartner][WARN] Device not exists!');
+            this.log.error('[XiaoMiAcPartner][WARN] Send signal failed!(Device not exists)');
             return;
         }
+
+        var accessory = this;
         var code;
         this.log.debug("[XiaoMiAcPartner][DEBUG] Last TargetHeatingCoolingState: " + this.LastHeatingCoolingState);
         this.log.debug("[XiaoMiAcPartner][DEBUG] Current TargetHeatingCoolingState: " + this.TargetHeatingCoolingState);
@@ -277,17 +288,58 @@ XiaoMiAcPartner.prototype = {
         }
 
         this.log.debug("[XiaoMiAcPartner][DEBUG] Sending code: " + code);
-        this.LastHeatingCoolingState = this.TargetHeatingCoolingState;
-        this.device.call('send_cmd', [code]);
+        this.device.call('send_cmd', [code])
+            .then(function(data){
+                if (data[0] == "ok") {
+                    accessory.LastHeatingCoolingState = accessory.TargetHeatingCoolingState;
+                    accessory.log.debug("[XiaoMiAcPartner][DEBUG] Change Successful");
+                }else{
+                    accessory.log.debug("[XiaoMiAcPartner][DEBUG] Unsuccess! Maybe invaild AC Code?");
+                    accessory.getACState(true);
+                }
+            });
         delete code;
-        //this.getModelandState();
-    }/*,
+    },
 
-    getModelandState: function(){
+    getACState: function(unsync){
+        if (!unsync) {
+            setTimeout(this.getACState.bind(this),5000);   
+        }
+        if (!this.device) {
+            this.log.error("[XiaoMiAcPartner][WARN] Sync failed!(Device not exists)");
+            return;
+        }
+
+        var acc = this;
+        //this.log("[XiaoMiAcPartner][INFO] Syncing...")
         this.device.call('get_model_and_state', [])
-            .then(function(nowState){
+            .then(function(retMaS){
+                acc.PartnerState.rtPower = retMaS[2];
+                acc.PartnerState.acModel = retMaS[0].substr(0,2) + retMaS[0].substr(8,8);
+                acc.PartnerState.power = retMaS[1].substr(2,1);
+                acc.PartnerState.mode = retMaS[1].substr(3,1);
+                acc.PartnerState.wind_force = retMaS[1].substr(4,1);
+                acc.PartnerState.sweep = retMaS[1].substr(5,1);
+                acc.PartnerState.temp = parseInt(retMaS[1].substr(6,2),16);
+                //acc.log.debug("[XiaoMiAcPartner][DEBUG] Partner_State:(model:%s, power_state:%s, mode:%s, wind:%s, sweep:%s, temp:%s, AC_POWER:%s",acc.PartnerState.acModel,acc.PartnerState.power,acc.PartnerState.mode,acc.PartnerState.wind_force,acc.PartnerState.sweep,acc.TargetTemperature,acc.PartnerState.rtPower);
 
-            }
-        
-    }*/
+                //update values
+                if (acc.PartnerState.power == 1) {
+                    if (acc.PartnerState.mode == 0) {
+                        acc.TargetHeatingCoolingState = Characteristic.TargetHeatingCoolingState.HEAT;
+                    }else if (acc.PartnerState.mode == 1) {
+                        acc.TargetHeatingCoolingState = Characteristic.TargetHeatingCoolingState.COOL;
+                    }else{
+                        acc.TargetHeatingCoolingState = Characteristic.TargetHeatingCoolingState.AUTO;
+                    }
+                }else{
+                    acc.LastHeatingCoolingState = acc.TargetHeatingCoolingState = Characteristic.TargetHeatingCoolingState.OFF;
+                }
+                acc.acPartnerService.getCharacteristic(Characteristic.TargetHeatingCoolingState)
+                    .updateValue(acc.TargetHeatingCoolingState);
+                acc.TargetTemperature = acc.PartnerState.temp;
+                acc.acPartnerService.getCharacteristic(Characteristic.TargetTemperature)
+                    .updateValue(acc.TargetTemperature);
+            });
+    }
 };
