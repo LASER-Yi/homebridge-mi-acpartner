@@ -53,14 +53,16 @@ npm install -g homebridge-mi-acpartner miio
 
       Follow this [Document](https://github.com/aholstenson/miio/blob/master/docs/management.md#getting-the-token-of-a-device) get your AC Partner's token.
 
-            ``If you are using Android device, you can get token by using MIJIA app.``
+            If you are using Android device, you can get token by using MIJIA app.
 
     * "name": "Name show in Home App"
 
     * "ip": "your_ac_partner_ip_address"
 
     1. "brand": "Your AC brand",
+
       "preset_no": "Preset No. in MIJIA App"
+
         Support:
 
             - media: 1 
