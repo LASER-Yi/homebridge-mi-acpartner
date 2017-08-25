@@ -61,17 +61,17 @@ npm install -g homebridge-mi-acpartner miio
 
     1. "brand": "Your AC brand",
 
-    "preset_no": "Preset No. in MIJIA App"
+        "preset_no": "Preset No. in MIJIA App"
 
-        Support:
+            Support:
 
-            - media: 1 
+                - media: 1 
 
-            - gree: 1,8
+                - gree: 1,8
 
-        Testing:
+            Testing:
 
-            - gree: 2
+                - gree: 2
 
     2. "customize":
        Use this [method](https://github.com/aholstenson/miio/blob/master/docs/protocol.md#) to get your AC's command.
@@ -91,7 +91,7 @@ npm install -g homebridge-mi-acpartner miio
 
     * "minTemp": "Set min temperature"
 
-#### Config Example
+### Config Example
 
 Using preset AC command.
 
