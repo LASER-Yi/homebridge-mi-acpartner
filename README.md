@@ -26,6 +26,8 @@ Thanks for [takatost's project](https://github.com/takatost/homebridge-mi-ac-par
 
 * Auto get AC signal.(may not work for all AC)
 
+* Lumi Gateway Temperature Sensor Support.(Coming soon)
+
 
 ### Installation
 
@@ -48,8 +50,10 @@ npm install -g homebridge-mi-acpartner miio
     * "accessory": "XiaoMiAcPartner"
 
     * "token": "Your AC Partner token"
+
       Follow this [Document](https://github.com/aholstenson/miio/blob/master/docs/management.md#getting-the-token-of-a-device) get your AC Partner's token.
-            If you are using Android device, you can get token by using MIJIA app.
+
+            ``If you are using Android device, you can get token by using MIJIA app.``
 
     * "name": "Name show in Home App"
 
@@ -57,18 +61,23 @@ npm install -g homebridge-mi-acpartner miio
 
     1. "brand": "Your AC brand",
       "preset_no": "Preset No. in MIJIA App"
-
         Support:
+
             - media: 1 
+
             - gree: 1,8
 
         Testing:
+
             - gree: 2
 
     2. "customize":
        Use this [method](https://github.com/aholstenson/miio/blob/master/docs/protocol.md#) to get your AC's command.
+
              Please see Config Example for more detail.
+
              Not every AC need "on" signal, please check your AC's command for more infomation.
+
              If "auto" signal undefined, plugin will send signal(cool/heat) basic on current temperature.
 
     **You must choose one method(preset or customize) to control your AC.**
