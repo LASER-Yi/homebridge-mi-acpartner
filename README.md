@@ -140,9 +140,9 @@ Using customize AC command.
 ```
 
 ### Changelog
-  0.2.2
+  0.2.3
 
-  Gree 2 preset support, cus IR control support.
+  Gree 2 preset support, customize IR control support.
 
   0.2.0
 
