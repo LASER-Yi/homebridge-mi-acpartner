@@ -42,8 +42,9 @@
             "main": "0180222221pomowiswtt02"
         },
         "2": {
-            "main": "0100010727pomowiswtt1100190tt205002102000t6t0190tt207002000000t4wt0",
-            "EXTRA_VALUE": ["t6t","t4wt"],
+            "main": "0100010727pomowiswtt1100190t0t205002102000t6t0190t0t207002000000t4wt0",
+            "EXTRA_VALUE": ["t0t","t6t","t4wt"],
+            "t0t": "1",
             "t6t": "7",
             "t4wt": "4"
         },

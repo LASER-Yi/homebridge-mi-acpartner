@@ -55,12 +55,20 @@ module.exports = function(data){
     valueCont = presets[data.model][data.preset_no].EXTRA_VALUE;
     for (var index = 0; index < valueCont.length; index++) {
       var tep = valueCont[index];//extra replacement
-      if (tep == "t6t") {
-        var temp = (parseInt(codeConfig.t6t) + parseInt(data.TargetTemperature)).toString(16);
-        mainCode = mainCode.replace(/t6t/g, temp);
-      }else if (tep == "t4wt") {
-        var temp = (parseInt(codeConfig.t4wt) + parseInt(data.TargetTemperature)).toString(16);
-        mainCode = mainCode.replace(/t4wt/g, temp);
+      switch (tep) {
+        case "t0t":
+          var temp = (parseInt(codeConfig.t0t) + parseInt(data.TargetTemperature) - 17) % 16;
+          mainCode = mainCode.replace(/t0t/g, temp.toString(16).toUpperCase());
+          break;
+        case "t6t":
+          var temp = (parseInt(codeConfig.t6t) + parseInt(data.TargetTemperature) - 17) % 16;
+          mainCode = mainCode.replace(/t6t/g, temp.toString(16).toUpperCase());
+          break;
+        case "t4wt":
+          var temp = (parseInt(codeConfig.t4wt) + parseInt(data.TargetTemperature) - 17) % 16;
+          mainCode = mainCode.replace(/t4wt/g, temp.toString(16).toUpperCase());
+        default:
+          break;
       }
     }
   }

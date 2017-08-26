@@ -82,6 +82,8 @@ npm install -g homebridge-mi-acpartner miio
 
              If "auto" signal undefined, plugin will send signal(cool/heat) basic on current temperature.
 
+             You can add "type": "IR" to send customize IR command.
+
     **You must choose one method(preset or customize) to control your AC.**
 
 
@@ -138,6 +140,10 @@ Using customize AC command.
 ```
 
 ### Changelog
+  0.2.2
+
+  Gree 2 preset support, cus IR control support.
+
   0.2.0
 
   Sync State between hk and AC Partner. maxTemp & minTemp Support. Add gree 2 preset for testing.
@@ -151,4 +157,5 @@ Using customize AC command.
   Auto mode support, "on" signal support, code reconstruction, presets reconstruction.
 
   0.0.1
+
   ADD Basic File.

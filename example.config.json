@@ -22,6 +22,7 @@
             "minTemp": "17",
             "ip": "192.168.1.1",
             "customize": {
+                "type": "IR",
                 "off": "You_AC_Signal_Here",
                 "auto": "",
                 "heat":{
