@@ -78,6 +78,7 @@ module.exports = function(data){
           case "t4wt":
             var temp = (parseInt(codeConfig.t4wt) + parseInt(data.TargetTemperature) - 17) % 16;
             mainCode = mainCode.replace(/t4wt/g, temp.toString(16).toUpperCase());
+            break;
           default:
             break;
         }

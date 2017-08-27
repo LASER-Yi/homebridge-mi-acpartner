@@ -11,6 +11,10 @@
             "token": "token-as-hex",
             "name": "AcPartner_1",
             "ip": "192.168.1.1",
+            "sensor": {
+                "gatewaySid": "6409802da3b3",
+                "sensorName": "158d000156e667"
+            },
             "brand": "media",
             "preset_no": "1"
         },
@@ -22,7 +26,7 @@
             "minTemp": "17",
             "ip": "192.168.1.1",
             "customize": {
-                "type": "IR",
+                "type": "IR/AC",
                 "off": "You_AC_Signal_Here",
                 "auto": "",
                 "heat":{

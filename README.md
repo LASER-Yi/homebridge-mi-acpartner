@@ -3,7 +3,7 @@
 
 XiaoMi AC Partner plugins for HomeBridge.
 
-Thanks for [takatost's project](https://github.com/takatost/homebridge-mi-ac-partner),  [miio](https://github.com/aholstenson/miio) and all other developer and testers.
+Thanks for [takatost's project](https://github.com/takatost/homebridge-mi-ac-partner),  [miio](https://github.com/aholstenson/miio), [YinHangCode's project](https://github.com/YinHangCode/homebridge-mi-aqara) and all other developer and testers.
 
 **Note: I don't have much time to get AC command for presets. You can commit your customize setting to [issues](https://github.com/LASER-Yi/homebridge-mi-acpartner/issues) or ly0007@yeah.net. I will write a Commit Format later.**
 
@@ -15,6 +15,7 @@ Thanks for [takatost's project](https://github.com/takatost/homebridge-mi-ac-par
 
 * Control modes:
 
+  - Use AC signal or IR signal to control your AC.
   - Change temperature between 17 - 30(default).
   - HEAT mode, COOL mode, AUTO mode support.
   - Wind Force, Wind Sweep control support.(Basic on iOS 11, Coming sooooon)
@@ -26,7 +27,7 @@ Thanks for [takatost's project](https://github.com/takatost/homebridge-mi-ac-par
 
 * Auto get AC signal.(may not work for all AC)
 
-* Lumi Gateway Temperature Sensor Support.(Coming soon)
+* Lumi Gateway Temperature Sensor Support.~~(Coming soon)~~
 
 
 ### Installation
@@ -67,7 +68,7 @@ npm install -g homebridge-mi-acpartner miio
 
                 - media: 1 
 
-                - gree: 1,8
+                - gree: 1,2,8
 
             Testing:
 
@@ -93,6 +94,12 @@ npm install -g homebridge-mi-acpartner miio
 
     * "minTemp": "Set min temperature"
 
+    * "sensor": "Use Lumi Gateway temperature sensor to update your AC's current temperature"
+
+        - "gatewaySid": "Your gateway Sid"
+
+        - "sensorName": "Your temperature sensor Sid"
+
 ### Config Example
 
 Using preset AC command.
@@ -108,6 +115,25 @@ Using preset AC command.
             "preset_no": "1"
         }
     ]
+```
+
+Using outer Temperature Sensor from Lumi Gateway
+
+```
+"accessories": [
+        {
+            "accessory": "XiaoMiAcPartner",
+            "token": "token-as-hex",
+            "name": "AcPartner_1",
+            "ip": "192.168.1.1",
+            "sensor": {
+                "gatewaySid": "6409802da3b3",
+                "sensorName": "158d000156e667"
+            },
+            "brand": "media",
+            "preset_no": "1"
+        }
+]
 ```
 
 Using customize AC command.
@@ -139,7 +165,41 @@ Using customize AC command.
     ]
 ```
 
+Using customize IR command.
+
+```
+"accessories": [
+        {
+            "accessory": "XiaoMiAcPartner",
+            "token": "token-as-hex",
+            "name": "AcPartner",
+            "minTemp": "18",
+            "ip": "your_ac_partner_ip_address",
+            "customize": {
+                "type": "IR",
+                "off": "AC off signal(Necessary)",
+                "on": "Some_AC_need_this(Optional)",
+                "auto": "AC auto mode signal(Optional)",
+                "heat":{
+                    "30": "(Optional)",
+                    "29": "",
+                    "17": ""
+                },
+                "cool":{
+                    "30": "Necessary",
+                    "29": "",
+                    "17": ""
+                }
+            }
+        }
+    ]
+```
+
 ### Changelog
+  0.2.4
+
+  Outer temperature sensor support. 
+
   0.2.3
 
   Gree 2 preset support, customize IR control support.

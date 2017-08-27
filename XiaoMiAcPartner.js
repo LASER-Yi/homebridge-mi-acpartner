@@ -2,6 +2,16 @@ var miio = require('miio');
 var outputSignal = require("./packages/acSignal_handle");
 var Accessory, Service, Characteristic;
 
+//Listening Server
+const dgram = require('dgram');
+const serverSocket = dgram.createSocket({
+    type: 'udp4',
+    reuseAddr: true
+});
+const multicastAddress = '224.0.0.50';
+const multicastPort = 4321;
+const serverPort = 9898;
+
 
 module.exports = function(homebridge) {
     Accessory = homebridge.platformAccessory;
@@ -23,13 +33,14 @@ function XiaoMiAcPartner(log, config) {
     this.token = config.token;
     this.ip = config.ip;
     this.LastHeatingCoolingState = Characteristic.TargetHeatingCoolingState.OFF;
-    //this.TargetHeatingCoolingState = Characteristic.TargetHeatingCoolingState.OFF;
-    //this.TargetTemperature = 26;
 
-    //optional
+    //Optional
     this.maxTemp = parseInt(config.maxTemp) || 30;
     this.minTemp = parseInt(config.minTemp) || 17;
     this.sendType = "AC";
+    this.outerTemSen = config.sensor;
+    this.gatewayIpAddress;
+    this.gatewayPort;
 
     if (config.customize == null) {
         this.config = config;
@@ -77,7 +88,7 @@ function XiaoMiAcPartner(log, config) {
         .setProps({
             maxValue: 40,
             minValue: -20,
-            minStep: 0.5
+            minStep: 1
         })
         .on('get', this.getCurrentTemperature.bind(this));;
 
@@ -92,9 +103,29 @@ function XiaoMiAcPartner(log, config) {
     this.services.push(this.serviceInfo);
 
     this.discover();
+
+    this.doRestThing();
+
 }
 
 XiaoMiAcPartner.prototype = {
+    doRestThing: function(){
+        var that = this;
+        if (this.outerTemSen) {
+            this.startServer();
+            //outer Temp Sensor
+            that.sendWhoisCommand();
+            
+            setInterval(function() {
+                that.sendWhoisCommand();
+            }, 300000);   
+        }
+
+        setInterval(function() {
+            that.getACState();
+        }, 60000);
+    },
+
     discover: function(){
         var accessory = this;
         var log = this.log;
@@ -106,7 +137,7 @@ XiaoMiAcPartner.prototype = {
             .then(function(device){
                 accessory.device = device;
                 log.debug('[XiaoMiAcPartner][DEBUG] Discovered "%s" (ID: %s) on %s:%s.', device.hostname, device.id, device.address, device.port);
-                accessory.getACState(false);
+                accessory.getACState();
             })
     },
 
@@ -131,7 +162,7 @@ XiaoMiAcPartner.prototype = {
     },
 
     getTargetTemperature: function(callback) {
-        this.getACState(true);
+        this.getACState();
         callback(null, this.TargetTemperature);
     },
 
@@ -144,10 +175,12 @@ XiaoMiAcPartner.prototype = {
                     .updateValue(this.TargetHeatingCoolingState);
               }
 
-            // Update current temperature
-            this.acPartnerService
-                .getCharacteristic(Characteristic.CurrentTemperature)
-                .updateValue(parseFloat(TargetTemperature));
+            if (!this.outerTemSen) {
+                // Update current temperature
+                this.acPartnerService
+                    .getCharacteristic(Characteristic.CurrentTemperature)
+                    .updateValue(parseFloat(TargetTemperature));
+            }
 
             this.log.debug('[XiaoMiAcPartner][DEBUG] Set temperature: ' + TargetTemperature);
 
@@ -162,8 +195,14 @@ XiaoMiAcPartner.prototype = {
     },
 
     getCurrentTemperature: function(callback) {
-        this.log("[XiaoMiAcPartner][INFO] CurrentTemperature %s", this.TargetTemperature);
-        callback(null, parseFloat(this.TargetTemperature));
+        if (!this.outerTemSen) {
+            this.log("[XiaoMiAcPartner][INFO] CurrentTemperature %s", this.TargetTemperature);
+            callback(null, parseFloat(this.TargetTemperature));
+        }else{
+            var response = '{"cmd":"read", "sid":"' + this.outerTemSen.sensorName + '"}';
+            serverSocket.send(response, 0, response.length, this.gatewayPort, this.gatewayIpAddress);
+            callback(null, parseFloat(this.CurrentTemperature));
+        }
     },
 
     identify: function(callback) {
@@ -172,6 +211,77 @@ XiaoMiAcPartner.prototype = {
 
     getServices: function() {
         return this.services;
+    },
+
+    startServer: function() {
+        var that = this;
+
+        // Initialize a server socket for Aqara gateways.
+        serverSocket.on('message', this.serverMessage.bind(this));
+    
+        // err - Error object, https://nodejs.org/api/errors.html
+        serverSocket.on('error', function(err){
+            that.log.error('[XiaoMiAcPartner][ERROR]error, msg - %s, stack - %s\n', err.message, err.stack);
+        });
+    
+        // Show some message
+        serverSocket.on('listening', function(){
+            that.log.debug("[XiaoMiAcPartner][DEBUG]Outer Temp Senser server is listening on port 9898.");
+            serverSocket.addMembership(multicastAddress);
+        });
+    
+        // Start server
+        serverSocket.bind(serverPort);
+    },
+
+    // Parse message which is sent from Aqara gateways
+    serverMessage: function(msg, rinfo){
+        var that = this;
+        var json;
+        try {
+            json = JSON.parse(msg);
+        } catch (ex) {
+            that.log.error("[XiaoMiAcPartner][ERROR] Bad json %s", msg);
+            return;
+        }
+
+        var cmd = json['cmd'];
+        if (cmd === 'iam') {
+            this.gatewayIpAddress = json['ip'];
+            this.gatewayPort = json['port'];
+            this.log.debug("[XiaoMiAcPartner][INFO] Gateway ip:%s:%s",this.gatewayIpAddress,this.gatewayPort);
+        }else if (cmd === 'heartbeat' || cmd === 'read_ack') {
+            var model = json['model'];
+            if (model === 'sensor_ht' || model === 'weather.v1') {
+                var sid = json['sid'];
+                if (sid != this.outerTemSen.sensorName) {
+                    return;
+                }
+
+                var data = JSON.parse(json['data']);
+                this.CurrentTemperature = data['temperature'] / 100.0;
+                this.acPartnerService.getCharacteristic(Characteristic.CurrentTemperature)
+                .updateValue(this.CurrentTemperature);
+                this.log.debug("[XiaoMiAcPartner][INFO] Update CurrentTemperature %s", this.CurrentTemperature)
+            }else if (model === 'gateway') {
+                var sid = json['sid'];
+                if (sid != this.outerTemSen.gatewaySid) {
+                    return;
+                }
+
+                var data = JSON.parse(json['data']);
+                this.gatewayIpAddress = data['ip'];
+            }else{
+                this.log.error("[XiaoMiAcPartner][WARN] sensorName invaild!")
+            }
+        }
+    },
+
+    sendWhoisCommand: function(){
+        // Send whois to discovery Aqara gateways and resend every 300 seconds
+        var whoisCommand = '{"cmd": "whois"}';
+        // this.log.debug("[MiAqaraPlatform][DEBUG]send %s to %s:%d", whoisCommand, multicastAddress, multicastPort);
+        serverSocket.send(whoisCommand, 0, whoisCommand.length, multicastPort, multicastAddress);
     },
 
     getCuSignal: function(){
@@ -252,7 +362,7 @@ XiaoMiAcPartner.prototype = {
                     accessory.log.debug("[XiaoMiAcPartner][DEBUG] Change Successful");
                 }else{
                     accessory.log.debug("[XiaoMiAcPartner][DEBUG] Unsuccess! Maybe invaild AC Code?");
-                    accessory.getACState(true);
+                    accessory.getACState();
                 }
             });
     },
@@ -278,22 +388,19 @@ XiaoMiAcPartner.prototype = {
                     accessory.log.debug("[XiaoMiAcPartner][DEBUG] Send Successful");
                 }else{
                     accessory.log.debug("[XiaoMiAcPartner][DEBUG] Unsuccess! Maybe invaild IR Code?");
-                    accessory.getACState(true);
+                    accessory.getACState();
                 }
             });
     },
 
-    getACState: function(unsync){
-        if (!unsync) {
-            setTimeout(this.getACState.bind(this),10000);   
-        }
+    getACState: function(){
         if (!this.device) {
             this.log.error("[XiaoMiAcPartner][WARN] Sync failed!(Device not exists)");
             return;
         }
 
         var acc = this;
-        this.log("[XiaoMiAcPartner][INFO] Syncing...")
+        this.log.debug("[XiaoMiAcPartner][INFO] Syncing...")
         this.device.call('get_model_and_state', [])
             .then(function(retMaS){
                 acc.acPower = retMaS[2];
@@ -322,7 +429,7 @@ XiaoMiAcPartner.prototype = {
                 acc.TargetTemperature = temp;
                 acc.acPartnerService.getCharacteristic(Characteristic.TargetTemperature)
                     .updateValue(acc.TargetTemperature);
-                acc.log("[XiaoMiAcPartner][INFO] Sync complete")
+                acc.log.debug("[XiaoMiAcPartner][INFO] Sync complete")
             });
     }
 };
