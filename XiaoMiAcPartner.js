@@ -196,12 +196,17 @@ XiaoMiAcPartner.prototype = {
 
     getCurrentTemperature: function(callback) {
         if (!this.outerTemSen) {
-            this.log("[XiaoMiAcPartner][INFO] CurrentTemperature %s", this.TargetTemperature);
+            this.log("[XiaoMiAcPartner][INFO] Using TargetTemp update CurrentTemp %s", this.TargetTemperature);
             callback(null, parseFloat(this.TargetTemperature));
         }else{
-            var response = '{"cmd":"read", "sid":"' + this.outerTemSen.sensorName + '"}';
-            serverSocket.send(response, 0, response.length, this.gatewayPort, this.gatewayIpAddress);
-            callback(null, parseFloat(this.CurrentTemperature));
+            if (this.gatewayIpAddress && this.gatewayPort) {
+                var response = '{"cmd":"read", "sid":"' + this.outerTemSen.sensorName + '"}';
+                serverSocket.send(response, 0, response.length, this.gatewayPort, this.gatewayIpAddress);
+                callback(null, parseFloat(this.CurrentTemperature));   
+            }else{
+                this.log.error("[XiaoMiAcPartner][ERROR] GatewaySid invaild!");
+                callback(null, parseFloat(this.TargetTemperature));
+            }
         }
     },
 
@@ -247,9 +252,11 @@ XiaoMiAcPartner.prototype = {
 
         var cmd = json['cmd'];
         if (cmd === 'iam') {
-            this.gatewayIpAddress = json['ip'];
-            this.gatewayPort = json['port'];
-            this.log.debug("[XiaoMiAcPartner][INFO] Gateway ip:%s:%s",this.gatewayIpAddress,this.gatewayPort);
+            if (json['sid'] == this.outerTemSen.gatewaySid) {
+                this.gatewayIpAddress = json['ip'];
+                this.gatewayPort = json['port'];
+                this.log.debug("[XiaoMiAcPartner][INFO] Gateway ip:%s:%s",this.gatewayIpAddress,this.gatewayPort);   
+            }
         }else if (cmd === 'heartbeat' || cmd === 'read_ack') {
             var model = json['model'];
             if (model === 'sensor_ht' || model === 'weather.v1') {
