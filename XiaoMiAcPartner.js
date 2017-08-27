@@ -262,6 +262,7 @@ XiaoMiAcPartner.prototype = {
             if (model === 'sensor_ht' || model === 'weather.v1') {
                 var sid = json['sid'];
                 if (sid != this.outerTemSen.sensorName) {
+                    this.log.error("[XiaoMiAcPartner][WARN] sensorName invaild!")
                     return;
                 }
 
@@ -278,8 +279,6 @@ XiaoMiAcPartner.prototype = {
 
                 var data = JSON.parse(json['data']);
                 this.gatewayIpAddress = data['ip'];
-            }else{
-                this.log.error("[XiaoMiAcPartner][WARN] sensorName invaild!")
             }
         }
     },
