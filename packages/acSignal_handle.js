@@ -2,28 +2,27 @@ var presets = require('../presets.json');
 
 /* INPUT_DATA
 "data":{
-  "model": "config_model",
-  "preset_no": "config_num",
+  "model": "this.acModel"
   "LastHeatingCoolingState": "this.LastHeatingCoolingState"
-  "CurrentTemperature": "Characteristic",
   "TargetTemperature": "Characteristic",
   "TargetHeatingCoolingState": "Characteristic.TargetHeatingCoolingState.OFF@example",
   "defaultState": "Characteristic.TargetHeatingCoolingState"
 }*/
 
 module.exports = function(data){
-  if (!data.model && !data.preset_no) {
-    return;
-  }
-
-  if (presets[data.model][data.preset_no].off && data.TargetHeatingCoolingState == data.defaultState.OFF) {
-    var mainCode = presets[data.model][data.preset_no].off;
+  var mainCode;
+  var isAuto = false;
+  var stoModel = null;
+  if (!presets[data.model]) {
+    mainCode = data.model + "pomowiswtt02";
+    isAuto = true;
   }else{
-    if (data.autoModel) {
-      var mainCode = data.autoModel+"pomowiswtt02"
-    }else{
-      var mainCode = presets[data.model][data.preset_no].main;
-    }
+    mainCode = presets[data.model].main;
+    stoModel = presets[data.model].des;
+  }
+  if (presets[data.model] && presets[data.model].off && data.TargetHeatingCoolingState == data.defaultState.OFF) {
+    mainCode = presets[data.model].off;
+  }else{
     var codeConfig = presets.default;
     var valueCont = presets.default.VALUE;
     for (var index = 0; index < valueCont.length; index++) {
@@ -61,9 +60,9 @@ module.exports = function(data){
       }
     }
   
-    if (!data.autoModel && presets[data.model][data.preset_no].EXTRA_VALUE) {
-      codeConfig = presets[data.model][data.preset_no];
-      valueCont = presets[data.model][data.preset_no].EXTRA_VALUE;
+    if (presets[data.model] && presets[data.model].EXTRA_VALUE) {
+      codeConfig = presets[data.model];
+      valueCont = presets[data.model].EXTRA_VALUE;
       for (var index = 0; index < valueCont.length; index++) {
         var tep = valueCont[index];//extra replacement
         switch (tep) {
@@ -87,10 +86,12 @@ module.exports = function(data){
   }
 
   /* RETURN_DATA
-  data: "AC Code"
+  data: "AC Code",
+  auto: "Use auto_gen code"
   */
-
   return {
-    data: mainCode
+    data: mainCode,
+    model: stoModel,
+    auto: isAuto
   };
 }

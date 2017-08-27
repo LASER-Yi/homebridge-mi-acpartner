@@ -1,108 +1,98 @@
 # homebridge-mi-acpartner
 [![npm version](https://badge.fury.io/js/homebridge-mi-acpartner.svg)](https://badge.fury.io/js/homebridge-mi-acpartner)
 
-XiaoMi AC Partner plugins for HomeBridge.
-
-Thanks for [takatost's project](https://github.com/takatost/homebridge-mi-ac-partner),  [miio](https://github.com/aholstenson/miio), [YinHangCode's project](https://github.com/YinHangCode/homebridge-mi-aqara) and all other developer and testers.
-
-**Note: I don't have much time to get AC command for presets. You can commit your customize setting to [issues](https://github.com/LASER-Yi/homebridge-mi-acpartner/issues) or ly0007@yeah.net. I will write a Commit Format later.**
-
-**WARN: This plugin will not support Miio Auto Discover feature after 0.2.2. Please add your ac partner's ip address to config.json as quick as possible, Thanks.**
-
-### Feature
-
-* Switch on / off.
-
-* Control modes:
-
-  - Use AC signal or IR signal to control your AC.
-  - Change temperature between 17 - 30(default).
-  - HEAT mode, COOL mode, AUTO mode support.
-  - Wind Force, Wind Sweep control support.(Basic on iOS 11, Coming sooooon)
-  - Customize IR Signal Support.(Coming sooooooooon)
-
-* Customize your AC's Signal
-
-* Sync AC State bewteen AC Partner and Home App.~~(Coming soon)~~
-
-* Auto get AC signal.(may not work for all AC)
-
-* Lumi Gateway Temperature Sensor Support.~~(Coming soon)~~
+[English Ver. Here](https://github.com/LASER-Yi/homebridge-mi-acpartner/blob/master/doc/README_EN.md#)
 
 
-### Installation
+小米空调伴侣的Homebridge插件
 
-1. Install [Homebridge](https://github.com/nfarina/homebridge)
+感谢[takatost](https://github.com/takatost/homebridge-mi-ac-partner)，[miio](https://github.com/aholstenson/miio)，[YinHangCode](https://github.com/YinHangCode/homebridge-mi-aqara)和所有测试开发人员提供支持。
 
-2. Install required packages(include miio).
+**注意：我没有很多时间去获取空调伴侣的预设信息，如果你手上有我没有提供的空调伴侣预设码，请前往[issues](https://github.com/LASER-Yi/homebridge-mi-acpartner/issues)或者直接发送邮件到ly0007@yeah.net提供。我需要空调30到17度制冷制热模式，各个模式任意温度和各种风力下的空调码。**
 
-```
-npm install -g homebridge-mi-acpartner miio
-```
+**注意：此插件在0.2.2版本后移除了Miio自动查找的功能，如果插件无法使用，请在"config.json"中添加你要控制的空调伴侣的IP地址。此插件在0.2.6版本后就开始使用自动查找预设功能，你可以在之后的版本放心移除"model"和"preset_no"字段。**
 
-3. Add plugin configuration to your config.json file, please see ``Config`` and ``Config Example`` for more detail.
 
-4. Start Homebridge.
+### Feature(功能）
 
-### Config
+* 开关空调
 
-* Necessary
+* 控制模式：
+
+  - 使用空调码或是红外码控制你的空调。
+  - 在17-30度之间调整空调温度（默认情况）。
+  - 制冷，制热，自动模式支持。
+  - 改变风力，改变扫风状态。（即将于iOS 11中支持）
+  - 自定义红外码以控制你的其他电器。
+
+* 如果我们没有提供预设，可自定义你的空调码
+
+* 在空调伴侣和Homekit中同步信息。~~(即将上线)~~
+
+* 自动获取你的空调型号。(并不会支持所有空调)
+
+* 米家温湿度传感器支持。(即将上线)
+
+
+### Installation（安装）
+
+1. 安装[Homebridge](https://github.com/nfarina/homebridge)
+
+2. 安装此插件和依赖包(miio)
+
+           npm install -g homebridge-mi-acpartner miio
+
+
+3. 在**config.json**中加入你的配置信息，请参考下方的``Config``和``Config Example``添加
+
+4. 启动Homebridge.
+
+### Preset（预设）
+
+此插件目前支持的预设：
+
+        格力：1，2，8
+        美的：1
+如果你有预设信息，请于[issues](https://github.com/LASER-Yi/homebridge-mi-acpartner/issues)中分享给我，或者发送到我的电子邮箱中。
+
+### Config（配置）
+
+* 必要配置
 
     * "accessory": "XiaoMiAcPartner"
 
-    * "token": "Your AC Partner token"
+    * "token": "空调伴侣的token"
 
-      Follow this [Document](https://github.com/aholstenson/miio/blob/master/docs/management.md#getting-the-token-of-a-device) get your AC Partner's token.
+        参考这篇[文章](https://github.com/aholstenson/miio/blob/master/docs/management.md#getting-the-token-of-a-device)获得空调伴侣的token。
 
-            If you are using Android device, you can get token by using MIJIA app.
+        如果你正使用安卓手机，你可以直接从米家App中拿到token
 
-    * "name": "Name show in Home App"
+    * "name": "在家庭App中显示的名字（如添加多个空调伴侣，请确保此处互不相同）"
 
-    * "ip": "your_ac_partner_ip_address"
+    * "ip": "空调伴侣在当前网络下的IP地址" 
 
-    1. "brand": "Your AC brand",
+* 可选配置
 
-        "preset_no": "Preset No. in MIJIA App"
+    * "customize":
+        使用这种[方法](https://github.com/aholstenson/miio/blob/master/docs/protocol.md#)来获取你正使用的空调码，然后填入到这里。
 
-            Support:
+            请参考Config Example来获取详细内容。
 
-                - media: 1 
+            不是所有的空调都需要"on"信号，如果在调节温度时空调自动关机，则请填写相应信号到此处。
 
-                - gree: 1,2,8
+            如果"auto"信号没有定义，则会自动发送制冷信号。
 
-            Testing:
+            使用"type": "IR"来发送自定义红外信号。
 
-                - gree: 2
+    * "maxTemp": "设置温度上限（默认为30度）"
 
-    2. "customize":
-       Use this [method](https://github.com/aholstenson/miio/blob/master/docs/protocol.md#) to get your AC's command.
+    * "minTemp": "设置温度下限（默认为17度）"
 
-             Please see Config Example for more detail.
+    * "sensorSid": "填写你的**温湿度传感器**ID，此**温湿度传感器**必须绑定在空调伴侣下"（尚未支持）
 
-             Not every AC need "on" signal, please check your AC's command for more infomation.
+### Config Example（配置例子）
 
-             If "auto" signal undefined, plugin will send signal(cool/heat) basic on current temperature.
-
-             You can add "type": "IR" to send customize IR command.
-
-    **You must choose one method(preset or customize) to control your AC.**
-
-
-* Optional
-
-    * "maxTemp": "Set max temperature"
-
-    * "minTemp": "Set min temperature"
-
-    * "sensor": "Use Lumi Gateway temperature sensor to update your AC's current temperature"
-
-        - "gatewaySid": "Your gateway Sid"
-
-        - "sensorName": "Your temperature sensor Sid"
-
-### Config Example
-
-Using preset AC command.
+基本插件配置
 
 ```
 "accessories": [
@@ -110,14 +100,12 @@ Using preset AC command.
             "accessory": "XiaoMiAcPartner",
             "token": "token-as-hex",
             "name": "AcPartner",
-            "ip": "your_ac_partner_ip_address",
-            "brand": "media",
-            "preset_no": "1"
+            "ip": "your_ac_partner_ip_address"
         }
     ]
 ```
 
-Using outer Temperature Sensor from Lumi Gateway
+使用外置温湿度传感器
 
 ```
 "accessories": [
@@ -126,17 +114,12 @@ Using outer Temperature Sensor from Lumi Gateway
             "token": "token-as-hex",
             "name": "AcPartner_1",
             "ip": "192.168.1.1",
-            "sensor": {
-                "gatewaySid": "6409802da3b3",
-                "sensorName": "158d000156e667"
-            },
-            "brand": "media",
-            "preset_no": "1"
+            "sensorSid": "lumi.158d000156e667"
         }
 ]
 ```
 
-Using customize AC command.
+使用自定义空调码
 
 ```
 "accessories": [
@@ -144,19 +127,18 @@ Using customize AC command.
             "accessory": "XiaoMiAcPartner",
             "token": "token-as-hex",
             "name": "AcPartner",
-            "minTemp": "18",
             "ip": "your_ac_partner_ip_address",
             "customize": {
-                "off": "AC off signal(Necessary)",
-                "on": "Some_AC_need_this(Optional)",
-                "auto": "AC auto mode signal(Optional)",
+                "off": "关闭信号（必须）",
+                "on": "有些空调需要这个信号（可选）",
+                "auto": "自动模式信号（可选）",
                 "heat":{
-                    "30": "(Optional)",
+                    "30": "（可选信号）",
                     "29": "",
                     "17": ""
                 },
                 "cool":{
-                    "30": "Necessary",
+                    "30": "（必要信号）",
                     "29": "",
                     "17": ""
                 }
@@ -165,7 +147,7 @@ Using customize AC command.
     ]
 ```
 
-Using customize IR command.
+使用自定义红外码
 
 ```
 "accessories": [
@@ -173,20 +155,19 @@ Using customize IR command.
             "accessory": "XiaoMiAcPartner",
             "token": "token-as-hex",
             "name": "AcPartner",
-            "minTemp": "18",
             "ip": "your_ac_partner_ip_address",
             "customize": {
                 "type": "IR",
-                "off": "AC off signal(Necessary)",
-                "on": "Some_AC_need_this(Optional)",
-                "auto": "AC auto mode signal(Optional)",
+                "off": "关闭信号（必须）",
+                "on": "有些空调需要这个信号（可选）",
+                "auto": "自动模式信号（可选）",
                 "heat":{
-                    "30": "(Optional)",
+                    "30": "（可选信号）",
                     "29": "",
                     "17": ""
                 },
                 "cool":{
-                    "30": "Necessary",
+                    "30": "（必要信号）",
                     "29": "",
                     "17": ""
                 }
@@ -196,26 +177,31 @@ Using customize IR command.
 ```
 
 ### Changelog
-  0.2.5
 
-  Outer temperature sensor support. 
+0.2.6
 
-  0.2.3
+Remove Gateway temperature sensor support. Add automatic preset detection.
 
-  Gree 2 preset support, customize IR control support.
+0.2.5
 
-  0.2.0
+Outer temperature sensor support. 
 
-  Sync State between hk and AC Partner. maxTemp & minTemp Support. Add gree 2 preset for testing.
+0.2.3
 
-  0.1.5
+Gree 2 preset support, customize IR control support.
 
-  Presets reconstruction.
+0.2.0
 
-  0.0.9
+Sync State between hk and AC Partner. maxTemp & minTemp Support. Add gree 2 preset for testing.
 
-  Auto mode support, "on" signal support, code reconstruction, presets reconstruction.
+0.1.5
 
-  0.0.1
+Presets reconstruction.
 
-  ADD Basic File.
+0.0.9
+
+Auto mode support, "on" signal support, code reconstruction, presets reconstruction.
+
+0.0.1
+
+ADD Basic File.
