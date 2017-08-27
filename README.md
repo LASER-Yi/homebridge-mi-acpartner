@@ -196,7 +196,7 @@ Using customize IR command.
 ```
 
 ### Changelog
-  0.2.4
+  0.2.5
 
   Outer temperature sensor support. 
 
