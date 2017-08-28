@@ -19,7 +19,7 @@ function XiaoMiAcPartner(log, config) {
     //Init
     var that = this;
     this.log = log;
-    this.name = config.name;
+    this.name = config.name || "AcPartner";
     this.token = config.token;
     this.ip = config.ip;
     this.LastHeatingCoolingState = Characteristic.TargetHeatingCoolingState.OFF;
@@ -30,14 +30,11 @@ function XiaoMiAcPartner(log, config) {
     //Optional
     this.maxTemp = parseInt(config.maxTemp) || 30;
     this.minTemp = parseInt(config.minTemp) || 17;
-    this.sendType = "AC";
     this.outerSensor = config.sensorSid;
-
+    this.wiSync = config.sync;
+    this.autoStart = config.autoStart;
     if (config.customize) {
         this.customi = config.customize;
-        if (this.customi.type != null) {
-            this.sendType = this.customi.type;
-        }
         this.log.debug("[XiaoMiAcPartner][DEBUG] Using customized AC signal...");
     }else{
         this.data = JSON;
@@ -93,9 +90,16 @@ XiaoMiAcPartner.prototype = {
     doRestThing: function(){
         var that = this;
 
-        setInterval(function() {
-            that.getACState();
-        }, 60000);
+        if (!this.wiSync) {
+            this.log("[XiaoMiAcPartner][DEBUG] Auto sync every 60 second");
+            setInterval(function() {
+                that.getACState();
+            }, 60000);   
+        }else{
+            this.log("[XiaoMiAcPartner][DEBUG] Auto sync off");
+            this.TargetTemperature = (this.maxTemp + this.minTemp)/2;
+            this.TargetHeatingCoolingState = Characteristic.TargetHeatingCoolingState.OFF;
+        }
     },
 
     discover: function(){
@@ -109,7 +113,9 @@ XiaoMiAcPartner.prototype = {
             .then(function(device){
                 accessory.device = device;
                 log.debug('[XiaoMiAcPartner][DEBUG] Discovered "%s" (ID: %s) on %s:%s.', device.hostname, device.id, device.address, device.port);
-                accessory.getACState();
+                if (!accessory.wiSync) {
+                    accessory.getACState();   
+                }
             })
     },
 
@@ -124,24 +130,23 @@ XiaoMiAcPartner.prototype = {
                 this.log("[XiaoMiAcPartner][INFO] AC turned off");
             }
             
-            if (this.sendType == "IR") {
-                this.sendIrCmd();
-            }else{
-                this.SendCmd();
-            }
+            this.SendCmd();
         }
         callback();
     },
 
     getTargetTemperature: function(callback) {
-        this.getACState();
+        if (!this.wiSync) {
+            this.getACState();
+        }
+
         callback(null, this.TargetTemperature);
     },
 
     setTargetTemperature: function(TargetTemperature, callback, context) {
         if(context !== 'fromSetValue') {
               this.TargetTemperature = TargetTemperature;
-              if (this.TargetHeatingCoolingState == Characteristic.TargetHeatingCoolingState.OFF) {
+              if (!this.autoStart && this.TargetHeatingCoolingState == Characteristic.TargetHeatingCoolingState.OFF) {
                 this.TargetHeatingCoolingState = Characteristic.TargetHeatingCoolingState.AUTO;
                 this.acPartnerService.getCharacteristic(Characteristic.TargetHeatingCoolingState)
                     .updateValue(this.TargetHeatingCoolingState);
@@ -155,12 +160,7 @@ XiaoMiAcPartner.prototype = {
             }
 
             this.log.debug('[XiaoMiAcPartner][DEBUG] Set temperature: ' + TargetTemperature);
-
-            if (this.sendType == "IR") {
-                this.sendIrCmd();
-            }else{
-                this.SendCmd();
-            }
+            this.SendCmd();
         }
 
         callback();
@@ -183,13 +183,26 @@ XiaoMiAcPartner.prototype = {
         return this.services;
     },
 
-    getCuSignal: function(){
+    onStart: function() {
         var code;
+        if (this.TargetHeatingCoolingState == Characteristic.TargetHeatingCoolingState.OFF && this.LastHeatingCoolingState == Characteristic.TargetHeatingCoolingState.OFF) {
+            return;
+        }
         if (this.LastHeatingCoolingState == Characteristic.TargetHeatingCoolingState.OFF && this.customi.on) {
             code = this.customi.on;
-            this.log.debug("[XiaoMiAcPartner][DEBUG] AC on, sending code: " + code);
-            this.device.call('send_cmd', [code]);
+            if (code.substr(0,2) == "01") {
+                this.log.debug("[XiaoMiAcPartner][DEBUG] AC on, sending AC code: " + code);
+                this.device.call('send_cmd', [code]);
+            }else{
+                this.log.debug("[XiaoMiAcPartner][DEBUG] AC on, sending IR code: " + code);
+                this.device.call('send_ir_code', [code]);
+            }
         }
+    },
+
+    getCuSignal: function(){
+        this.onStart();
+        var code;
         if (this.TargetHeatingCoolingState != Characteristic.TargetHeatingCoolingState.OFF) {
             if (this.TargetHeatingCoolingState == Characteristic.TargetHeatingCoolingState.HEAT) {
                 if (!this.customi||!this.customi.heat||!this.customi.heat[this.TargetTemperature]) {
@@ -256,45 +269,36 @@ XiaoMiAcPartner.prototype = {
 
         }else{
             code = this.getCuSignal();
+            if (!code) {
+                return;
+            }
         }
-
-        this.log.debug("[XiaoMiAcPartner][DEBUG] Sending code: " + code);
-        this.device.call('send_cmd', [code])
-            .then(function(data){
-                if (data[0] == "ok") {
-                    accessory.LastHeatingCoolingState = accessory.TargetHeatingCoolingState;
-                    accessory.log.debug("[XiaoMiAcPartner][DEBUG] Change Successful");
-                }else{
-                    accessory.log.debug("[XiaoMiAcPartner][DEBUG] Unsuccess! Maybe invaild AC Code?");
-                    accessory.getACState();
-                }
-            });
-    },
-
-    sendIrCmd :function(){
-        if (!this.device) {
-            this.log.error('[XiaoMiAcPartner][WARN] Send IR code failed!(Device not exists)');
-            return;
+        
+        if (code.substr(0,2) == "01") {
+            this.log.debug("[XiaoMiAcPartner][DEBUG] Sending AC code: " + code);
+            this.device.call('send_cmd', [code])
+                .then(function(data){
+                    if (data[0] == "ok") {
+                        accessory.LastHeatingCoolingState = accessory.TargetHeatingCoolingState;
+                        accessory.log.debug("[XiaoMiAcPartner][DEBUG] Change Successful");
+                    }else{
+                        accessory.log.debug("[XiaoMiAcPartner][DEBUG] Unsuccess! Maybe invaild AC Code?");
+                        accessory.getACState();
+                    }
+                });
+        }else{
+            this.log.debug("[XiaoMiAcPartner][DEBUG] Sending IR code: " + code);
+            this.device.call('send_ir_code', [code])
+                .then(function(data){
+                    if (data[0] == "ok") {
+                        accessory.LastHeatingCoolingState = accessory.TargetHeatingCoolingState;
+                        accessory.log.debug("[XiaoMiAcPartner][DEBUG] Send Successful");
+                    }else{
+                        accessory.log.debug("[XiaoMiAcPartner][DEBUG] Unsuccess! Maybe invaild IR Code?");
+                        accessory.getACState();
+                    }
+                });
         }
-
-        var accessory = this;
-        var irCode;
-        this.log.debug("[XiaoMiAcPartner][DEBUG] Last TargetHeatingCoolingState: " + this.LastHeatingCoolingState);
-        this.log.debug("[XiaoMiAcPartner][DEBUG] Current TargetHeatingCoolingState: " + this.TargetHeatingCoolingState);
-
-        //
-        irCode = this.getCuSignal();
-        this.log.debug("[XiaoMiAcPartner][DEBUG] Sending IR code: " + irCode);
-        this.device.call('send_ir_code', [irCode])
-            .then(function(data){
-                if (data[0] == "ok") {
-                    accessory.LastHeatingCoolingState = accessory.TargetHeatingCoolingState;
-                    accessory.log.debug("[XiaoMiAcPartner][DEBUG] Send Successful");
-                }else{
-                    accessory.log.debug("[XiaoMiAcPartner][DEBUG] Unsuccess! Maybe invaild IR Code?");
-                    accessory.getACState();
-                }
-            });
     },
 
     getACState: function(){

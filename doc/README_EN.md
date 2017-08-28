@@ -44,6 +44,19 @@ npm install -g homebridge-mi-acpartner miio
 
 4. Start Homebridge.
 
+### Preset
+
+Support:
+
+    Gree: 1,2,8
+    Media: 1
+
+Please change your preset in MIJIA app.
+
+If ``customize`` not exist and we don't support your AC, this plugin will auto generate AC code. 
+
+If you have preset infomation ,you can share with me in [issues](https://github.com/LASER-Yi/homebridge-mi-acpartner/issues) or send me an email.
+
 ### Config
 
 * Necessary
@@ -72,13 +85,17 @@ npm install -g homebridge-mi-acpartner miio
 
         If "auto" signal undefined, plugin will send signal(cool/heat) basic on current temperature.
 
-        You can add "type": "IR" to send customize IR command.
+        When fill in IR signal, plugin will send IR code automatic(Make sure you turn off "sync" function)
 
     * "maxTemp": "Set max temperature"
 
     * "minTemp": "Set min temperature"
 
-    * "sensorSid": "Your Temperature Sensor Series ID, that sensor must connected with AC Partner"
+    * "sync": "off" （Turn off sync state with AC Partner）
+
+    * "autoStart": "off"（When state is "off", change temperature will not change state）
+
+    * "sensorSid": "Your Temperature Sensor Series ID, that sensor must connected with AC Partner(Can find in Android device)"
 
 ### Config Example
 
@@ -109,7 +126,9 @@ Using outer Temperature Sensor
 ]
 ```
 
-Using customize AC command.
+Using customize AC command or IR command.
+
+Most AC command start with "01" and most IR command start with "FE"
 
 ```
 "accessories": [
@@ -120,36 +139,6 @@ Using customize AC command.
             "minTemp": "18",
             "ip": "your_ac_partner_ip_address",
             "customize": {
-                "off": "AC off signal(Necessary)",
-                "on": "Some_AC_need_this(Optional)",
-                "auto": "AC auto mode signal(Optional)",
-                "heat":{
-                    "30": "(Optional)",
-                    "29": "",
-                    "17": ""
-                },
-                "cool":{
-                    "30": "Necessary",
-                    "29": "",
-                    "17": ""
-                }
-            }
-        }
-    ]
-```
-
-Using customize IR command.
-
-```
-"accessories": [
-        {
-            "accessory": "XiaoMiAcPartner",
-            "token": "token-as-hex",
-            "name": "AcPartner",
-            "minTemp": "18",
-            "ip": "your_ac_partner_ip_address",
-            "customize": {
-                "type": "IR",
                 "off": "AC off signal(Necessary)",
                 "on": "Some_AC_need_this(Optional)",
                 "auto": "AC auto mode signal(Optional)",
@@ -169,6 +158,14 @@ Using customize IR command.
 ```
 
 ### Changelog
+
+0.2.8
+
+Deeper customize support
+
+0.2.7
+
+Temperature sensor that connected with AC Partner support.
 
 0.2.6
 
