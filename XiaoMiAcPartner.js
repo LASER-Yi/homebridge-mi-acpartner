@@ -25,15 +25,13 @@ function XiaoMiAcPartner(log, config) {
     this.LastHeatingCoolingState = Characteristic.TargetHeatingCoolingState.OFF;
     this.CurrentTemperature = 0;
     this.config = config;
-    this.acModel;
+    this.acModel = null;
 
     //Optional
     this.maxTemp = parseInt(config.maxTemp) || 30;
     this.minTemp = parseInt(config.minTemp) || 17;
     this.sendType = "AC";
-    this.outerSensor// = config.sensorSid;
-    this.gatewayIpAddress;
-    this.gatewayPort = 9898;
+    this.outerSensor = config.sensorSid;
 
     if (config.customize) {
         this.customi = config.customize;
@@ -149,7 +147,7 @@ XiaoMiAcPartner.prototype = {
                     .updateValue(this.TargetHeatingCoolingState);
               }
 
-            if (!this.outerTemSen) {
+            if (!this.outerSensor) {
                 // Update current temperature
                 this.acPartnerService
                     .getCharacteristic(Characteristic.CurrentTemperature)
@@ -170,10 +168,10 @@ XiaoMiAcPartner.prototype = {
 
     getCurrentTemperature: function(callback) {
         if (!this.outerSensor) {
-            this.log("[XiaoMiAcPartner][INFO] Using TargetTemp update CurrentTemp %s", this.TargetTemperature);
+            this.log("[XiaoMiAcPartner][INFO] set CurrentTemperature %s", this.TargetTemperature);
             callback(null, parseFloat(this.TargetTemperature));
         }else{
-            callback(null, parseFloat(this.TargetTemperature));
+            callback(null, parseFloat(this.CurrentTemperature));
         }
     },
 
@@ -307,6 +305,23 @@ XiaoMiAcPartner.prototype = {
 
         var acc = this;
         this.log.debug("[XiaoMiAcPartner][INFO] Syncing...")
+
+        //Update CurrentTemperature
+        if(this.outerSensor){
+            this.device.call('get_device_prop_exp', [[acc.outerSensor, "temperature"]])
+                .then(function(curTep){
+                    if (curTep[0][0] == null) {
+                        acc.log.error("[XiaoMiAcPartner][WARN] Invaild sensorSid!")
+                    }else{
+                        acc.log.debug("[XiaoMiAcPartner][INFO] Temperature Sensor return:%s",curTep[0][0]);
+                        acc.CurrentTemperature = curTep[0][0] / 100.0;
+                        acc.acPartnerService.getCharacteristic(Characteristic.CurrentTemperature)
+                            .updateValue(acc.CurrentTemperature);
+                    }
+                })
+        }
+
+        //Update AC state
         this.device.call('get_model_and_state', [])
             .then(function(retMaS){
                 //acc.log(retMaS);

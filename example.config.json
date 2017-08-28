@@ -10,13 +10,8 @@
             "accessory": "XiaoMiAcPartner",
             "token": "token-as-hex",
             "name": "AcPartner_1",
-            "ip": "192.168.1.1",
-            "sensor": {
-                "gatewaySid": "6409802da3b3",
-                "sensorName": "158d000156e667"
-            },
-            "brand": "media",
-            "preset_no": "1"
+            "ip": "192.168.1.2",
+            "sensorSid": "lumi.158d000156e667"
         },
         {
             "accessory": "XiaoMiAcPartner",
@@ -24,9 +19,8 @@
             "name": "AcPartner_2",
             "maxTemp": "30",
             "minTemp": "17",
-            "ip": "192.168.1.1",
+            "ip": "192.168.1.3",
             "customize": {
-                "type": "IR/AC",
                 "off": "You_AC_Signal_Here",
                 "auto": "",
                 "heat":{
