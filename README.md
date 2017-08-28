@@ -88,7 +88,7 @@
 
     * "minTemp": "设置温度下限（默认为17度）"
 
-    * "sensorSid": "填写你的**温湿度传感器**ID，此**温湿度传感器**必须绑定在空调伴侣下"（尚未支持）
+    * "sensorSid": "填写你的**温湿度传感器**ID，此**温湿度传感器**必须绑定在空调伴侣下"
 
 ### Config Example（配置例子）
 
@@ -177,6 +177,10 @@
 ```
 
 ### Changelog
+
+0.2.7
+
+Temperature sensor that connected with AC Partner support.
 
 0.2.6
 
