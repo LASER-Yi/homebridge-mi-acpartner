@@ -50,6 +50,9 @@ Support:
 
     Gree: 1,2,8
     Media: 1
+    Haier: 1
+    AUX: 1
+    Chigo: 1
 
 Please change your preset in MIJIA app.
 
@@ -59,7 +62,7 @@ If you have preset infomation ,you can share with me in [issues](https://github.
 
 ### Config
 
-* Necessary
+* Required
 
     * "accessory": "XiaoMiAcPartner"
 
@@ -139,7 +142,7 @@ Most AC command start with "01" and most IR command start with "FE"
             "minTemp": "18",
             "ip": "your_ac_partner_ip_address",
             "customize": {
-                "off": "AC off signal(Necessary)",
+                "off": "AC off signal(Required)",
                 "on": "Some_AC_need_this(Optional)",
                 "auto": "AC auto mode signal(Optional)",
                 "heat":{
@@ -148,7 +151,7 @@ Most AC command start with "01" and most IR command start with "FE"
                     "17": ""
                 },
                 "cool":{
-                    "30": "Necessary",
+                    "30": "Required",
                     "29": "",
                     "17": ""
                 }
@@ -158,6 +161,14 @@ Most AC command start with "01" and most IR command start with "FE"
 ```
 
 ### Changelog
+
+0.3.0
+
+Auto reconnect support, add presets
+
+0.2.9
+
+Relative Humidity data support.
 
 0.2.8
 

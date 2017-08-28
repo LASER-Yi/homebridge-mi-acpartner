@@ -14,7 +14,7 @@ module.exports = function(data){
   var isAuto = false;
   var stoModel = null;
   if (!presets[data.model]) {
-    mainCode = data.model + "pomowiswtt02";
+    mainCode = data.model + "pomowiswtta0";
     isAuto = true;
   }else{
     mainCode = presets[data.model].main;

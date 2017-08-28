@@ -25,7 +25,6 @@ function XiaoMiAcPartner(log, config) {
     this.LastHeatingCoolingState = this.TargetHeatingCoolingState = Characteristic.TargetHeatingCoolingState.OFF;
     this.CurrentTemperature = 0;
     this.CurrentRelativeHumidity = 0;
-    this.TargetTemperature = 26;
     this.config = config;
     this.acModel = null;
 
@@ -43,6 +42,7 @@ function XiaoMiAcPartner(log, config) {
         this.data.defaultState = Characteristic.TargetHeatingCoolingState;
         this.log.debug("[XiaoMiAcPartner][DEBUG] Using presets...");
     }
+    
     this.services = [];
 
     //Register as Thermostat
@@ -66,7 +66,7 @@ function XiaoMiAcPartner(log, config) {
     this.acPartnerService
         .getCharacteristic(Characteristic.CurrentTemperature)
         .setProps({
-            maxValue: 40,
+            maxValue: 60,
             minValue: -20,
             minStep: 1
         })
@@ -107,13 +107,19 @@ XiaoMiAcPartner.prototype = {
     doRestThing: function(){
         var that = this;
 
+        setInterval(function() {
+            //Rediscover Partner every 180s
+            that.discover();
+        }, 180000);
+
         if (!this.wiSync) {
-            this.log("[XiaoMiAcPartner][DEBUG] Auto sync every 60 second");
+            this.log.info("[XiaoMiAcPartner][INFO] Auto sync every 60 second");
             setInterval(function() {
                 that.getACState();
             }, 60000);   
         }else{
-            this.log("[XiaoMiAcPartner][DEBUG] Auto sync off");
+            this.TargetTemperature = (this.maxTemp + this.minTemp) / 2;
+            this.log.info("[XiaoMiAcPartner][INFO] Auto sync off");
         }
     },
 
@@ -121,13 +127,13 @@ XiaoMiAcPartner.prototype = {
         var accessory = this;
         var log = this.log;
         var token = this.token;
-        this.log('[XiaoMiAcPartner][INFO] Searching AC Partner...');
+        this.log.debug('[XiaoMiAcPartner][DEBUG] Searching AC Partner...');
         // Discover device in the network
 
         miio.device({ address: this.ip, token: this.token })
             .then(function(device){
                 accessory.device = device;
-                log.debug('[XiaoMiAcPartner][DEBUG] Discovered "%s" (ID: %s) on %s:%s.', device.hostname, device.id, device.address, device.port);
+                accessory.log.debug('[XiaoMiAcPartner][DEBUG] Discovered "%s" (ID: %s) on %s:%s.', device.hostname, device.id, device.address, device.port);
                 if (!accessory.wiSync) {
                     accessory.getACState();   
                 }
@@ -168,13 +174,13 @@ XiaoMiAcPartner.prototype = {
               }
 
             if (!this.outerSensor) {
-                // Update current temperature
+                // Update CurrentTemperature
                 this.acPartnerService
                     .getCharacteristic(Characteristic.CurrentTemperature)
                     .updateValue(parseFloat(TargetTemperature));
             }
 
-            this.log.debug('[XiaoMiAcPartner][DEBUG] Set temperature: ' + TargetTemperature);
+            this.log.debug('[XiaoMiAcPartner][DEBUG] Set TargetTemperature: ' + TargetTemperature);
             this.SendCmd();
         }
 
@@ -183,7 +189,7 @@ XiaoMiAcPartner.prototype = {
 
     getCurrentTemperature: function(callback) {
         if (!this.outerSensor) {
-            this.log("[XiaoMiAcPartner][INFO] set CurrentTemperature %s", this.TargetTemperature);
+            this.log("[XiaoMiAcPartner][INFO] Set CurrentTemperature %s", this.TargetTemperature);
             callback(null, parseFloat(this.TargetTemperature));
         }else{
             callback(null, parseFloat(this.CurrentTemperature));
@@ -338,9 +344,9 @@ XiaoMiAcPartner.prototype = {
                     }else{
                         acc.log.debug("[XiaoMiAcPartner][INFO] Temperature Sensor return:%s",curTep[0]);
                         acc.CurrentTemperature = curTep[0][0] / 100.0;
+                        acc.CurrentRelativeHumidity = curTep[0][1] / 100.0;
                         acc.acPartnerService.getCharacteristic(Characteristic.CurrentTemperature)
                             .updateValue(acc.CurrentTemperature);
-                        acc.CurrentRelativeHumidity = curTep[0][1] / 100.0;
                         acc.acPartnerService.getCharacteristic(Characteristic.CurrentRelativeHumidity)
                             .updateValue(acc.CurrentRelativeHumidity);
                     }
