@@ -22,8 +22,10 @@ function XiaoMiAcPartner(log, config) {
     this.name = config.name || "AcPartner";
     this.token = config.token;
     this.ip = config.ip;
-    this.LastHeatingCoolingState = Characteristic.TargetHeatingCoolingState.OFF;
+    this.LastHeatingCoolingState = this.TargetHeatingCoolingState = Characteristic.TargetHeatingCoolingState.OFF;
     this.CurrentTemperature = 0;
+    this.CurrentRelativeHumidity = 0;
+    this.TargetTemperature = 26;
     this.config = config;
     this.acModel = null;
 
@@ -70,6 +72,15 @@ function XiaoMiAcPartner(log, config) {
         })
         .on('get', this.getCurrentTemperature.bind(this));;
 
+    this.acPartnerService
+        .getCharacteristic(Characteristic.CurrentRelativeHumidity)
+        .setProps({
+            maxValue: 100,
+            minValue: 0,
+            minStep: 1
+        })
+        .on('get', this.getCurrentRelativeHumidity.bind(this));
+
     this.services.push(this.acPartnerService);
 
     this.serviceInfo = new Service.AccessoryInformation();
@@ -81,6 +92,12 @@ function XiaoMiAcPartner(log, config) {
     this.services.push(this.serviceInfo);
 
     this.discover();
+
+    /*this.humSensorService = new Service.HumiditySensor("Hum_" + this.name);
+    //if connected with temperature sensor, register new humSensor.
+    if (this.outerSensor) {
+        this.humSensorService = new Service.HumiditySensor("Hum_" + this.name);
+    }*/
 
     this.doRestThing();
 
@@ -97,8 +114,6 @@ XiaoMiAcPartner.prototype = {
             }, 60000);   
         }else{
             this.log("[XiaoMiAcPartner][DEBUG] Auto sync off");
-            this.TargetTemperature = (this.maxTemp + this.minTemp)/2;
-            this.TargetHeatingCoolingState = Characteristic.TargetHeatingCoolingState.OFF;
         }
     },
 
@@ -173,6 +188,10 @@ XiaoMiAcPartner.prototype = {
         }else{
             callback(null, parseFloat(this.CurrentTemperature));
         }
+    },
+
+    getCurrentRelativeHumidity: function(callback){
+        callback(null, parseFloat(this.CurrentRelativeHumidity));
     },
 
     identify: function(callback) {
@@ -312,15 +331,18 @@ XiaoMiAcPartner.prototype = {
 
         //Update CurrentTemperature
         if(this.outerSensor){
-            this.device.call('get_device_prop_exp', [[acc.outerSensor, "temperature"]])
+            this.device.call('get_device_prop_exp', [[acc.outerSensor, "temperature", "humidity"]])
                 .then(function(curTep){
                     if (curTep[0][0] == null) {
                         acc.log.error("[XiaoMiAcPartner][WARN] Invaild sensorSid!")
                     }else{
-                        acc.log.debug("[XiaoMiAcPartner][INFO] Temperature Sensor return:%s",curTep[0][0]);
+                        acc.log.debug("[XiaoMiAcPartner][INFO] Temperature Sensor return:%s",curTep[0]);
                         acc.CurrentTemperature = curTep[0][0] / 100.0;
                         acc.acPartnerService.getCharacteristic(Characteristic.CurrentTemperature)
                             .updateValue(acc.CurrentTemperature);
+                        acc.CurrentRelativeHumidity = curTep[0][1] / 100.0;
+                        acc.acPartnerService.getCharacteristic(Characteristic.CurrentRelativeHumidity)
+                            .updateValue(acc.CurrentRelativeHumidity);
                     }
                 })
         }
@@ -352,7 +374,12 @@ XiaoMiAcPartner.prototype = {
                 }
                 acc.acPartnerService.getCharacteristic(Characteristic.TargetHeatingCoolingState)
                     .updateValue(acc.TargetHeatingCoolingState);
-                acc.TargetTemperature = temp;
+
+                if (temp <= acc.maxTemp && temp >= acc.minTemp) {
+                    acc.TargetTemperature = temp;   
+                }else{
+                    acc.TargetTemperature = acc.maxTemp;
+                }
                 acc.acPartnerService.getCharacteristic(Characteristic.TargetTemperature)
                     .updateValue(acc.TargetTemperature);
                 acc.log.debug("[XiaoMiAcPartner][INFO] Sync complete")

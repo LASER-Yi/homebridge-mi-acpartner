@@ -160,6 +160,10 @@
 
 ### Changelog
 
+0.2.9
+
+Relative Humidity data support.
+
 0.2.8
 
 Deeper customize support
