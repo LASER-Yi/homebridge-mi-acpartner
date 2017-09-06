@@ -1,5 +1,4 @@
 var miio = require('miio');
-const dgram = require('dgram');
 var outputSignal = require("./packages/acSignal_handle");
 var Accessory, Service, Characteristic;
 
@@ -137,6 +136,8 @@ XiaoMiAcPartner.prototype = {
                 if (!accessory.wiSync) {
                     accessory.getACState();   
                 }
+            }).catch(function(err){
+                accessory.log.error("[XiaoMiAcPartner][ERROR] Cannot connect to AC Partner." + err);
             })
     },
 
@@ -157,10 +158,6 @@ XiaoMiAcPartner.prototype = {
     },
 
     getTargetTemperature: function(callback) {
-        if (!this.wiSync) {
-            this.getACState();
-        }
-
         callback(null, this.TargetTemperature);
     },
 
@@ -210,6 +207,7 @@ XiaoMiAcPartner.prototype = {
 
     onStart: function() {
         var code;
+        var that = this;
         if (this.TargetHeatingCoolingState == Characteristic.TargetHeatingCoolingState.OFF && this.LastHeatingCoolingState == Characteristic.TargetHeatingCoolingState.OFF) {
             return;
         }
@@ -217,10 +215,20 @@ XiaoMiAcPartner.prototype = {
             code = this.customi.on;
             if (code.substr(0,2) == "01") {
                 this.log.debug("[XiaoMiAcPartner][DEBUG] AC on, sending AC code: " + code);
-                this.device.call('send_cmd', [code]);
+                this.device.call('send_cmd', [code])
+                    .then(function(ret){
+                        that.log.debug("[XiaoMiAcPartner][DEBUG] Return result: " + ret[0]);
+                    }).catch(function(err){
+                        that.log.error("[XiaoMiAcPartner][ERROR] Send code fail! Error: " + err);
+                    });
             }else{
                 this.log.debug("[XiaoMiAcPartner][DEBUG] AC on, sending IR code: " + code);
-                this.device.call('send_ir_code', [code]);
+                this.device.call('send_ir_code', [code])
+                    .then(function(ret){
+                        that.log.debug("[XiaoMiAcPartner][DEBUG] Return result: " + ret[0]);
+                    }).catch(function(err){
+                        that.log.error("[XiaoMiAcPartner][ERROR] Send code fail! Error: " + err);
+                    });
             }
         }
     },
@@ -310,6 +318,8 @@ XiaoMiAcPartner.prototype = {
                         accessory.log.debug("[XiaoMiAcPartner][DEBUG] Unsuccess! Maybe invaild AC Code?");
                         accessory.getACState();
                     }
+                }).catch(function(err){
+                    that.log.error("[XiaoMiAcPartner][ERROR] Send code fail! Error: " + err);
                 });
         }else{
             this.log.debug("[XiaoMiAcPartner][DEBUG] Sending IR code: " + code);
@@ -322,6 +332,8 @@ XiaoMiAcPartner.prototype = {
                         accessory.log.debug("[XiaoMiAcPartner][DEBUG] Unsuccess! Maybe invaild IR Code?");
                         accessory.getACState();
                     }
+                }).catch(function(err){
+                        accessory.log.error("[XiaoMiAcPartner][ERROR] Send IR code fail! " + err);
                 });
         }
     },
@@ -389,6 +401,8 @@ XiaoMiAcPartner.prototype = {
                 acc.acPartnerService.getCharacteristic(Characteristic.TargetTemperature)
                     .updateValue(acc.TargetTemperature);
                 acc.log.debug("[XiaoMiAcPartner][INFO] Sync complete")
+            }).catch(function(err){
+                acc.log.error("[XiaoMiAcPartner][ERROR] Sync fail! Error:" + err);
             });
     }
 };
