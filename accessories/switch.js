@@ -84,7 +84,7 @@ SwitchAccessory.prototype = {
     },
 
     setSwitchState: function(value, callback){
-        if(!this.device){
+        if(!this.device || !this.device.call){
             return;
         }
 

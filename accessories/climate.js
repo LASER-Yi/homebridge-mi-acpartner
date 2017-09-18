@@ -17,6 +17,7 @@ ClimateAccessory = function(log, config, platform){
     this.name = config['name'];
     this.LastHeatingCoolingState = this.TargetHeatingCoolingState = Characteristic.TargetHeatingCoolingState.OFF;
     this.CurrentTemperature = 0;
+    this.TargetTemperature = 0;
     this.CurrentRelativeHumidity = 0;
     this.config = config;
     this.acModel = null;

@@ -2,7 +2,7 @@ const miio = require('miio');
 require('./accessories/switch');
 require('./accessories/climate');
 
-var Accessory, PlatformAccessory, Service, Characteristi, UUIDGen;
+var Accessory, PlatformAccessory, Service, Characteristic, UUIDGen;
 
 module.exports = function(homebridge) {
     Accessory = homebridge.hap.Accessory;
@@ -37,12 +37,12 @@ function XiaoMiAcPartner(log, config){
             .then(function(device){
                 that.device = device;
                 that.log("[XiaoMiAcPartner][INFO]Discovered Device(Global)!");
+                setInterval(function(){
+                    that.rediscover();
+                }, 300000)
             }).catch(function(err){
                 that.log.error("[XiaoMiAcPartner][ERROR]Cannot connect to AC Partner. " + err);
             })
-        setInterval(function(){
-            that.rediscover();
-        }, 300000)
     }
 
     this.log.info("[XiaoMiAcPartner][INFO]Plugin start successful");
