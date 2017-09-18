@@ -1,4 +1,4 @@
-//require('./Base');
+//require('./base');
 
 //const inherits = require('util').inherits;
 const miio = require('miio');
@@ -6,7 +6,6 @@ const miio = require('miio');
 var Accessory, PlatformAccessory, Service, Characteristic, UUIDGen;
 
 SwitchAccessory = function(log, config, platform){
-    //this.init(platform, config);
     this.log = log;
     this.platform = platform;
     this.config = config;
@@ -16,36 +15,19 @@ SwitchAccessory = function(log, config, platform){
     Service = platform.Service;
     Characteristic = platform.Characteristic;
     UUIDGen = platform.UUIDGen;
-
     this.name = config['name'];
     this.onState = Characteristic.On.NO;
 
     if(!config.data || !config.data.on || !config.data.off){
-        this.log.error("[XiaoMiAcPartnerIR][ERROR]IR code no defined!");
+        this.log.error("[XiaoMiAcPartner][ERROR]IR code no defined!");
     }else{
         this.onCode = config.data.on;
         this.offCode = config.data.off;
     }
 
-    var that = this;
-
-    if(null != this.config['ip'] && null != this.config['token']){
-        miio.device({ address: this.config['ip'], token: this.config['token'] })
-            .then(function(device){
-                that.device = device;
-                that.log("[XiaoMiAcPartnerIR][%s]Discovered Device!",this.name);
-            }).catch(function(err){
-                that.log.error("[XiaoMiAcPartnerIR][ERROR]Cannot connect to AC Partner. " + err);
-            })
-    }else if(platform.device){
-        this.device = platform.device;
-    }else{
-        that.log.error("[XiaoMiAcPartnerIR][%s]Cannot find device infomation",this.name);
-    }
-
     this.services = [];
 
-    this.platform.log.debug("[XiaoMiAcPartnerIR][%s]Initializing switch acc",this.name);
+    platform.log.debug("[XiaoMiAcPartner][%s]Initializing switch acc",this.name);
 
     this.infoService = new Service.AccessoryInformation();
     this.infoService
@@ -62,10 +44,41 @@ SwitchAccessory = function(log, config, platform){
         .on('get', this.getSwitchState.bind(this));
     this.services.push(this.switchService);
 
-    this.platform.log.debug("[XiaoMiAcPartnerIR][%s]Initialized successful",this.name);
+    platform.log.debug("[XiaoMiAcPartner][%s]Initialized successful",this.name);
+
+    this.doRestThing();
 }
+//inherits(SwitchAccessory, Base);
 
 SwitchAccessory.prototype = {
+    discover: function(){
+        var that = this;
+        
+        this.log.debug("[XiaoMiAcPartner][%s]Discovering...",this.name);
+        miio.device({ address: this.config['ip'], token: this.config['token'] })
+        .then(function(device){
+            that.device = device;
+            that.log("[XiaoMiAcPartner][CLIMATE]Discovered Device!",this.name);
+        }).catch(function(err){
+            that.log.error("[XiaoMiAcPartner][ERROR]Cannot connect to AC Partner. " + err);
+        })
+    },
+
+    doRestThing: function(){
+        var that = this;
+        
+        if(null != this.config['ip'] && null != this.config['token']){
+            this.discover();                        
+            setInterval(function(){
+                that.discover();
+            }, 300000)
+        }else if(this.platform.device){
+            this.device = this.platform.device;
+        }else{
+            this.log.error("[XiaoMiAcPartner][%s]Cannot find device infomation",this.name);
+        }
+    },
+
     getServices: function(){
         return this.services;
     },
@@ -78,16 +91,16 @@ SwitchAccessory.prototype = {
         if(value == Characteristic.On.NO){
             this.device.call('send_ir_code',this.offCode)
                 .then(function(ret){
-                    that.log.debug("[XiaoMiAcPartnerIR][%s]Return result: %s",this.name,ret);
+                    that.log.debug("[XiaoMiAcPartner][%s]Return result: %s",this.name,ret);
                 }).catch(function(err){
-                    that.log.error("[XiaoMiAcPartnerIR][ERROR]Send code fail! " + err);
+                    that.log.error("[XiaoMiAcPartner][ERROR]Send code fail! " + err);
                 });
         }else{
             this.device.call('send_ir_code',this.onCode)
             .then(function(ret){
-                that.log.debug("[XiaoMiAcPartnerIR][%s]Return result: %s",this.name,ret);
+                that.log.debug("[XiaoMiAcPartner][%s]Return result: %s",this.name,ret);
             }).catch(function(err){
-                that.log.error("[XiaoMiAcPartnerIR][ERROR]Send code fail! " + err);
+                that.log.error("[XiaoMiAcPartner][ERROR]Send code fail! " + err);
             });
         }
         this.onState = value;

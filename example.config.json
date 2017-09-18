@@ -5,35 +5,46 @@
         "port": 51826,
         "pin": "123-45-568"
     },
-    "accessories": [
+    "platforms": [
         {
-            "accessory": "XiaoMiAcPartner",
-            "token": "token-as-hex",
-            "name": "AcPartner_1",
-            "ip": "192.168.1.2",
-            "sensorSid": "lumi.158d000156e667"
-        },
-        {
-            "accessory": "XiaoMiAcPartner",
-            "token": "token-as-hex",
-            "name": "AcPartner_2",
-            "maxTemp": "30",
-            "minTemp": "17",
-            "ip": "192.168.1.3",
-            "customize": {
-                "off": "You_AC_Signal_Here",
-                "auto": "",
-                "heat":{
-                    "30": "",
-                    "29": "",
-                    "17": ""
-                },
-                "cool":{
-                    "30": "",
-                    "29": "",
-                    "17": ""
+            "platform": "XiaoMiAcPartner",
+            "ip": "192.168.31.1",
+            "token": "dsasdhe23gda",
+            "accessories":[
+                {
+                    "name": "test",
+                    "type": "switch",
+                    "data":{
+                        "on": "FE01825423434",
+                        "off": "FE01920531312"
+                    }
+                },{
+                    "name": "Ac Partner",
+                    "type": "climate",
+                    "sensorSid": "lumi.158d000156e667"
+                },{
+                    "name": "Ac Partner 2",
+                    "type": "climate",
+                    "ip":"192.168.1.3",
+                    "token":"asdgwedsfds",
+                    "maxTemp": "30",
+                    "minTemp": "17",
+                    "customize": {
+                        "off": "You_AC_Signal_Here",
+                        "auto": "",
+                        "heat":{
+                            "30": "",
+                            "29": "",
+                            "17": ""
+                        },
+                        "cool":{
+                            "30": "",
+                            "29": "",
+                            "17": ""
+                        }
+                    }
                 }
-            }
+            ]
         }
     ]
 }

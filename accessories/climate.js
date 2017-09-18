@@ -95,15 +95,39 @@ ClimateAccessory.prototype = {
     doRestThing: function(){
         var that = this;
 
+        if(null != this.config['ip'] && null != this.config['token']){
+            this.discover();                        
+            setInterval(function(){
+                that.discover();
+            }, 300000)
+        }else if(this.platform.device){
+            this.device = this.platform.device;
+        }else{
+            this.log.error("[XiaoMiAcPartnerIR][%s]Cannot find device infomation",this.name);
+        }
+
         if (!this.wiSync) {
-            this.log.info("[XiaoMiAcPartner][CLIMATE] Auto sync every 60 second");
+            this.log.info("[XiaoMiAcPartner][CLIMATE]Auto sync every 60 second");
             setInterval(function() {
                 that.getACState();
             }, 60000);   
         }else{
             this.TargetTemperature = (this.maxTemp + this.minTemp) / 2;
-            this.log.info("[XiaoMiAcPartner][CLIMATE] Auto sync off");
+            this.log.info("[XiaoMiAcPartner][CLIMATE]Auto sync off");
         }
+    },
+
+    discover: function(){
+        var that = this;
+
+        this.log.debug("[XiaoMiAcPartner][%s]Discovering...",this.name);
+        miio.device({ address: this.config['ip'], token: this.config['token'] })
+        .then(function(device){
+            that.device = device;
+            that.log("[XiaoMiAcPartner][CLIMATE]Discovered Device!",this.name);
+        }).catch(function(err){
+            that.log.error("[XiaoMiAcPartner][ERROR]Cannot connect to AC Partner. " + err);
+        })
     },
 
     getTargetHeatingCoolingState: function(callback) {
