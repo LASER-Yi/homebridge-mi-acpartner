@@ -29,11 +29,11 @@ ClimateAccessory = function(log, config, platform){
     this.autoStart = config.autoStart;
     if (config.customize) {
         this.customi = config.customize;
-        this.log.debug("[XiaoMiAcPartner][DEBUG] Using customized AC signal...");
+        this.log.debug("[XiaoMiAcPartner][DEBUG]Using customized AC signal...");
     }else{
         this.data = JSON;
         this.data.defaultState = Characteristic.TargetHeatingCoolingState;
-        this.log.debug("[XiaoMiAcPartner][DEBUG] Using presets...");
+        this.log.debug("[XiaoMiAcPartner][DEBUG]Using presets...");
     }
 
     this.services = [];
@@ -138,7 +138,7 @@ ClimateAccessory.prototype = {
         if(context !== 'fromSetValue') {
             this.TargetHeatingCoolingState = TargetHeatingCoolingState;
             if (this.TargetHeatingCoolingState == Characteristic.TargetHeatingCoolingState.OFF) {
-                this.log("[XiaoMiAcPartner][CLIMATE] AC turned off");
+                this.log("[XiaoMiAcPartner][CLIMATE]AC turned off");
             }
             
             this.SendCmd();
@@ -166,7 +166,7 @@ ClimateAccessory.prototype = {
                     .updateValue(parseFloat(TargetTemperature));
             }
 
-            this.log.debug('[XiaoMiAcPartner][DEBUG] Set TargetTemperature: ' + TargetTemperature);
+            this.log.debug('[XiaoMiAcPartner][DEBUG]Set TargetTemperature: ' + TargetTemperature);
             this.SendCmd();
         }
 
@@ -175,7 +175,7 @@ ClimateAccessory.prototype = {
 
     getCurrentTemperature: function(callback) {
         if (!this.outerSensor) {
-            this.log("[XiaoMiAcPartner][CLIMATE] Set CurrentTemperature %s", this.TargetTemperature);
+            this.log("[XiaoMiAcPartner][CLIMATE]Set CurrentTemperature %s", this.TargetTemperature);
             callback(null, parseFloat(this.TargetTemperature));
         }else{
             callback(null, parseFloat(this.CurrentTemperature));
@@ -203,20 +203,20 @@ ClimateAccessory.prototype = {
         if (this.LastHeatingCoolingState == Characteristic.TargetHeatingCoolingState.OFF && this.customi.on) {
             code = this.customi.on;
             if (code.substr(0,2) == "01") {
-                this.log.debug("[XiaoMiAcPartner][DEBUG] AC on, sending AC code: " + code);
+                this.log.debug("[XiaoMiAcPartner][DEBUG]AC on, sending AC code: " + code);
                 this.device.call('send_cmd', [code])
                     .then(function(ret){
-                        that.log.debug("[XiaoMiAcPartner][DEBUG] Return result: " + ret[0]);
+                        that.log.debug("[XiaoMiAcPartner][DEBUG]Return result: " + ret[0]);
                     }).catch(function(err){
-                        that.log.error("[XiaoMiAcPartner][ERROR] Send code fail! Error: " + err);
+                        that.log.error("[XiaoMiAcPartner][ERROR]Send code fail! Error: " + err);
                     });
             }else{
                 this.log.debug("[XiaoMiAcPartner][DEBUG] AC on, sending IR code: " + code);
                 this.device.call('send_ir_code', [code])
                     .then(function(ret){
-                        that.log.debug("[XiaoMiAcPartner][DEBUG] Return result: " + ret[0]);
+                        that.log.debug("[XiaoMiAcPartner][DEBUG]Return result: " + ret[0]);
                     }).catch(function(err){
-                        that.log.error("[XiaoMiAcPartner][ERROR] Send code fail! Error: " + err);
+                        that.log.error("[XiaoMiAcPartner][ERROR]Send code fail! Error: " + err);
                     });
             }
         }
@@ -268,8 +268,8 @@ ClimateAccessory.prototype = {
 
         var accessory = this;
         var code;
-        this.log.debug("[XiaoMiAcPartner][DEBUG] Last TargetHeatingCoolingState: " + this.LastHeatingCoolingState);
-        this.log.debug("[XiaoMiAcPartner][DEBUG] Current TargetHeatingCoolingState: " + this.TargetHeatingCoolingState);
+        this.log.debug("[XiaoMiAcPartner][DEBUG]Last TargetHeatingCoolingState: " + this.LastHeatingCoolingState);
+        this.log.debug("[XiaoMiAcPartner][DEBUG]Current TargetHeatingCoolingState: " + this.TargetHeatingCoolingState);
         if (!this.customi) {
             this.data.model = this.acModel;
             this.data.TargetTemperature = this.TargetTemperature;
@@ -282,9 +282,9 @@ ClimateAccessory.prototype = {
             }
             //this.log.debug("[XiaoMiAcPartner][DEBUG] Get code: " + retCode.data);
             if (retCode.auto) {
-                this.log('[XiaoMiAcPartner][CLIMATE] You are using auto_gen code, if your AC don\'t response, please use customize method to control your AC.')
+                this.log('[XiaoMiAcPartner][CLIMATE]You are using auto_gen code, if your AC don\'t response, please use customize method to control your AC.')
             }else{
-                this.log.debug('[XiaoMiAcPartner][CLIMATE] Using preset: %s',retCode.model);
+                this.log.debug('[XiaoMiAcPartner][CLIMATE]Using preset: %s',retCode.model);
             }
             code = retCode.data;
             delete retCode;
