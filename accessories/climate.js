@@ -19,7 +19,8 @@ ClimateAccessory = function(log, config, platform){
     this.CurrentTemperature = 0;
     this.TargetTemperature = 0;
     this.CurrentRelativeHumidity = 0;
-    this.config = config;
+
+    this.syncInterval = config.syncInterval || 60000;
     this.model = null;
     if(null != this.config['ip'] && null != this.config['token']){
         this.ip = this.config['ip'];
@@ -129,6 +130,7 @@ ClimateAccessory.prototype = {
         .then(function(device){
             that.device = device;
             that.log("[XiaoMiAcPartner][CLIMATE]Discovered Device!");
+            that.getACState();
         }).catch(function(err){
             that.log.error("[XiaoMiAcPartner][ERROR]Cannot connect to AC Partner. " + err);
         })
