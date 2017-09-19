@@ -100,6 +100,8 @@
 | --- | --- | --- |
 | ``name`` | 显示在Homekit中的名字 | * |
 | ``type`` | "switch" | * |
+| ``ip`` | 你空调伴侣的IP地址，此处没有填写ip均使用上方全局ip设置 |  |
+| ``token`` | 你空调伴侣的token，此处没有填写token均使用上方全局token设置 |  |
 | ``data`` | 请参考``Config Example``,必须要包含on和off | * |
 
 
