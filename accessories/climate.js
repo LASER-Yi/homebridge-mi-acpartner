@@ -337,23 +337,23 @@ ClimateAccessory.prototype = {
             return;
         }
 
-        var acc = this;
+        var that = this;
         this.log.debug("[XiaoMiAcPartner][CLIMATE]Syncing...")
 
         //Update CurrentTemperature
         if(this.outerSensor){
-            this.device.call('get_device_prop_exp', [[acc.outerSensor, "temperature", "humidity"]])
+            this.device.call('get_device_prop_exp', [[that.outerSensor, "temperature", "humidity"]])
                 .then(function(curTep){
                     if (curTep[0][0] == null) {
-                        acc.log.error("[XiaoMiAcPartner][ERROR]Invaild sensorSid!")
+                        that.log.error("[XiaoMiAcPartner][ERROR]Invaild sensorSid!")
                     }else{
-                        acc.log.debug("[XiaoMiAcPartner][CLIMATE]Temperature Sensor return:%s",curTep[0]);
-                        acc.CurrentTemperature = curTep[0][0] / 100.0;
-                        acc.CurrentRelativeHumidity = curTep[0][1] / 100.0;
-                        acc.acPartnerService.getCharacteristic(Characteristic.CurrentTemperature)
-                            .updateValue(acc.CurrentTemperature);
-                        acc.acPartnerService.getCharacteristic(Characteristic.CurrentRelativeHumidity)
-                            .updateValue(acc.CurrentRelativeHumidity);
+                        that.log.debug("[XiaoMiAcPartner][CLIMATE]Temperature Sensor return:%s",curTep[0]);
+                        that.CurrentTemperature = curTep[0][0] / 100.0;
+                        that.CurrentRelativeHumidity = curTep[0][1] / 100.0;
+                        that.acPartnerService.getCharacteristic(Characteristic.CurrentTemperature)
+                            .updateValue(that.CurrentTemperature);
+                        that.acPartnerService.getCharacteristic(Characteristic.CurrentRelativeHumidity)
+                            .updateValue(that.CurrentRelativeHumidity);
                     }
                 })
         }
@@ -361,41 +361,41 @@ ClimateAccessory.prototype = {
         //Update AC state
         this.device.call('get_model_and_state', [])
             .then(function(retMaS){
-                //acc.log(retMaS);
-                acc.acPower = retMaS[2];
-                acc.acModel = retMaS[0].substr(0,2) + retMaS[0].substr(8,8);
+                //that.log(retMaS);
+                that.acPower = retMaS[2];
+                that.acModel = retMaS[0].substr(0,2) + retMaS[0].substr(8,8);
                 var power = retMaS[1].substr(2,1);
                 var mode = retMaS[1].substr(3,1);
                 var wind_force = retMaS[1].substr(4,1);
                 var sweep = retMaS[1].substr(5,1);
                 var temp = parseInt(retMaS[1].substr(6,2),16);
-                acc.log.debug("[XiaoMiAcPartner][DEBUG]Partner_State:(model:%s, power_state:%s, mode:%s, wind:%s, sweep:%s, temp:%s, AC_POWER:%s",acc.acModel,power,mode,wind_force,sweep,temp,acc.acPower);
+                that.log.debug("[XiaoMiAcPartner][DEBUG]Partner_State:(model:%s, power_state:%s, mode:%s, wind:%s, sweep:%s, temp:%s, AC_POWER:%s",that.acModel,power,mode,wind_force,sweep,temp,that.acPower);
 
-                //update values
+                //Update values
                 if (power == 1) {
                     if (mode == 0) {
-                        acc.TargetHeatingCoolingState = Characteristic.TargetHeatingCoolingState.HEAT;
+                        that.TargetHeatingCoolingState = Characteristic.TargetHeatingCoolingState.HEAT;
                     }else if (mode == 1) {
-                        acc.TargetHeatingCoolingState = Characteristic.TargetHeatingCoolingState.COOL;
+                        that.TargetHeatingCoolingState = Characteristic.TargetHeatingCoolingState.COOL;
                     }else{
-                        acc.TargetHeatingCoolingState = Characteristic.TargetHeatingCoolingState.AUTO;
+                        that.TargetHeatingCoolingState = Characteristic.TargetHeatingCoolingState.AUTO;
                     }
                 }else{
-                    acc.LastHeatingCoolingState = acc.TargetHeatingCoolingState = Characteristic.TargetHeatingCoolingState.OFF;
+                    that.LastHeatingCoolingState = that.TargetHeatingCoolingState = Characteristic.TargetHeatingCoolingState.OFF;
                 }
-                acc.acPartnerService.getCharacteristic(Characteristic.TargetHeatingCoolingState)
-                    .updateValue(acc.TargetHeatingCoolingState);
+                that.acPartnerService.getCharacteristic(Characteristic.TargetHeatingCoolingState)
+                    .updateValue(that.TargetHeatingCoolingState);
 
-                if (temp <= acc.maxTemp && temp >= acc.minTemp) {
-                    acc.TargetTemperature = temp;   
+                if (temp <= that.maxTemp && temp >= that.minTemp) {
+                    that.TargetTemperature = temp;   
                 }else{
-                    acc.TargetTemperature = acc.maxTemp;
+                    that.TargetTemperature = that.maxTemp;
                 }
-                acc.acPartnerService.getCharacteristic(Characteristic.TargetTemperature)
-                    .updateValue(acc.TargetTemperature);
-                acc.log.debug("[XiaoMiAcPartner][CLIMATE]Sync complete")
+                that.acPartnerService.getCharacteristic(Characteristic.TargetTemperature)
+                    .updateValue(that.TargetTemperature);
+                that.log.debug("[XiaoMiAcPartner][CLIMATE]Sync complete")
             }).catch(function(err){
-                acc.log.error("[XiaoMiAcPartner][ERROR]Sync fail! Error:" + err);
+                that.log.error("[XiaoMiAcPartner][ERROR]Sync fail! Error:" + err);
             });
     }
 };
