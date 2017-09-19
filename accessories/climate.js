@@ -111,7 +111,7 @@ ClimateAccessory.prototype = {
         }, 300000)
 
         if (!this.wiSync) {
-            this.log.info("[XiaoMiAcPartner][CLIMATE]Auto sync every 60 second");
+            this.log.info("[XiaoMiAcPartner][CLIMATE]Auto sync on");
             setInterval(function() {
                 that.getACState();
             }, 60000);   

@@ -8,9 +8,7 @@
 
 感谢[takatost](https://github.com/takatost/homebridge-mi-ac-partner)，[miio](https://github.com/aholstenson/miio)，[YinHangCode](https://github.com/YinHangCode/homebridge-mi-aqara)和所有测试开发人员提供支持。
 
-**注意：我没有很多时间去获取空调伴侣的预设信息，如果你手上有我没有提供的空调伴侣预设码，请前往[issues](https://github.com/LASER-Yi/homebridge-mi-acpartner/issues)或者直接发送邮件到ly0007@yeah.net提供。我需要空调30到17度制冷制热模式，各个模式任意温度和各种风力下的空调码。**
-
-**注意：此插件在0.2.2版本后移除了Miio自动查找的功能，如果插件无法使用，请在"config.json"中添加你要控制的空调伴侣的IP地址。此插件在0.2.6版本后就开始使用自动查找预设功能，你可以在之后的版本放心移除"model"和"preset_no"字段。**
+**注意：此插件于0.4.0版本后修改成platform，请根据本文修改你的配置文件以保证插件可用。**
 
 
 ### Feature(功能）
@@ -23,7 +21,7 @@
   - 在17-30度之间调整空调温度（默认情况）。
   - 制冷，制热，自动模式支持。
   - 改变风力，改变扫风状态。（即将于iOS 11中支持）
-  - 自定义红外码以控制你的其他电器。（可能支持）
+  - 自定义红外码以控制你的其他电器。~~（可能支持）~~
 
 * 如果我们没有提供预设，可自定义你的空调码
 
@@ -67,7 +65,7 @@
 
 * 必要配置
 
-    * "accessory": "XiaoMiAcPartner"
+    * "platform": "XiaoMiAcPartner"
 
     * "token": "空调伴侣的token"
 

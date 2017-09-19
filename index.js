@@ -66,16 +66,5 @@ XiaoMiAcPartner.prototype = {
             this.log.info("[XiaoMiAcPartner][INFO]Register complete");
         }
         callback(myAccessories);
-    },
-
-    rediscover: function(){
-        var that = this;
-        miio.device({ address: this.config['ip'], token: this.config['token'] })
-        .then(function(device){
-            that.device = device;
-            that.log("[XiaoMiAcPartner][INFO]Discovered Device(Global)!");
-        }).catch(function(err){
-            that.log.error("[XiaoMiAcPartner][ERROR]Cannot connect to AC Partner. " + err);
-        })
     }
 }
