@@ -1,4 +1,3 @@
-const miio = require('miio');
 require('./accessories/switch');
 require('./accessories/climate');
 
@@ -30,19 +29,12 @@ function XiaoMiAcPartner(log, config){
     this.UUIDGen = UUIDGen;
 
     var that = this;
+    this.isGlobal = false;
     
     if(null != this.config['ip'] && null != this.config['token']){
-        this.device = 1;
-        miio.device({ address: this.config['ip'], token: this.config['token'] })
-            .then(function(device){
-                that.device = device;
-                that.log("[XiaoMiAcPartner][INFO]Discovered Device(Global)!");
-                setInterval(function(){
-                    that.rediscover();
-                }, 300000)
-            }).catch(function(err){
-                that.log.error("[XiaoMiAcPartner][ERROR]Cannot connect to AC Partner. " + err);
-            })
+        this.isGlobal = true;
+        this.ip = this.config['ip'];
+        this.token = this.config['token'];
     }
 
     this.log.info("[XiaoMiAcPartner][INFO]Plugin start successful");
@@ -58,7 +50,8 @@ XiaoMiAcPartner.prototype = {
                 if(null == configAcc['type'] || "" == configAcc['type'] || null == configAcc['name'] || "" == configAcc['name']){
                     continue;
                 }
-
+                
+                //Register
                 if(configAcc['type'] == "climate"){
                     this.log.info("[XiaoMiAcPartner][INFO]Register acc type:climate, name:%s",configAcc['name']);
                     var climateAcc = new ClimateAccessory(this.log, configAcc, this);

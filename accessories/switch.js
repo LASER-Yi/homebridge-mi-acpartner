@@ -16,6 +16,16 @@ SwitchAccessory = function(log, config, platform){
     Characteristic = platform.Characteristic;
     UUIDGen = platform.UUIDGen;
     this.name = config['name'];
+    if(null != this.config['ip'] && null != this.config['token']){
+        this.ip = this.config['ip'];
+        this.token = this.config['token'];
+    }else if(this.platform.isGlobal){
+        this.ip = this.platform.ip;
+        this.ip = this.platform.token;
+    }else{
+        this.log.error("[XiaoMiAcPartner][%s]Cannot find device infomation",this.name);
+    }
+
     this.onState = Characteristic.On.NO;
 
     if(!config.data || !config.data.on || !config.data.off){
@@ -55,7 +65,7 @@ SwitchAccessory.prototype = {
         var that = this;
         
         this.log.debug("[XiaoMiAcPartner][%s]Discovering...",this.name);
-        miio.device({ address: this.config['ip'], token: this.config['token'] })
+        miio.device({ address: this.ip, token: this.token })
         .then(function(device){
             that.device = device;
             that.log("[XiaoMiAcPartner][CLIMATE]Discovered Device!",this.name);
@@ -67,16 +77,10 @@ SwitchAccessory.prototype = {
     doRestThing: function(){
         var that = this;
         
-        if(null != this.config['ip'] && null != this.config['token']){
-            this.discover();                        
-            setInterval(function(){
-                that.discover();
-            }, 300000)
-        }else if(this.platform.device){
-            this.device = this.platform.device;
-        }else{
-            this.log.error("[XiaoMiAcPartner][%s]Cannot find device infomation",this.name);
-        }
+        this.discover();                        
+        setInterval(function(){
+            that.discover();
+        }, 300000)
     },
 
     getServices: function(){
