@@ -26,7 +26,7 @@ ClimateAccessory = function(log, config, platform){
         this.token = this.config['token'];
     }else if(this.platform.isGlobal){
         this.ip = this.platform.ip;
-        this.ip = this.platform.token;
+        this.token = this.platform.token;
     }else{
         this.log.error("[XiaoMiAcPartner][%s]Cannot find device infomation",this.name);
     }
