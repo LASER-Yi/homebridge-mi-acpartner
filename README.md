@@ -21,7 +21,7 @@
   - 在17-30度之间调整空调温度（默认情况）。
   - 制冷，制热，自动模式支持。
   - 改变风力，改变扫风状态。（即将于iOS 11中支持）
-  - 自定义红外码以控制你的其他电器。~~（可能支持）~~
+  - 自定义红外码以控制你的其他电器。~~（即将支持）~~
 
 * 如果我们没有提供预设，可自定义你的空调码
 
@@ -38,7 +38,7 @@
 
 2. 安装此插件和依赖包(miio)
 
-           npm install -g homebridge-mi-acpartner miio
+           npm install -g  homebridge-mi-acpartner miio
 
 
 3. 在**config.json**中加入你的配置信息，请参考下方的``Config``和``Config Example``添加
@@ -50,116 +50,186 @@
 此插件目前支持的预设：
 
     格力：1，2，8
-    美的：1
-    海尔：1
-    奥克斯：1
-    志高：1
+    大部分空调的1号预设
 
-请在米家App中更改预设信息
+你可以在米家App中更改预设信息
 
 如果没有定义``customize``，其他空调会使用自动生成的空调码，不保证可用性。
 
-如果你有预设信息，请于[issues](https://github.com/LASER-Yi/homebridge-mi-acpartner/issues)中分享给我，或者发送到我的电子邮箱中。
+如果你有预设信息，请于[issues](https://github.com/LASER-Yi/homebridge-mi-acpartner/issues)中分享给我。
 
 ### Config（配置）
 
-* 必要配置
+**全局配置**
 
-    * "platform": "XiaoMiAcPartner"
+| 参数 | 说明 | 必填 |
+| --- | --- | --- |
+| ``platform`` | “XiaoMiAcPartner" | * |
+| ``ip`` | 你空调伴侣的IP地址，下方accessories中没有填写ip的均使用本ip设置 |  |
+| ``token`` | 你空调伴侣的token，下方accessories中没有填写token的均使用本token设置 |  |
 
-    * "token": "空调伴侣的token"
 
-        参考这篇[文章](https://github.com/aholstenson/miio/blob/master/docs/management.md#getting-the-token-of-a-device)获得空调伴侣的token。
+参考这篇[文章](https://github.com/aholstenson/miio/blob/master/docs/management.md#getting-the-token-of-a-device)获得空调伴侣的token。
 
-        如果你正使用安卓手机，你可以直接从米家App中拿到token
+如果你正使用安卓手机，你可以直接从米家App中拿到token
 
-    * "name": "在家庭App中显示的名字（如添加多个空调伴侣，请确保此处互不相同）"
+**设备配置**
 
-    * "ip": "空调伴侣在当前网络下的IP地址" 
+*   climate（空调）
 
-* 可选配置
+    
+| 参数 | 说明 | 必填 |
+| --- | --- | --- |
+| ``name`` | 显示在Homekit中的名字 | * |
+| ``type`` | “climate" | * |
+| ``ip`` | 你空调伴侣的IP地址，此处没有填写ip均使用上方全局ip设置 |  |
+| ``token`` | 你空调伴侣的token，此处没有填写token均使用上方全局token设置 |  |
+| ``maxTemp`` | 设置调节温度上限（默认为30度） |   |
+| ``minTemp`` | 设置调节温度下限（默认为17度） |  |
+| ``sync`` | "off”（不与空调伴侣进行同步） |  |
+| ``autoStart`` | "off"（当在关机状态下调整温度时，不会自动启动空调） |  |
+| ``sensorSid`` | 填写你的温湿度传感器ID，此温湿度传感器**必须**绑定在空调伴侣下（可在安卓设备下查到） |  |
 
-    * "customize":
-        使用这种[方法](https://github.com/aholstenson/miio/blob/master/docs/protocol.md#)来获取你正使用的空调码，然后填入到这里。
 
-            请参考Config Example填写。
+使用这种[方法](https://github.com/aholstenson/miio/blob/master/docs/protocol.md#)来获取你正使用的空调码，然后填入到config，填写方法请参考Config Example。
 
-            不是所有的空调都需要"on"信号，如果在调节温度时空调自动关机，则请填写相应信号到此处。
+*   switch（红外开关）
 
-            如果"auto"信号没有定义，则会自动发送制冷信号。
 
-            填入红外码，则会自动发送红外信号 [请注意关闭同步(sync)以免影响空调工作]
+| 参数 | 说明 | 必填 |
+| --- | --- | --- |
+| ``name`` | 显示在Homekit中的名字 | * |
+| ``type`` | "switch" | * |
+| ``data`` | 请参考``Config Example``,必须要包含on和off | * |
 
-    * "maxTemp": "设置温度上限（默认为30度）"
 
-    * "minTemp": "设置温度下限（默认为17度）"
 
-    * "sync": "off" （关闭与空调伴侣的信息同步）
 
-    * "autoStart": "off"（当在关机状态下调整温度时，不会自动启动空调）
-
-    * "sensorSid": "填写你的**温湿度传感器**ID，此**温湿度传感器**必须绑定在空调伴侣下（可在安卓设备下查到）"
 
 ### Config Example（配置例子）
 
 基本插件配置
 
 ```Json
-"accessories": [
+"platforms": [
         {
-            "accessory": "XiaoMiAcPartner",
-            "token": "token-as-hex",
-            "name": "AcPartner",
-            "ip": "your_ac_partner_ip_address"
+            "platform": "XiaoMiAcPartner",
+            "ip": "your_ac_partner_token",
+            "token": "your_ac_partner_token",
+            "accessories":[
+                {
+                    "name": "Ac Partner",
+                    "type": "climate"
+                }
+            ]
         }
     ]
 ```
 
+也可以写成这样
+
+```Json
+"platforms": [
+        {
+            "platform": "XiaoMiAcPartner",
+            "accessories":[
+                {
+                    "name": "Ac Partner",
+                    "type": "climate",
+                    "ip": "your_ac_partner_token",
+                    "token": "your_ac_partner_token"
+                }
+            ]
+        }
+    ]
+```
+
+加入空调和开关
+
+```Json
+"platforms": [
+        {
+            "platform": "XiaoMiAcPartner",
+            "ip": "AC_Partner_1",
+            "token": "AC_Partner_1_token",
+            "accessories":[
+                {
+                    "name": "test",
+                    "type": "switch",
+                    "data":{
+                        "on": "FE018254234ON",
+                        "off": "FE019205313OFF"
+                    }
+                },{
+                    "name": "Ac Partner",
+                    "type": "climate",
+                    "ip":"AC_Partner_2",
+                    "token":"AC_Partner_2_token"
+                }
+            ]
+        }
+    ]
+```
+
+
 使用外置温湿度传感器
 
 ```Json
-"accessories": [
+"platforms": [
         {
-            "accessory": "XiaoMiAcPartner",
-            "token": "token-as-hex",
-            "name": "AcPartner_1",
-            "ip": "192.168.1.1",
-            "sensorSid": "lumi.158d000156e667"
+            "platform": "XiaoMiAcPartner",
+            "ip": "your_ac_partner_token",
+            "token": "your_ac_partner_token",
+            "accessories":[
+                {
+                    "name": "Ac Partner",
+                    "type": "climate",
+                    "sensorSid": "lumi.158d000156e667"
+                }
+            ]
         }
-]
+    ]
 ```
 
 使用自定义空调码或红外码
 
 大部分空调码以01开头，且能与空调伴侣同步信息；大部分红外码以FE开头，能否同步信息未知
 
-```json
-"accessories": [
+```Json
+"platforms": [
         {
-            "accessory": "XiaoMiAcPartner",
-            "token": "token-as-hex",
-            "name": "AcPartner",
-            "ip": "your_ac_partner_ip_address",
-            "customize": {
-                "off": "关闭信号（必须）",
-                "on": "有些空调需要这个信号（可选）",
-                "auto": "自动模式信号（可选）",
-                "heat":{
-                    "30": "（可选信号）",
-                    "29": "",
-                    "17": ""
-                },
-                "cool":{
-                    "30": "（必要信号）",
-                    "29": "",
-                    "17": ""
+            "platform": "XiaoMiAcPartner",
+            "ip": "your_ac_partner_token",
+            "token": "your_ac_partner_token",
+            "accessories":[
+                {
+                    "name": "Ac Partner",
+                    "type": "climate",
+                    "customize": {
+                        "off": "关闭信号（必须）",
+                        "on": "有些空调需要这个信号（可选）",
+                        "auto": "自动模式信号（可选）",
+                        "heat":{
+                            "30": "（可选信号）",
+                            "29": "",
+                            "17": ""
+                        },
+                        "cool":{
+                            "30": "（必要信号）",
+                            "29": "",
+                            "17": ""
+                        }
+                    }
                 }
-            }
+            ]
         }
     ]
 ```
 
 ### Changelog
+
+0.4.0
+Change to Platform,support basic IR switch
 
 0.3.0
 
@@ -204,3 +274,7 @@ Auto mode support, "on" signal support, code reconstruction, presets reconstruct
 0.0.1
 
 ADD Basic File.
+
+
+
+
