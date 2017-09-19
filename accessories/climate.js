@@ -20,7 +20,7 @@ ClimateAccessory = function(log, config, platform){
     this.TargetTemperature = 0;
     this.CurrentRelativeHumidity = 0;
     this.config = config;
-    this.acModel = null;
+    this.model = null;
     if(null != this.config['ip'] && null != this.config['token']){
         this.ip = this.config['ip'];
         this.token = this.config['token'];
@@ -275,7 +275,7 @@ ClimateAccessory.prototype = {
         this.log.debug("[XiaoMiAcPartner][DEBUG]Last TargetHeatingCoolingState: " + this.LastHeatingCoolingState);
         this.log.debug("[XiaoMiAcPartner][DEBUG]Current TargetHeatingCoolingState: " + this.TargetHeatingCoolingState);
         if (!this.customi) {
-            this.data.model = this.acModel;
+            this.data.model = this.model;
             this.data.TargetTemperature = this.TargetTemperature;
             this.data.TargetHeatingCoolingState = this.TargetHeatingCoolingState;
             this.data.LastHeatingCoolingState = this.LastHeatingCoolingState;
@@ -363,13 +363,13 @@ ClimateAccessory.prototype = {
             .then(function(retMaS){
                 //that.log(retMaS);
                 that.acPower = retMaS[2];
-                that.acModel = retMaS[0].substr(0,2) + retMaS[0].substr(8,8);
+                that.model = retMaS[0].substr(0,2) + retMaS[0].substr(8,8);
                 var power = retMaS[1].substr(2,1);
                 var mode = retMaS[1].substr(3,1);
                 var wind_force = retMaS[1].substr(4,1);
                 var sweep = retMaS[1].substr(5,1);
                 var temp = parseInt(retMaS[1].substr(6,2),16);
-                that.log.debug("[XiaoMiAcPartner][DEBUG]Partner_State:(model:%s, power_state:%s, mode:%s, wind:%s, sweep:%s, temp:%s, AC_POWER:%s",that.acModel,power,mode,wind_force,sweep,temp,that.acPower);
+                that.log.debug("[XiaoMiAcPartner][DEBUG]Partner_State:(model:%s, power_state:%s, mode:%s, wind:%s, sweep:%s, temp:%s, AC_POWER:%s",that.model,power,mode,wind_force,sweep,temp,that.acPower);
 
                 //Update values
                 if (power == 1) {
