@@ -128,7 +128,7 @@ ClimateAccessory.prototype = {
         miio.device({ address: this.ip, token: this.token })
         .then(function(device){
             that.device = device;
-            that.log("[XiaoMiAcPartner][CLIMATE]Discovered Device!",this.name);
+            that.log("[XiaoMiAcPartner][CLIMATE]Discovered Device!");
         }).catch(function(err){
             that.log.error("[XiaoMiAcPartner][ERROR]Cannot connect to AC Partner. " + err);
         })

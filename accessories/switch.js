@@ -16,6 +16,7 @@ SwitchAccessory = function(log, config, platform){
     Characteristic = platform.Characteristic;
     UUIDGen = platform.UUIDGen;
     this.name = config['name'];
+
     if(null != this.config['ip'] && null != this.config['token']){
         this.ip = this.config['ip'];
         this.token = this.config['token'];
@@ -68,7 +69,7 @@ SwitchAccessory.prototype = {
         miio.device({ address: this.ip, token: this.token })
         .then(function(device){
             that.device = device;
-            that.log("[XiaoMiAcPartner][CLIMATE]Discovered Device!",this.name);
+            that.log("[XiaoMiAcPartner][%s]Discovered Device!",that.name);
         }).catch(function(err){
             that.log.error("[XiaoMiAcPartner][ERROR]Cannot connect to AC Partner. " + err);
         })
@@ -91,6 +92,8 @@ SwitchAccessory.prototype = {
         if(!this.device || !this.device.call){
             return;
         }
+
+        var that = this;
 
         if(value == Characteristic.On.NO){
             this.device.call('send_ir_code',this.offCode)
