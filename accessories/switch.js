@@ -96,14 +96,16 @@ SwitchAccessory.prototype = {
         var that = this;
 
         if(value == Characteristic.On.NO){
-            this.device.call('send_ir_code',this.offCode)
+            this.log.debug("[XiaoMiAcPartner][%s]Sending IR code: %s",this.name,this.offCode);
+            this.device.call('send_ir_code',[this.offCode])
                 .then(function(ret){
                     that.log.debug("[XiaoMiAcPartner][%s]Return result: %s",this.name,ret);
                 }).catch(function(err){
                     that.log.error("[XiaoMiAcPartner][ERROR]Send code fail! " + err);
                 });
         }else{
-            this.device.call('send_ir_code',this.onCode)
+            this.log.debug("[XiaoMiAcPartner][%s]Sending IR code: %s",this.name,this.onCode);
+            this.device.call('send_ir_code',[this.onCode])
             .then(function(ret){
                 that.log.debug("[XiaoMiAcPartner][%s]Return result: %s",this.name,ret);
             }).catch(function(err){
