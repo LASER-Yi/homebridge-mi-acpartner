@@ -23,7 +23,9 @@ SwitchAccessory = function(log, config, platform){
             .then(() => {
                 this.device = new Array();
                 this.device = that.platform.device;
-                this.log.debug("[%s]Got global device information",this.name)
+                this.log.debug("[%s]Global device connected",this.name);
+            }).catch((err) =>{
+                this.log.debug("[%s]Connect to global device fail! "+ err);
             })
     }else{
         this.log.error("[%s]Cannot find device infomation",this.name);
@@ -59,7 +61,6 @@ SwitchAccessory = function(log, config, platform){
 
     platform.log.debug("[%s]Initialized successful",this.name);
 
-    this.doRestThing();
 }
 
 SwitchAccessory.prototype = {

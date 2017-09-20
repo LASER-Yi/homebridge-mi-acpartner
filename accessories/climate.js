@@ -14,7 +14,23 @@ ClimateAccessory = function(log, config, platform){
     Characteristic = platform.Characteristic;
     UUIDGen = platform.UUIDGen;
 
+    //Config
+    this.maxTemp = parseInt(config.maxTemp) || 30;
+    this.minTemp = parseInt(config.minTemp) || 17;
+    this.outerSensor = config.sensorSid;
+    this.wiSync = config.sync;
+    this.autoStart = config.autoStart;
+    if (config.customize) {
+        this.customi = config.customize;
+        this.log.debug("[DEBUG]Using customized AC signal...");
+    }else{
+        this.data = JSON;
+        this.data.defaultState = Characteristic.TargetHeatingCoolingState;
+        this.log.debug("[DEBUG]Using presets...");
+    }
     this.name = config['name'];
+
+    //Init charact
     this.LastHeatingCoolingState = this.TargetHeatingCoolingState = Characteristic.TargetHeatingCoolingState.OFF;
     this.CurrentTemperature = 0;
     this.TargetTemperature = 0;
@@ -37,21 +53,6 @@ ClimateAccessory = function(log, config, platform){
             })
     }else{
         this.log.error("[%s]Cannot find device infomation",this.name);
-    }
-
-    //Optional
-    this.maxTemp = parseInt(config.maxTemp) || 30;
-    this.minTemp = parseInt(config.minTemp) || 17;
-    this.outerSensor = config.sensorSid;
-    this.wiSync = config.sync;
-    this.autoStart = config.autoStart;
-    if (config.customize) {
-        this.customi = config.customize;
-        this.log.debug("[DEBUG]Using customized AC signal...");
-    }else{
-        this.data = JSON;
-        this.data.defaultState = Characteristic.TargetHeatingCoolingState;
-        this.log.debug("[DEBUG]Using presets...");
     }
 
     this.services = [];
@@ -230,7 +231,7 @@ ClimateAccessory.prototype = {
         }
     },
 
-    getCuSignal: function(){
+    cusCodeHandle: function(){
         this.onStart();
         var code;
         if (this.TargetHeatingCoolingState != Characteristic.TargetHeatingCoolingState.OFF) {
@@ -298,7 +299,7 @@ ClimateAccessory.prototype = {
             delete retCode;
 
         }else{
-            code = this.getCuSignal();
+            code = this.cusCodeHandle();
             if (!code) {
                 return;
             }
@@ -350,31 +351,31 @@ ClimateAccessory.prototype = {
 
         //Update CurrentTemperature
         let p1 = this.outerSensor && this.device.call('get_device_prop_exp', [[this.outerSensor, "temperature", "humidity"]])
-        .then(function(curTep){
-            if (curTep[0][0] == null) {
+        .then(function(senRet){
+            if (senRet[0][0] == null) {
                 that.log.error("[ERROR]Invaild sensorSid!")
             }else{
-                that.log.debug("[CLIMATE]Temperature Sensor return:%s",curTep[0]);
-                that.CurrentTemperature = curTep[0][0] / 100.0;
-                that.CurrentRelativeHumidity = curTep[0][1] / 100.0;
-                that.acPartnerService.getCharacteristic(Characteristic.CurrentTemperature)
-                    .updateValue(that.CurrentTemperature);
-                that.acPartnerService.getCharacteristic(Characteristic.CurrentRelativeHumidity)
-                    .updateValue(that.CurrentRelativeHumidity);
+                that.log.debug("[CLIMATE]Temperature Sensor return:%s",senRet[0]);
+                that.CurrentTemperature = senRet[0][0] / 100.0;
+                that.CurrentRelativeHumidity = senRet[0][1] / 100.0;
+                that.acPartnerService.getCharacteristic(Characteristic.CurrentTemperature).updateValue(that.CurrentTemperature);
+                that.acPartnerService.getCharacteristic(Characteristic.CurrentRelativeHumidity).updateValue(that.CurrentRelativeHumidity);
             }
-        })
+        }).catch((err) =>{
+            this.log.error("[ERROR]Current Temperature sync fail! " + err);
+        });
 
         //Update AC state
         let p2 = this.device.call('get_model_and_state', [])
-            .then(function(retMaS){
-                //that.log(retMaS);
-                that.acPower = retMaS[2];
-                that.model = retMaS[0].substr(0,2) + retMaS[0].substr(8,8);
-                var power = retMaS[1].substr(2,1);
-                var mode = retMaS[1].substr(3,1);
-                var wind_force = retMaS[1].substr(4,1);
-                var sweep = retMaS[1].substr(5,1);
-                var temp = parseInt(retMaS[1].substr(6,2),16);
+            .then(function(ret){
+                //that.log(ret);
+                that.acPower = ret[2];
+                that.model = ret[0].substr(0,2) + ret[0].substr(8,8);
+                var power = ret[1].substr(2,1);
+                var mode = ret[1].substr(3,1);
+                var wind_force = ret[1].substr(4,1);
+                var sweep = ret[1].substr(5,1);
+                var temp = parseInt(ret[1].substr(6,2),16);
                 that.log.debug("[DEBUG]Partner_State:(model:%s, power_state:%s, mode:%s, wind:%s, sweep:%s, temp:%s, AC_POWER:%s",that.model,power,mode,wind_force,sweep,temp,that.acPower);
 
                 //Update values
@@ -399,13 +400,15 @@ ClimateAccessory.prototype = {
                 }
                 that.acPartnerService.getCharacteristic(Characteristic.TargetTemperature)
                     .updateValue(that.TargetTemperature);
-                that.log.debug("[CLIMATE]Sync complete")
             }).catch(function(err){
                 that.log.error("[ERROR]Sync fail! Error:" + err);
             });
 
         Promise.all([p1,p2])
-            .catch(err => this.log.error("[ERROR]Rediscover fail,error: " + err))
-            .then(() => setTimeout(this.getACState.bind(this), 60000));
+            .catch(err => this.log.error("[ERROR]Rediscover fail, error: " + err))
+            .then(() => {
+                this.log.debug("[CLIMATE]Sync complete")
+                setTimeout(this.getACState.bind(this), 60000)
+            });
     }
 };
