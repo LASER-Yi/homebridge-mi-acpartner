@@ -25,7 +25,7 @@ SwitchAccessory = function(log, config, platform){
                 this.device = that.platform.device;
                 this.log.debug("[%s]Global device connected",this.name);
             }).catch((err) =>{
-                this.log.debug("[%s]Connect to global device fail! "+ err);
+                this.log.debug("[SWITCH]Connect to global device fail! "+ err);
             })
     }else{
         this.log.error("[%s]Cannot find device infomation",this.name);
