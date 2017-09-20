@@ -41,7 +41,6 @@ ClimateAccessory = function(log, config, platform){
         this.ip = this.config['ip'];
         this.token = this.config['token'];
         this.connectService = setInterval(this.search.bind(this),3000);
-        this.doRestThing();
     }else if(this.platform.globalDevice){
         Promise.all([this.platform.globalDevice])
             .then(() => {
@@ -139,10 +138,7 @@ ClimateAccessory.prototype = {
         }
     },
 
-    discover: function(){
-        if (this.platform.syncLock == true) {
-            return;
-        }
+    refresh: function(){
 
         this.log.debug("[%s]Discovering...",this.name);
         let p1 =  miio.device({ address: this.ip, token: this.token })
@@ -155,7 +151,7 @@ ClimateAccessory.prototype = {
 
         Promise.all([p1])
             .catch(err => this.log.error("[CLIMATE_ERROR]Discover fail,error: " + err))
-            .then(() => setTimeout(this.discover.bind(this), 300000));
+            .then(() => setTimeout(this.refresh.bind(this), 300000));
     },
 
     getTargetHeatingCoolingState: function(callback) {

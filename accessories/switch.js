@@ -83,7 +83,7 @@ SwitchAccessory.prototype = {
         }
     },
 
-    discover: function(){
+    refresh: function(){
         if (this.platform.syncLock == true) {
             return;
         }
@@ -99,7 +99,7 @@ SwitchAccessory.prototype = {
 
         Promise.all([p1])
             .catch(err => this.log.error("[SWITCH_ERROR]Discover fail,error: " + err))
-            .then(() => setTimeout(this.discover.bind(this), 300000));
+            .then(() => setTimeout(this.refresh.bind(this), 300000));
 
     },
 
