@@ -84,6 +84,17 @@ Please Follow this [document](https://github.com/aholstenson/miio/blob/master/do
 | ``autoStart`` | "off" (When state is "off", change temperature will not change state) |  |
 | ``sensorSid`` | Your Temperature Sensor Series ID, that sensor must connected with AC Partner(You can find it in Android device) |  |
 
+*   switch(IR)
+
+
+| 参数 | 说明 | 必填 |
+| --- | --- | --- |
+| ``name`` | name show in Homekit | * |
+| ``type`` | "switch" | * |
+| ``ip`` | Your AC Partner ip address for this accessory |  |
+| ``token`` | Your AC Partner ip address for this accessory |  |
+| ``data`` | Follow ``Config Example``, must include ``on`` and ``off`` | * |
+
 ### Config Example
 
 Basic setting

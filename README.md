@@ -65,8 +65,8 @@
 | 参数 | 说明 | 必填 |
 | --- | --- | --- |
 | ``platform`` | “XiaoMiAcPartner" | * |
-| ``ip`` | 你空调伴侣的IP地址，下方accessories中没有填写ip的均使用本ip设置 |  |
-| ``token`` | 你空调伴侣的token，下方accessories中没有填写token的均使用本token设置 |  |
+| ``ip`` | 你空调伴侣的IP地址，下方设备(accessories)中没有填写ip的均使用本ip设置 |  |
+| ``token`` | 你空调伴侣的token，下方设备(accessories)中没有填写token的均使用本token设置 |  |
 
 
 参考这篇[文章](https://github.com/aholstenson/miio/blob/master/docs/management.md#getting-the-token-of-a-device)获得空调伴侣的token。

@@ -41,6 +41,7 @@ ClimateAccessory = function(log, config, platform){
         this.ip = this.config['ip'];
         this.token = this.config['token'];
         this.connectService = setInterval(this.search.bind(this),3000);
+        setTimeout(this.refresh.bind(this),600000);
     }else if(this.platform.globalDevice){
         Promise.all([this.platform.globalDevice])
             .then(() => {
@@ -139,19 +140,22 @@ ClimateAccessory.prototype = {
     },
 
     refresh: function(){
+        if (this.platform.syncLock == true) {
+            return;
+        }
+        this.platform.syncLock = true;
 
-        this.log.debug("[%s]Discovering...",this.name);
-        let p1 =  miio.device({ address: this.ip, token: this.token })
+        this.log.debug("[%s]Refreshing...",this.name);
+        miio.device({ address: this.ip, token: this.token })
             .then((device) =>{
                 this.device = device;
-                this.log("[%s]Discovered Device!",this.name);
+                this.log("[%s]Device refreshed",this.name);
+                this.platform.syncLock = false;
             }).catch((err) =>{
-                this.log.error("[CLIMATE_ERROR]Cannot connect to AC Partner. " + err);
+                this.log.error("[CLIMATE_ERROR]Refresh fail. " + err);
+                this.platform.syncLock = false;
             })
 
-        Promise.all([p1])
-            .catch(err => this.log.error("[CLIMATE_ERROR]Discover fail,error: " + err))
-            .then(() => setTimeout(this.refresh.bind(this), 300000));
     },
 
     getTargetHeatingCoolingState: function(callback) {

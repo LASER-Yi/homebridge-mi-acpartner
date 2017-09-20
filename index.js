@@ -37,7 +37,7 @@ function XiaoMiAcPartner(log, config){
     
     if(null != this.config['ip'] && null != this.config['token']){
         this.syncLock = true;
-        setTimeout(this.discover.bind(this), 300000);
+        setTimeout(this.refresh.bind(this), 600000);
         this.globalDevice = !this.device && miio.device({ address: this.config['ip'], token: this.config['token'] })
             .then((device) =>{
                 this.device = device;
@@ -83,22 +83,21 @@ XiaoMiAcPartner.prototype = {
         callback(myAccessories);
     },
 
-    discover: function(){
+    refresh: function(){
+        if (this.syncLock == true) {
+            return;
+        }
         this.syncLock = true;
         
-        this.log.debug("[GLOBAL]Discovering...");
-        let p1 = miio.device({ address: this.config['ip'], token: this.config['token'] })
+        this.log.debug("[GLOBAL]Refreshing...");
+        miio.device({ address: this.config['ip'], token: this.config['token'] })
             .then((device) =>{
                 this.device = device;
-                this.log("[GLOBAL]Discovered Device!");
+                this.log("[GLOBAL]Device refreshed");
                 this.syncLock = false;
-            }).catch(function(err){
-                this.log.error("[GLOBAL_ERROR]Cannot connect to AC Partner. " + err);
+            }).catch((err) =>{
+                this.log.error("[GLOBAL_ERROR]Refresh fail. " + err);
                 this.syncLock = false;
             })
-
-        Promise.all([p1])
-            .catch(err => this.log.error("[GLOBAL_ERROR]Rediscover fail,error: " + err))
-            .then(() => setTimeout(this.discover.bind(this), 3000));
     }
 }
