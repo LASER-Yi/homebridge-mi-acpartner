@@ -70,9 +70,9 @@ Please Follow this [document](https://github.com/aholstenson/miio/blob/master/do
 
 **accessories**
 
-*   climate(Basic AC function)
+*   climate(Basic partner function)
 
-| parameter | description | 必required |
+| parameter | description | required |
 | --- | --- | --- |
 | ``name`` | name show in Homekit | * |
 | ``type`` | “climate" | * |
@@ -87,7 +87,7 @@ Please Follow this [document](https://github.com/aholstenson/miio/blob/master/do
 *   switch(IR)
 
 
-| 参数 | 说明 | 必填 |
+| parameter | description | required |
 | --- | --- | --- |
 | ``name`` | name show in Homekit | * |
 | ``type`` | "switch" | * |
