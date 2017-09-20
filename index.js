@@ -1,3 +1,5 @@
+const miio = require('miio')
+
 require('./accessories/switch');
 require('./accessories/climate');
 
@@ -28,13 +30,19 @@ function XiaoMiAcPartner(log, config){
     this.Characteristic = Characteristic;
     this.UUIDGen = UUIDGen;
 
+    this.device;
+
     var that = this;
-    this.isGlobal = false;
     
     if(null != this.config['ip'] && null != this.config['token']){
-        this.isGlobal = true;
-        this.ip = this.config['ip'];
-        this.token = this.config['token'];
+        this.globalDevice = !this.device && miio.device({ address: this.config['ip'], token: this.config['token'] })
+            .then(function(device){
+                that.device = device;
+                that.log("[XiaoMiAcPartner][GLOBAL]Discovered Device!");
+            }).catch(function(err){
+                that.log.error("[XiaoMiAcPartner][GLOBAL_ERROR]Cannot connect to AC Partner. " + err);
+            })
+
     }
 
     this.log.info("[XiaoMiAcPartner][INFO]Plugin start successful");

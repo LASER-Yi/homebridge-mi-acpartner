@@ -1,5 +1,5 @@
-var miio = require('miio');
-var outputSignal = require("../packages/acSignal_handle");
+const miio = require('miio');
+const outputSignal = require("../packages/acSignal_handle");
 
 var Accessory, PlatformAccessory, Service, Characteristic, UUIDGen;
 
@@ -25,9 +25,15 @@ ClimateAccessory = function(log, config, platform){
     if(null != this.config['ip'] && null != this.config['token']){
         this.ip = this.config['ip'];
         this.token = this.config['token'];
-    }else if(this.platform.isGlobal){
-        this.ip = this.platform.ip;
-        this.token = this.platform.token;
+        this.discover();
+        that.doRestThing();
+    }else if(this.platform.globalDevice){
+        Promise.all([this.platform.globalDevice])
+            .then(() => {
+                that.device = that.platform.device;
+                that.log.debug("[XiaoMiAcPartner][%s]Got global device information",this.name);
+                that.doRestThing();
+            })
     }else{
         this.log.error("[XiaoMiAcPartner][%s]Cannot find device infomation",this.name);
     }
@@ -98,7 +104,6 @@ ClimateAccessory = function(log, config, platform){
         
     this.services.push(this.serviceInfo);
 
-    this.doRestThing();
 }
 
 
@@ -106,16 +111,9 @@ ClimateAccessory.prototype = {
     doRestThing: function(){
         var that = this;
 
-        this.discover();                        
-        setInterval(function(){
-            that.discover();
-        }, 300000)
-
         if (!this.wiSync) {
             this.log.info("[XiaoMiAcPartner][CLIMATE]Auto sync on");
-            setInterval(function() {
-                that.getACState();
-            }, 60000);   
+            that.getACState();  
         }else{
             this.TargetTemperature = (this.maxTemp + this.minTemp) / 2;
             this.log.info("[XiaoMiAcPartner][CLIMATE]Auto sync off");
@@ -124,16 +122,19 @@ ClimateAccessory.prototype = {
 
     discover: function(){
         var that = this;
-
+        
         this.log.debug("[XiaoMiAcPartner][%s]Discovering...",this.name);
-        miio.device({ address: this.ip, token: this.token })
-        .then(function(device){
-            that.device = device;
-            that.log("[XiaoMiAcPartner][CLIMATE]Discovered Device!");
-            that.getACState();
-        }).catch(function(err){
-            that.log.error("[XiaoMiAcPartner][ERROR]Cannot connect to AC Partner. " + err);
-        })
+        let p1 =  miio.device({ address: this.ip, token: this.token })
+            .then(function(device){
+                that.device = device;
+                that.log("[XiaoMiAcPartner][%s]Discovered Device!",that.name);
+            }).catch(function(err){
+                that.log.error("[XiaoMiAcPartner][ERROR]Cannot connect to AC Partner. " + err);
+            })
+
+        Promise.all([p1])
+            .catch(err => this.log.error("[XiaoMiAcPartner][ERROR]Rediscover fail,error: " + err))
+            .then(() => setTimeout(this.discover.bind(this), 300000));
     },
 
     getTargetHeatingCoolingState: function(callback) {
@@ -311,7 +312,9 @@ ClimateAccessory.prototype = {
                         accessory.log.debug("[XiaoMiAcPartner][DEBUG]Change Successful");
                     }else{
                         accessory.log.debug("[XiaoMiAcPartner][DEBUG]Unsuccess! Maybe invaild AC Code?");
-                        accessory.getACState();
+                        if (accessory.wiSync) {
+                            accessory.getACState();   
+                        }
                     }
                 }).catch(function(err){
                     that.log.error("[XiaoMiAcPartner][ERROR]Send code fail! Error: " + err);
@@ -325,7 +328,9 @@ ClimateAccessory.prototype = {
                         accessory.log.debug("[XiaoMiAcPartner][DEBUG]Send Successful");
                     }else{
                         accessory.log.debug("[XiaoMiAcPartner][DEBUG]Unsuccess! Maybe invaild IR Code?");
-                        accessory.getACState();
+                        if (accessory.wiSync) {
+                            accessory.getACState();   
+                        }
                     }
                 }).catch(function(err){
                         accessory.log.error("[XiaoMiAcPartner][ERROR]Send IR code fail! " + err);
@@ -340,28 +345,26 @@ ClimateAccessory.prototype = {
         }
 
         var that = this;
-        this.log.debug("[XiaoMiAcPartner][CLIMATE]Syncing...")
+        this.log.debug("[XiaoMiAcPartner][CLIMATE_%s]Syncing...",this.name);
 
         //Update CurrentTemperature
-        if(this.outerSensor){
-            this.device.call('get_device_prop_exp', [[that.outerSensor, "temperature", "humidity"]])
-                .then(function(curTep){
-                    if (curTep[0][0] == null) {
-                        that.log.error("[XiaoMiAcPartner][ERROR]Invaild sensorSid!")
-                    }else{
-                        that.log.debug("[XiaoMiAcPartner][CLIMATE]Temperature Sensor return:%s",curTep[0]);
-                        that.CurrentTemperature = curTep[0][0] / 100.0;
-                        that.CurrentRelativeHumidity = curTep[0][1] / 100.0;
-                        that.acPartnerService.getCharacteristic(Characteristic.CurrentTemperature)
-                            .updateValue(that.CurrentTemperature);
-                        that.acPartnerService.getCharacteristic(Characteristic.CurrentRelativeHumidity)
-                            .updateValue(that.CurrentRelativeHumidity);
-                    }
-                })
-        }
+        let p1 = this.outerSensor && this.device.call('get_device_prop_exp', [[that.outerSensor, "temperature", "humidity"]])
+        .then(function(curTep){
+            if (curTep[0][0] == null) {
+                that.log.error("[XiaoMiAcPartner][ERROR]Invaild sensorSid!")
+            }else{
+                that.log.debug("[XiaoMiAcPartner][CLIMATE]Temperature Sensor return:%s",curTep[0]);
+                that.CurrentTemperature = curTep[0][0] / 100.0;
+                that.CurrentRelativeHumidity = curTep[0][1] / 100.0;
+                that.acPartnerService.getCharacteristic(Characteristic.CurrentTemperature)
+                    .updateValue(that.CurrentTemperature);
+                that.acPartnerService.getCharacteristic(Characteristic.CurrentRelativeHumidity)
+                    .updateValue(that.CurrentRelativeHumidity);
+            }
+        })
 
         //Update AC state
-        this.device.call('get_model_and_state', [])
+        let p2 = this.device.call('get_model_and_state', [])
             .then(function(retMaS){
                 //that.log(retMaS);
                 that.acPower = retMaS[2];
@@ -399,5 +402,9 @@ ClimateAccessory.prototype = {
             }).catch(function(err){
                 that.log.error("[XiaoMiAcPartner][ERROR]Sync fail! Error:" + err);
             });
+
+        Promise.all([p1,p2])
+            .catch(err => this.log.error("[XiaoMiAcPartner][ERROR]Rediscover fail,error: " + err))
+            .then(() => setTimeout(this.getACState.bind(this), 60000));
     }
 };

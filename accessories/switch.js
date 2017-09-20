@@ -1,6 +1,3 @@
-//require('./base');
-
-//const inherits = require('util').inherits;
 const miio = require('miio');
 
 var Accessory, PlatformAccessory, Service, Characteristic, UUIDGen;
@@ -16,13 +13,18 @@ SwitchAccessory = function(log, config, platform){
     Characteristic = platform.Characteristic;
     UUIDGen = platform.UUIDGen;
     this.name = config['name'];
+    var that = this;
 
     if(null != this.config['ip'] && null != this.config['token']){
         this.ip = this.config['ip'];
         this.token = this.config['token'];
-    }else if(this.platform.isGlobal){
-        this.ip = this.platform.ip;
-        this.token = this.platform.token;
+        this.discover();
+    }else if(this.platform.globalDevice){
+        Promise.all([this.platform.globalDevice])
+            .then(() => {
+                that.device = that.platform.device;
+                that.log.debug("[XiaoMiAcPartner][%s]Got global device information",this.name)
+            })
     }else{
         this.log.error("[XiaoMiAcPartner][%s]Cannot find device infomation",this.name);
     }
@@ -59,29 +61,28 @@ SwitchAccessory = function(log, config, platform){
 
     this.doRestThing();
 }
-//inherits(SwitchAccessory, Base);
 
 SwitchAccessory.prototype = {
     discover: function(){
         var that = this;
         
         this.log.debug("[XiaoMiAcPartner][%s]Discovering...",this.name);
-        miio.device({ address: this.ip, token: this.token })
-        .then(function(device){
-            that.device = device;
-            that.log("[XiaoMiAcPartner][%s]Discovered Device!",that.name);
-        }).catch(function(err){
-            that.log.error("[XiaoMiAcPartner][ERROR]Cannot connect to AC Partner. " + err);
-        })
+        let p1 =  miio.device({ address: this.ip, token: this.token })
+            .then(function(device){
+                that.device = device;
+                that.log("[XiaoMiAcPartner][%s]Discovered Device!",that.name);
+            }).catch(function(err){
+                that.log.error("[XiaoMiAcPartner][ERROR]Cannot connect to AC Partner. " + err);
+            })
+
+        Promise.all([p1])
+            .catch(err => this.log.error("[XiaoMiAcPartner][ERROR]Rediscover fail,error: " + err))
+            .then(() => setTimeout(this.discover.bind(this), 300000));
     },
 
     doRestThing: function(){
         var that = this;
         
-        this.discover();                        
-        setInterval(function(){
-            that.discover();
-        }, 300000)
     },
 
     getServices: function(){
@@ -89,7 +90,7 @@ SwitchAccessory.prototype = {
     },
 
     setSwitchState: function(value, callback){
-        if(!this.device || !this.device.call){
+        if(!this.device || !this.device.call || !this.onCode || !this.offCode){
             return;
         }
 
