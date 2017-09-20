@@ -17,15 +17,15 @@ SwitchAccessory = function(log, config, platform){
     if(null != this.config['ip'] && null != this.config['token']){
         this.ip = this.config['ip'];
         this.token = this.config['token'];
-        this.discover();
+        this.connectService = setInterval(this.discover(),1000);
     }else if(this.platform.globalDevice){
         Promise.all([this.platform.globalDevice])
-            .then(() => {
+            .then(() =>{
                 this.device = new Array();
                 this.device = this.platform.device;
                 this.log.debug("[%s]Global device connected",this.name);
             }).catch((err) =>{
-                this.log.debug("[SWITCH]Connect to global device fail! "+ err);
+                this.log.debug("[SWITCH_ERROR]Connect to global device fail! "+ err);
             })
     }else{
         this.log.error("[%s]Cannot find device infomation",this.name);
@@ -34,7 +34,7 @@ SwitchAccessory = function(log, config, platform){
     this.onState = Characteristic.On.NO;
 
     if(!config.data || !config.data.on || !config.data.off){
-        this.log.error("[ERROR]IR code no defined!");
+        this.log.error("[SWITCH_ERROR]IR code no defined!");
     }else{
         this.onCode = config.data.on;
         this.offCode = config.data.off;
@@ -65,25 +65,31 @@ SwitchAccessory = function(log, config, platform){
 
 SwitchAccessory.prototype = {
     discover: function(){
-        var that = this;
-        
+        if(this.platform.syncLock){
+            return;
+        }else{
+            this.platform.syncLock = true;
+        }
+
         this.log.debug("[%s]Discovering...",this.name);
         let p1 =  miio.device({ address: this.ip, token: this.token })
-            .then(function(device){
-                that.device = device;
-                that.log("[%s]Discovered Device!",that.name);
+            .then((device) =>{
+                this.device = device;
+                this.log("[%s]Discovered Device!",that.name);
+                clearInterval(this.connectService);
             }).catch(function(err){
-                that.log.error("[ERROR]Cannot connect to AC Partner. " + err);
+                this.log.error("[SWITCH_ERROR]Cannot connect to AC Partner. " + err);
             })
 
         Promise.all([p1])
-            .catch(err => this.log.error("[ERROR]Rediscover fail,error: " + err))
+            .catch(err => this.log.error("[SWITCH_ERROR]Rediscover fail,error: " + err))
             .then(() => setTimeout(this.discover.bind(this), 300000));
+
+        this.platform.syncLock = false;
     },
 
     doRestThing: function(){
-        var that = this;
-        
+        //waiting
     },
 
     getServices: function(){
@@ -95,16 +101,14 @@ SwitchAccessory.prototype = {
             return;
         }
 
-        var that = this;
-
         this.onState = value;
 
         this.log.debug("[%s]Sending IR code: %s",this.name,value ? this.onCode : this.offCode);
         this.device.call('send_ir_code',[value ? this.onCode : this.offCode])
-            .then(function(ret){
-                that.log.debug("[%s]Return result: %s",this.name,ret);
-            }).catch(function(err){
-                that.log.error("[ERROR]Send fail! " + err);
+            .then((ret) =>{
+                this.log.debug("[%s]Return result: %s",this.name,ret);
+            }).catch((err) =>{
+                this.log.error("[SWITCH_ERROR]Send fail! " + err);
             });
 
         callback();

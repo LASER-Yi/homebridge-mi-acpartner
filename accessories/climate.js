@@ -20,6 +20,7 @@ ClimateAccessory = function(log, config, platform){
     this.outerSensor = config.sensorSid;
     this.wiSync = config.sync;
     this.autoStart = config.autoStart;
+    this.syncInterval = config.syncInterval || 60000;
     if (config.customize) {
         this.customi = config.customize;
         this.log.debug("[DEBUG]Using customized AC signal...");
@@ -35,13 +36,11 @@ ClimateAccessory = function(log, config, platform){
     this.CurrentTemperature = 0;
     this.TargetTemperature = 0;
     this.CurrentRelativeHumidity = 0;
-
-    this.syncInterval = config.syncInterval || 60000;
     this.model = null;
     if(null != this.config['ip'] && null != this.config['token']){
         this.ip = this.config['ip'];
         this.token = this.config['token'];
-        this.discover();
+        this.connectService = setInterval(this.discover(),1000);
         this.doRestThing();
     }else if(this.platform.globalDevice){
         Promise.all([this.platform.globalDevice])
@@ -111,11 +110,10 @@ ClimateAccessory = function(log, config, platform){
 
 ClimateAccessory.prototype = {
     doRestThing: function(){
-        var that = this;
 
         if (!this.wiSync) {
             this.log.info("[CLIMATE]Auto sync on");
-            that.getACState();  
+            this.getACState();  
         }else{
             this.TargetTemperature = (this.maxTemp + this.minTemp) / 2;
             this.log.info("[CLIMATE]Auto sync off");
@@ -123,20 +121,27 @@ ClimateAccessory.prototype = {
     },
 
     discover: function(){
-        var that = this;
-        
+        if(this.platform.syncLock){
+            return;
+        }else{
+            this.platform.syncLock = true;
+        }
+
         this.log.debug("[%s]Discovering...",this.name);
         let p1 =  miio.device({ address: this.ip, token: this.token })
-            .then(function(device){
-                that.device = device;
-                that.log("[%s]Discovered Device!",that.name);
-            }).catch(function(err){
-                that.log.error("[ERROR]Cannot connect to AC Partner. " + err);
+            .then((device) =>{
+                this.device = device;
+                this.log("[%s]Discovered Device!",that.name);
+                clearInterval(this.connectService);
+            }).catch((err) =>{
+                this.log.error("[ERROR]Cannot connect to AC Partner. " + err);
             })
 
         Promise.all([p1])
             .catch(err => this.log.error("[ERROR]Rediscover fail,error: " + err))
             .then(() => setTimeout(this.discover.bind(this), 300000));
+
+        this.platform.syncLock = false
     },
 
     getTargetHeatingCoolingState: function(callback) {

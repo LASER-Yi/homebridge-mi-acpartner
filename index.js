@@ -30,9 +30,10 @@ function XiaoMiAcPartner(log, config){
     this.Characteristic = Characteristic;
     this.UUIDGen = UUIDGen;
 
+    //miio device
     this.device;
 
-    var that = this;
+    this.syncLock = true;//true: something connected; false: free to use
     
     if(null != this.config['ip'] && null != this.config['token']){
         setTimeout(this.discover.bind(this), 300000);
@@ -40,9 +41,14 @@ function XiaoMiAcPartner(log, config){
             .then((device) =>{
                 this.device = device;
                 this.log("[GLOBAL]Discovered Device!");
+                this.syncLock = false;
             }).catch((err) =>{
                 this.log.error("[GLOBAL_ERROR]Cannot connect to AC Partner. " + err);
-            })
+                this.syncLock = false;
+            });
+
+        this.log("[GLOBAL]Connecting...")
+        Promise.all([this.globalDevice]);
 
     }
 
@@ -78,15 +84,17 @@ XiaoMiAcPartner.prototype = {
     },
 
     discover: function(){
-        var that = this;
+        this.syncLock = true;
         
         this.log.debug("[GLOBAL]Discovering...");
         let p1 = miio.device({ address: this.config['ip'], token: this.config['token'] })
-            .then(function(device){
-                that.device = device;
-                that.log("[GLOBAL]Discovered Device!");
+            .then((device) =>{
+                this.device = device;
+                this.log("[GLOBAL]Discovered Device!");
+                this.syncLock = false;
             }).catch(function(err){
-                that.log.error("[GLOBAL_ERROR]Cannot connect to AC Partner. " + err);
+                this.log.error("[GLOBAL_ERROR]Cannot connect to AC Partner. " + err);
+                this.syncLock = false;
             })
 
         Promise.all([p1])
