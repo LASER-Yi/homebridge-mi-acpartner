@@ -13,7 +13,6 @@ SwitchAccessory = function(log, config, platform){
     Characteristic = platform.Characteristic;
     UUIDGen = platform.UUIDGen;
     this.name = config['name'];
-    var that = this;
 
     if(null != this.config['ip'] && null != this.config['token']){
         this.ip = this.config['ip'];
@@ -22,17 +21,18 @@ SwitchAccessory = function(log, config, platform){
     }else if(this.platform.globalDevice){
         Promise.all([this.platform.globalDevice])
             .then(() => {
-                that.device = that.platform.device;
-                that.log.debug("[XiaoMiAcPartner][%s]Got global device information",this.name)
+                this.device = new Array();
+                this.device = that.platform.device;
+                this.log.debug("[%s]Got global device information",this.name)
             })
     }else{
-        this.log.error("[XiaoMiAcPartner][%s]Cannot find device infomation",this.name);
+        this.log.error("[%s]Cannot find device infomation",this.name);
     }
 
     this.onState = Characteristic.On.NO;
 
     if(!config.data || !config.data.on || !config.data.off){
-        this.log.error("[XiaoMiAcPartner][ERROR]IR code no defined!");
+        this.log.error("[ERROR]IR code no defined!");
     }else{
         this.onCode = config.data.on;
         this.offCode = config.data.off;
@@ -40,7 +40,7 @@ SwitchAccessory = function(log, config, platform){
 
     this.services = [];
 
-    platform.log.debug("[XiaoMiAcPartner][%s]Initializing switch acc",this.name);
+    platform.log.debug("[%s]Initializing switch",this.name);
 
     this.infoService = new Service.AccessoryInformation();
     this.infoService
@@ -57,7 +57,7 @@ SwitchAccessory = function(log, config, platform){
         .on('get', this.getSwitchState.bind(this));
     this.services.push(this.switchService);
 
-    platform.log.debug("[XiaoMiAcPartner][%s]Initialized successful",this.name);
+    platform.log.debug("[%s]Initialized successful",this.name);
 
     this.doRestThing();
 }
@@ -66,17 +66,17 @@ SwitchAccessory.prototype = {
     discover: function(){
         var that = this;
         
-        this.log.debug("[XiaoMiAcPartner][%s]Discovering...",this.name);
+        this.log.debug("[%s]Discovering...",this.name);
         let p1 =  miio.device({ address: this.ip, token: this.token })
             .then(function(device){
                 that.device = device;
-                that.log("[XiaoMiAcPartner][%s]Discovered Device!",that.name);
+                that.log("[%s]Discovered Device!",that.name);
             }).catch(function(err){
-                that.log.error("[XiaoMiAcPartner][ERROR]Cannot connect to AC Partner. " + err);
+                that.log.error("[ERROR]Cannot connect to AC Partner. " + err);
             })
 
         Promise.all([p1])
-            .catch(err => this.log.error("[XiaoMiAcPartner][ERROR]Rediscover fail,error: " + err))
+            .catch(err => this.log.error("[ERROR]Rediscover fail,error: " + err))
             .then(() => setTimeout(this.discover.bind(this), 300000));
     },
 
@@ -98,12 +98,12 @@ SwitchAccessory.prototype = {
 
         this.onState = value;
 
-        this.log.debug("[XiaoMiAcPartner][%s]Sending IR code: %s",this.name,value ? this.onCode : this.offCode);
+        this.log.debug("[%s]Sending IR code: %s",this.name,value ? this.onCode : this.offCode);
         this.device.call('send_ir_code',[value ? this.onCode : this.offCode])
             .then(function(ret){
-                that.log.debug("[XiaoMiAcPartner][%s]Return result: %s",this.name,ret);
+                that.log.debug("[%s]Return result: %s",this.name,ret);
             }).catch(function(err){
-                that.log.error("[XiaoMiAcPartner][ERROR]Send code fail! " + err);
+                that.log.error("[ERROR]Send code fail! " + err);
             });
 
         callback();
