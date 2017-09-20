@@ -141,7 +141,7 @@ ClimateAccessory.prototype = {
             .catch(err => this.log.error("[ERROR]Rediscover fail,error: " + err))
             .then(() => setTimeout(this.discover.bind(this), 300000));
 
-        this.platform.syncLock = false
+        this.platform.syncLock = false;
     },
 
     getTargetHeatingCoolingState: function(callback) {
