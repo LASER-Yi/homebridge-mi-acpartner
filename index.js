@@ -33,9 +33,10 @@ function XiaoMiAcPartner(log, config){
     //miio device
     this.device;
 
-    this.syncLock = true;//true: something connected; false: free to use
+    this.syncLock = false;//true: something connected; false: free to use
     
     if(null != this.config['ip'] && null != this.config['token']){
+        this.syncLock = true;
         setTimeout(this.discover.bind(this), 300000);
         this.globalDevice = !this.device && miio.device({ address: this.config['ip'], token: this.config['token'] })
             .then((device) =>{
@@ -49,7 +50,6 @@ function XiaoMiAcPartner(log, config){
 
         this.log("[GLOBAL]Connecting...")
         Promise.all([this.globalDevice]);
-
     }
 
     this.log.info("[INFO]Plugin start successful");

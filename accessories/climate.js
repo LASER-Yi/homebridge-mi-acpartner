@@ -40,7 +40,7 @@ ClimateAccessory = function(log, config, platform){
     if(null != this.config['ip'] && null != this.config['token']){
         this.ip = this.config['ip'];
         this.token = this.config['token'];
-        this.connectService = setInterval(this.discover(),1000);
+        this.connectService = setInterval(this.search.bind(this),3000);
         this.doRestThing();
     }else if(this.platform.globalDevice){
         Promise.all([this.platform.globalDevice])
@@ -120,28 +120,39 @@ ClimateAccessory.prototype = {
         }
     },
 
-    discover: function(){
-        if(this.platform.syncLock){
+    search: function(){
+        if(this.platform.syncLock == true){
             return;
         }else{
             this.platform.syncLock = true;
+            this.log.debug("[%s]Searching...",this.name);
+            miio.device({ address: this.ip, token: this.token })
+                .then((device) =>{
+                    this.device = device;
+                    this.log("[%s]Discovered Device!",this.name);
+                    clearInterval(this.connectService);
+                    this.platform.syncLock = false;
+                }).catch((err) =>{
+                    this.log.error("[CLIMATE_ERROR]Cannot connect to AC Partner. " + err);
+                    this.platform.syncLock = false;
+                });
         }
+    },
+
+    discover: function(){
 
         this.log.debug("[%s]Discovering...",this.name);
         let p1 =  miio.device({ address: this.ip, token: this.token })
             .then((device) =>{
                 this.device = device;
-                this.log("[%s]Discovered Device!",that.name);
-                clearInterval(this.connectService);
+                this.log("[%s]Discovered Device!",this.name);
             }).catch((err) =>{
-                this.log.error("[ERROR]Cannot connect to AC Partner. " + err);
+                this.log.error("[CLIMATE_ERROR]Cannot connect to AC Partner. " + err);
             })
 
         Promise.all([p1])
-            .catch(err => this.log.error("[ERROR]Rediscover fail,error: " + err))
+            .catch(err => this.log.error("[CLIMATE_ERROR]Discover fail,error: " + err))
             .then(() => setTimeout(this.discover.bind(this), 300000));
-
-        this.platform.syncLock = false;
     },
 
     getTargetHeatingCoolingState: function(callback) {
@@ -222,7 +233,7 @@ ClimateAccessory.prototype = {
                     .then(function(ret){
                         that.log.debug("[DEBUG]Return result: " + ret[0]);
                     }).catch(function(err){
-                        that.log.error("[ERROR]Send code fail! Error: " + err);
+                        that.log.error("[CLIMATE_ERROR]Send code fail! Error: " + err);
                     });
             }else{
                 this.log.debug("[DEBUG] AC on, sending IR code: " + code);
@@ -230,7 +241,7 @@ ClimateAccessory.prototype = {
                     .then(function(ret){
                         that.log.debug("[DEBUG]Return result: " + ret[0]);
                     }).catch(function(err){
-                        that.log.error("[ERROR]Send code fail! Error: " + err);
+                        that.log.error("[CLIMATE_ERROR]Send code fail! Error: " + err);
                     });
             }
         }
@@ -242,21 +253,21 @@ ClimateAccessory.prototype = {
         if (this.TargetHeatingCoolingState != Characteristic.TargetHeatingCoolingState.OFF) {
             if (this.TargetHeatingCoolingState == Characteristic.TargetHeatingCoolingState.HEAT) {
                 if (!this.customi||!this.customi.heat||!this.customi.heat[this.TargetTemperature]) {
-                    this.log.error('[ERROR]HEAT Signal not define!');
+                    this.log.error('[CLIMATE_ERROR]HEAT Signal not define!');
                     return;
                 }
                 code = this.customi.heat[this.TargetTemperature];
             }else if (this.TargetHeatingCoolingState == Characteristic.TargetHeatingCoolingState.COOL){
                 if (!this.customi||!this.customi.cool||!this.customi.cool[this.TargetTemperature]) {
-                    this.log.error('[ERROR]COOL Signal not define!');
+                    this.log.error('[CLIMATE_ERROR]COOL Signal not define!');
                     return;
                 }
                 code = this.customi.cool[this.TargetTemperature];
             }else{
                 if (!this.customi||!this.customi.auto) {
-                    this.log.error('[ERROR]AUTO Signal not define! Will send COOL signal instead');
+                    this.log.error('[CLIMATE_ERROR]AUTO Signal not define! Will send COOL signal instead');
                     if (!this.customi||!this.customi.cool||!this.customi.cool[this.TargetTemperature]) {
-                        this.log.error('[ERROR]COOL Signal not define!');
+                        this.log.error('[CLIMATE_ERROR]COOL Signal not define!');
                         return;
                     }
                     code = this.customi.cool[this.TargetTemperature];
@@ -266,7 +277,7 @@ ClimateAccessory.prototype = {
             }
         }else{
             if (!this.customi||!this.customi.off) {
-                this.log.error('[ERROR]OFF Signal not define!');
+                this.log.error('[CLIMATE_ERROR]OFF Signal not define!');
                 return;
             }
             code = this.customi.off;
@@ -276,7 +287,7 @@ ClimateAccessory.prototype = {
 
     SendCmd: function() {
         if (!this.device) {
-            this.log.error('[ERROR]Send code failed!(Device not exists)');
+            this.log.error('[CLIMATE_ERROR]Send code failed!(Device not exists)');
             return;
         }
 
@@ -291,7 +302,7 @@ ClimateAccessory.prototype = {
             this.data.LastHeatingCoolingState = this.LastHeatingCoolingState;
             var retCode = outputSignal(this.data);
             if (!retCode) {
-                this.log.error('[ERROR]Cannot get command code.')
+                this.log.error('[CLIMATE_ERROR]Cannot get command code.')
                 return;
             }
             //this.log.debug("[DEBUG] Get code: " + retCode.data);
@@ -324,7 +335,7 @@ ClimateAccessory.prototype = {
                         }
                     }
                 }).catch(function(err){
-                    that.log.error("[ERROR]Send code fail! Error: " + err);
+                    that.log.error("[CLIMATE_ERROR]Send code fail! Error: " + err);
                 });
         }else{
             this.log.debug("[DEBUG]Sending IR code: " + code);
@@ -340,14 +351,14 @@ ClimateAccessory.prototype = {
                         }
                     }
                 }).catch(function(err){
-                        accessory.log.error("[ERROR]Send IR code fail! " + err);
+                        accessory.log.error("[CLIMATE_ERROR]Send IR code fail! " + err);
                 });
         }
     },
 
     getACState: function(){
         if (!this.device) {
-            this.log.error("[ERROR]Sync failed!(Device not exists)");
+            this.log.error("[CLIMATE_ERROR]Sync failed!(Device not exists)");
             return;
         }
 
@@ -358,7 +369,7 @@ ClimateAccessory.prototype = {
         let p1 = this.outerSensor && this.device.call('get_device_prop_exp', [[this.outerSensor, "temperature", "humidity"]])
         .then(function(senRet){
             if (senRet[0][0] == null) {
-                that.log.error("[ERROR]Invaild sensorSid!")
+                that.log.error("[CLIMATE_ERROR]Invaild sensorSid!")
             }else{
                 that.log.debug("[CLIMATE]Temperature Sensor return:%s",senRet[0]);
                 that.CurrentTemperature = senRet[0][0] / 100.0;
@@ -367,7 +378,7 @@ ClimateAccessory.prototype = {
                 that.acPartnerService.getCharacteristic(Characteristic.CurrentRelativeHumidity).updateValue(that.CurrentRelativeHumidity);
             }
         }).catch((err) =>{
-            this.log.error("[ERROR]Current Temperature sync fail! " + err);
+            this.log.error("[CLIMATE_ERROR]Current Temperature sync fail! " + err);
         });
 
         //Update AC state
@@ -406,11 +417,11 @@ ClimateAccessory.prototype = {
                 that.acPartnerService.getCharacteristic(Characteristic.TargetTemperature)
                     .updateValue(that.TargetTemperature);
             }).catch(function(err){
-                that.log.error("[ERROR]Sync fail! Error:" + err);
+                that.log.error("[CLIMATE_ERROR]Sync fail! Error:" + err);
             });
 
         Promise.all([p1,p2])
-            .catch(err => this.log.error("[ERROR]Rediscover fail, error: " + err))
+            .catch(err => this.log.error("[CLIMATE_ERROR]Rediscover fail, error: " + err))
             .then(() => {
                 this.log.debug("[CLIMATE]Sync complete")
                 setTimeout(this.getACState.bind(this), 60000)

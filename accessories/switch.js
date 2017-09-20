@@ -17,7 +17,7 @@ SwitchAccessory = function(log, config, platform){
     if(null != this.config['ip'] && null != this.config['token']){
         this.ip = this.config['ip'];
         this.token = this.config['token'];
-        this.connectService = setInterval(this.discover(),1000);
+        this.connectService = setInterval(this.search.bind(this),3500);
     }else if(this.platform.globalDevice){
         Promise.all([this.platform.globalDevice])
             .then(() =>{
@@ -64,28 +64,40 @@ SwitchAccessory = function(log, config, platform){
 }
 
 SwitchAccessory.prototype = {
-    discover: function(){
-        if(this.platform.syncLock){
+    search: function(){
+        if(this.platform.syncLock == true){
             return;
         }else{
             this.platform.syncLock = true;
+            this.log.debug("[%s]Searching...",this.name);
+            miio.device({ address: this.ip, token: this.token })
+                .then((device) =>{
+                    this.device = device;
+                    this.log("[%s]Discovered Device!",this.name);
+                    clearInterval(this.connectService);
+                    this.platform.syncLock = false;
+                }).catch((err) =>{
+                    this.log.error("[SWITCH_ERROR]Cannot connect to AC Partner. " + err);
+                    this.platform.syncLock = false;
+                });
         }
+    },
+
+    discover: function(){
 
         this.log.debug("[%s]Discovering...",this.name);
         let p1 =  miio.device({ address: this.ip, token: this.token })
             .then((device) =>{
                 this.device = device;
                 this.log("[%s]Discovered Device!",that.name);
-                clearInterval(this.connectService);
             }).catch(function(err){
                 this.log.error("[SWITCH_ERROR]Cannot connect to AC Partner. " + err);
             })
 
         Promise.all([p1])
-            .catch(err => this.log.error("[SWITCH_ERROR]Rediscover fail,error: " + err))
+            .catch(err => this.log.error("[SWITCH_ERROR]Discover fail,error: " + err))
             .then(() => setTimeout(this.discover.bind(this), 300000));
 
-        this.platform.syncLock = false;
     },
 
     doRestThing: function(){
