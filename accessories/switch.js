@@ -103,7 +103,7 @@ SwitchAccessory.prototype = {
             .then(function(ret){
                 that.log.debug("[%s]Return result: %s",this.name,ret);
             }).catch(function(err){
-                that.log.error("[ERROR]Send code fail! " + err);
+                that.log.error("[ERROR]Send fail! " + err);
             });
 
         callback();

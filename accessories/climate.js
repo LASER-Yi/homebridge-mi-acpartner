@@ -32,7 +32,7 @@ ClimateAccessory = function(log, config, platform){
             .then(() => {
                 this.device = new Array();
                 this.device = that.platform.device;
-                this.log.debug("[%s]Got global device information",this.name);
+                this.log.debug("[%s]Global device connected",this.name);
                 this.doRestThing();
             })
     }else{
@@ -349,7 +349,7 @@ ClimateAccessory.prototype = {
         this.log.debug("[CLIMATE_%s]Syncing...",this.name);
 
         //Update CurrentTemperature
-        let p1 = this.outerSensor && this.device.call('get_device_prop_exp', [[that.outerSensor, "temperature", "humidity"]])
+        let p1 = this.outerSensor && this.device.call('get_device_prop_exp', [[this.outerSensor, "temperature", "humidity"]])
         .then(function(curTep){
             if (curTep[0][0] == null) {
                 that.log.error("[ERROR]Invaild sensorSid!")
