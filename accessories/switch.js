@@ -84,6 +84,9 @@ SwitchAccessory.prototype = {
     },
 
     discover: function(){
+        if (this.platform.syncLock == true) {
+            return;
+        }
 
         this.log.debug("[%s]Discovering...",this.name);
         let p1 =  miio.device({ address: this.ip, token: this.token })

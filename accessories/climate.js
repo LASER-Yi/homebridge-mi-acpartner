@@ -48,7 +48,6 @@ ClimateAccessory = function(log, config, platform){
                 this.device = new Array();
                 this.device = that.platform.device;
                 this.log.debug("[%s]Global device connected",this.name);
-                this.doRestThing();
             })
     }else{
         this.log.error("[%s]Cannot find device infomation",this.name);
@@ -131,6 +130,7 @@ ClimateAccessory.prototype = {
                     this.device = device;
                     this.log("[%s]Discovered Device!",this.name);
                     clearInterval(this.connectService);
+                    this.doRestThing();
                     this.platform.syncLock = false;
                 }).catch((err) =>{
                     this.log.error("[CLIMATE_ERROR]Cannot connect to AC Partner. " + err);
@@ -140,6 +140,9 @@ ClimateAccessory.prototype = {
     },
 
     discover: function(){
+        if (this.platform.syncLock == true) {
+            return;
+        }
 
         this.log.debug("[%s]Discovering...",this.name);
         let p1 =  miio.device({ address: this.ip, token: this.token })
@@ -289,6 +292,10 @@ ClimateAccessory.prototype = {
         if (!this.device) {
             this.log.error('[CLIMATE_ERROR]Send code failed!(Device not exists)');
             return;
+        }
+
+        if(this.model == null){
+            this.getACState();
         }
 
         var accessory = this;
