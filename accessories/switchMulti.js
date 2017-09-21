@@ -15,7 +15,7 @@ SwitchMultiAccessory = function(log, config, platform){
 
     //config
     this.name = config['name'];
-    //this.sendInterval = config['interval'] || 500;
+    this.sendInterval = config['interval'] || 1000;
     if(null != this.config['ip'] && null != this.config['token']){
         this.ip = this.config['ip'];
         this.token = this.config['token'];
@@ -35,6 +35,8 @@ SwitchMultiAccessory = function(log, config, platform){
     }
 
     this.onState = Characteristic.On.NO;
+    this.codeNu = 0;
+    this.sendCode;
 
     if(!config.data || !config.data.on || !config.data.off){
         this.log.error("[SWITCHMULTI_ERROR]IR code no defined!");
@@ -118,24 +120,29 @@ SwitchMultiAccessory.prototype = {
         }
 
         this.onState = value;
+        this.sendCode = value ? this.config.data.on : this.config.data.off;
 
-        var sendCode = value ? this.config.data.on : this.config.data.off;
+        this.codeInterval = setInterval(this.sendCmd.bind(this),this.sendInterval);
+        callback();
+    },
 
-        for (var i = 0; i < sendCode.length; i++) {
-            var code = sendCode[i];
-            this.log.debug("[%s]Sending IR code #%s: %s",this.name,i + 1,code);
+    sendCmd: function(){
+        var code = this.sendCode[this.codeNu++];
 
-            let p1 = this.device.call('send_ir_code',[code])
+        this.log.debug("[%s]Sending IR code #%s: %s",this.name,this.codeNu,code);
+        let p1 = this.device.call('send_ir_code',[code])
             .then((ret) =>{
                 this.log.debug("[%s]Return result: %s",this.name,ret);
             }).catch((err) =>{
                 this.log.error("[SWITCHMULTI_ERROR]Send fail! " + err);
             });
 
-            Promise.all([p1]);
-
-        }
-        callback();
+        Promise.all([p1])
+            .then(() =>{
+                if (this.codeNu >= this.sendCode.length) {
+                    clearInterval(this.codeInterval);
+                }
+            })
     },
 
     getSwitchState: function(callback){

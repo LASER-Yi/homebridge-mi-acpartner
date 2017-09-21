@@ -128,6 +128,7 @@
 | ``type`` | "switchMulti" | * |
 | ``ip`` | 你空调伴侣的IP地址，此处没有填写ip均使用上方全局ip设置 |  |
 | ``token`` | 你空调伴侣的token，此处没有填写token均使用上方全局token设置 |  |
+| ``interval`` | 发送延时，单位为毫秒（默认1000） |   |
 | ``data`` | 请参考``Config Example``,必须要包含``on``和``off`` | * |
 
 ### Config Example（配置例子）

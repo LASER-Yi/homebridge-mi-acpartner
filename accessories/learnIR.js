@@ -110,14 +110,15 @@ LearnIRAccessory.prototype = {
         this.log.info("[%s]Auto Stop Learning...",this.name);
         clearInterval(this.autoStop);
         this.onState = false;
-        Characteristic.getCharacteristic(Characteristic.On).updateValue(false);
+        this.switchService.getCharacteristic(Characteristic.On).updateValue(false);
     },
 
     showIRCode: function(){
         let p1 = this.device.call('get_ir_learn_result',[])
             .then((ret) =>{
-                if(ret['result'][0] != '(null)'){
-                    this.log.info("[%s]IR Code: %s",this.name,ret['result'][0]);
+                this.log.debug(ret);
+                if(ret[0] != '(null)'){
+                    this.log.info("[%s]IR Code: %s",this.name,ret[0]);
                 }
             }).catch((err) =>this.log.error("[LEARN_ERROR]Return error! " + err));
 
@@ -147,6 +148,7 @@ LearnIRAccessory.prototype = {
             this.device.call('end_ir_learn',[])
                 .then(() =>{
                     this.log.info("[%s]Stop Learning...",this.name);
+                    clearInterval(this.autoStop);
                     callback();
                 }).catch((err) =>this.log.error("[LEARN_ERROR]End fail! " + err))
         }
