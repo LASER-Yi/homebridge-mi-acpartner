@@ -141,6 +141,7 @@ SwitchMultiAccessory.prototype = {
             .then(() =>{
                 if (this.codeNu >= this.sendCode.length) {
                     clearInterval(this.codeInterval);
+                    this.codeNu = 0;
                 }
             })
     },
