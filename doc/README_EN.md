@@ -302,7 +302,7 @@ Most AC command start with "01" and most IR command start with "FE"
 
 ### Changelog
 
-0.4.3
+0.4.4
 
 IR Learner and switchMulti support
 

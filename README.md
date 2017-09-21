@@ -311,7 +311,7 @@
 
 ### Changelog
 
-0.4.3
+0.4.4
 
 IR Learner and switchMulti support
 
