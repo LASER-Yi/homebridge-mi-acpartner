@@ -9,7 +9,7 @@ Thanks for [takatost's project](https://github.com/takatost/homebridge-mi-ac-par
 
 ### Support
 
-![AcPartner](https://github.com/LASER-Yi/homebridge-mi-acpartner/blob/master/img/two.jpg)
+![AcPartner](https://github.com/LASER-Yi/homebridge-mi-acpartner/raw/master/img/two.jpg)
 
 AC Partner v1 & AC Partner v2
 

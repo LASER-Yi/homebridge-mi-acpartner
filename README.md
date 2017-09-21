@@ -12,7 +12,7 @@
 
 ### Support(支持)
 
-![AcPartner](https://github.com/LASER-Yi/homebridge-mi-acpartner/blob/master/img/two.jpg)
+![AcPartner](https://github.com/LASER-Yi/homebridge-mi-acpartner/raw/master/img/two.jpg)
 
 空调伴侣2代 & 空调伴侣1代
 
