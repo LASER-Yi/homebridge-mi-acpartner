@@ -3,6 +3,7 @@ const miio = require('miio')
 require('./accessories/switch');
 require('./accessories/climate');
 require('./accessories/learnIR');
+require('./accessories/switchMulti');
 
 var Accessory, PlatformAccessory, Service, Characteristic, UUIDGen;
 
@@ -34,7 +35,7 @@ function XiaoMiAcPartner(log, config){
     //miio device
     this.device;
 
-    this.syncLock = false;//true: something connected; false: free to use
+    this.syncLock = false;//true: something using; false: free to use
     
     if(null != this.config['ip'] && null != this.config['token']){
         this.syncLock = true;
@@ -49,7 +50,7 @@ function XiaoMiAcPartner(log, config){
                 this.syncLock = false;
             });
 
-        this.log("[GLOBAL]Connecting...")
+        this.log.info("[GLOBAL]Connecting...")
         Promise.all([this.globalDevice]);
     }
 
@@ -80,6 +81,10 @@ XiaoMiAcPartner.prototype = {
                     this.log.info("[INFO]Register acc type:learnIR, name:%s",configAcc['name']);
                     var learnIRAcc = new LearnIRAccessory(this.log, configAcc, this);
                     myAccessories.push(learnIRAcc);
+                }else if(configAcc['type'] == "switchMulti"){
+                    this.log.info("[INFO]Register acc type:switchMulti, name:%s",configAcc['name']);
+                    var swMultiAcc = new SwitchMultiAccessory(this.log, configAcc, this);
+                    myAccessories.push(swMultiAcc);
                 }
             }
             this.log.info("[INFO]Register complete");

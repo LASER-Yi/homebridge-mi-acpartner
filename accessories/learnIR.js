@@ -12,8 +12,9 @@ LearnIRAccessory = function(log, config, platform){
     Service = platform.Service;
     Characteristic = platform.Characteristic;
     UUIDGen = platform.UUIDGen;
-    this.name = config['name'];
 
+    this.name = config['name'];
+    //this.autoTurnOsff = config['autoTurnOff'] || false;
     if(null != this.config['ip'] && null != this.config['token']){
         this.ip = this.config['ip'];
         this.token = this.config['token'];
@@ -26,13 +27,15 @@ LearnIRAccessory = function(log, config, platform){
                 this.device = this.platform.device;
                 this.log.debug("[%s]Global device connected",this.name);
             }).catch((err) =>{
-                this.log.debug("[LEARNIR_ERROR]Connect to global device fail! "+ err);
+                this.log.debug("[LEARN_ERROR]Connect to global device fail! "+ err);
             })
     }else{
         this.log.error("[%s]Cannot find device infomation",this.name);
     }
 
+    //State
     this.onState = Characteristic.On.NO;
+    this.staLearn = false;
 
     this.services = [];
 
@@ -71,7 +74,7 @@ LearnIRAccessory.prototype = {
                     clearInterval(this.connectService);
                     this.platform.syncLock = false;
                 }).catch((err) =>{
-                    this.log.error("[SWITCH_ERROR]Cannot connect to AC Partner. " + err);
+                    this.log.error("[LEARN_ERROR]Cannot connect to AC Partner. " + err);
                     this.platform.syncLock = false;
                 });
         }
@@ -90,7 +93,7 @@ LearnIRAccessory.prototype = {
                 this.log("[%s]Device refreshed",this.name);
                 this.platform.syncLock = false;
             }).catch((err) =>{
-                this.log.error("[SWITCH_ERROR]Refresh fail. " + err);
+                this.log.error("[LEARN_ERROR]Refresh fail. " + err);
                 this.platform.syncLock = false;
             })
 
@@ -104,26 +107,48 @@ LearnIRAccessory.prototype = {
         return this.services;
     },
 
+    autoClo: function(){
+        this.log.info("[%s]Auto Stop Learning...",this.name);
+        clearInterval(this.autoStop);
+        this.onState = false;
+        Characteristic.getCharacteristic(Characteristic.On).updateValue(false);
+    },
+
+    showIRCode: function(){
+        let p1 = this.device.call('get_ir_learn_result',[])
+            .then((ret) =>{
+                this.log.info("[%s]IR Code: %s",this.name,ret['code']);
+            }).catch((err) =>this.log.error("[LEARN_ERROR]Return error! " + err));
+
+        Promise.all([p1])
+            .then(() =>{
+                if (this.onState) {
+                    this.showIRCode();
+                }
+            })
+    },
+
     setSwitchState: function(value, callback){
         if(!this.device || !this.device.call){
             return;
         }
 
         this.onState = value;
-
-        this.log.debug("[%s]Start Learning IR Code...",this.name);
-        this.device.call('get_ir_learn_result',[])
-            .then((ret) =>{
-                this.log.debug("[%s]IR Code: %s",this.name,ret);
-                this.onState = 0;
-                this.switchService.getCharacteristic(Characteristic.On).updateValue(this.onState);
-            }).catch((err) =>{
-                this.log.error("[LEARNIR_ERROR]Learn fail! " + err);
-                this.onState = 0;
-                this.switchService.getCharacteristic(Characteristic.On).updateValue(this.onState);
-            });
-
-        callback();
+        if (value) {
+            this.device.call('start_ir_learn',[30])
+                .then(() =>{
+                    this.log.info("[%s]Start Learning...Auto stop after 30 seconds",this.name);
+                    this.showIRCode();
+                    this.autoStop = setInterval(this.autoClo.bind(this),30000);
+                    callback();
+                }).catch((err) =>this.log.error("[LEARN_ERROR]Start fail! " + err));
+        }else{
+            this.device.call('end_ir_learn',[])
+                .then(() =>{
+                    this.log.info("[%s]Stop Learning...",this.name);
+                    callback();
+                }).catch((err) =>this.log.error("[LEARN_ERROR]End fail! " + err))
+        }
     },
 
     getSwitchState: function(callback){
