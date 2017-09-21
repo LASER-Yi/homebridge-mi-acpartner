@@ -14,7 +14,7 @@
 
 ![AcPartner](https://github.com/LASER-Yi/homebridge-mi-acpartner/blob/master/img/two.jpg)
 
-空调伴侣1代 & 空调伴侣2代
+空调伴侣2代 & 空调伴侣1代
 
 ### Feature(功能）
 
@@ -26,7 +26,7 @@
   - 在17-30度之间调整空调温度（默认情况）。
   - 制冷，制热，自动模式支持。
   - 改变风力，改变扫风状态。（即将于iOS 11中支持）
-  - 自定义红外码以控制你的其他电器。~~（即将支持）~~
+  - 自定义红外码以控制你的其他电器。~~（即将上线）~~
 
 * 如果我们没有提供预设，可自定义你的空调码
 
@@ -108,6 +108,7 @@
 | ``token`` | 你空调伴侣的token，此处没有填写token均使用上方全局token设置 |  |
 
 打开开关后，直接使用遥控器向空调伴侣发送信号，30秒内接收到的红外信号会直接显示在日志中
+请注意空调码仍然需要自己抓包，且空调码和红外码是有区别的。
 
 *   switch（红外开关）
 
@@ -118,7 +119,7 @@
 | ``type`` | "switch" | * |
 | ``ip`` | 你空调伴侣的IP地址，此处没有填写ip均使用上方全局ip设置 |  |
 | ``token`` | 你空调伴侣的token，此处没有填写token均使用上方全局token设置 |  |
-| ``data`` | 请参考``Config Example``,必须要包含on和off | * |
+| ``data`` | 请参考``Config Example``,必须要包含``on``和``off`` | * |
 
 * switchMulti (多重信号红外开关)
 
@@ -169,6 +170,29 @@
     ]
 ```
 
+加入空调和红外学习开关
+
+```Json
+"platforms": [
+        {
+            "platform": "XiaoMiAcPartner",
+            "ip": "AC_Partner_1",
+            "token": "AC_Partner_1_token",
+            "accessories":[
+                {
+                    "name": "learn",
+                    "type": "learnIR"
+                },{
+                    "name": "Ac Partner",
+                    "type": "climate",
+                    "ip":"AC_Partner_2",
+                    "token":"AC_Partner_2_token"
+                }
+            ]
+        }
+    ]
+```
+
 加入空调和开关
 
 ```Json
@@ -196,6 +220,40 @@
     ]
 ```
 
+空调和多重信号开关
+
+```Json
+"platforms": [
+        {
+            "platform": "XiaoMiAcPartner",
+            "ip": "AC_Partner_1",
+            "token": "AC_Partner_1_token",
+            "accessories":[
+                {
+                    "name": "test",
+                    "type": "switchMulti",
+                    "interval": 1500,
+                    "data":{
+                        "on": [
+                            "FE.....",
+                            "FE......",
+                            "FE......"
+                        ],
+                        "off": [
+                            "FE.....",
+                            "FE......"
+                        ]
+                    }
+                },{
+                    "name": "Ac Partner",
+                    "type": "climate",
+                    "ip":"AC_Partner_2",
+                    "token":"AC_Partner_2_token"
+                }
+            ]
+        }
+    ]
+```
 
 使用外置温湿度传感器
 
@@ -252,6 +310,14 @@
 ```
 
 ### Changelog
+
+0.4.3
+
+IR Learner and switchMulti support
+
+0.4.2
+
+add synclock to support multi-device problem
 
 0.4.0
 

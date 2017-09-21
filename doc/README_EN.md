@@ -90,8 +90,19 @@ Please Follow this [document](https://github.com/aholstenson/miio/blob/master/do
 | ``autoStart`` | "off" (When AC is off, change temperature will not turn on AC) |  |
 | ``sensorSid`` | Your Temperature Sensor Series ID, that sensor **must** connected with AC Partner(You can find it in Android device) |  |
 
-*   switch(IR)
+*   learnIR (Learn IR code)
 
+| parameter | description | required |
+| --- | --- | --- |
+| ``name`` | name show in Homekit | * |
+| ``type`` | "learnIR" | * |
+| ``ip`` | Your AC Partner ip address for this accessory |  |
+| ``token`` | Your AC Partner token address for this accessory |  |
+
+When switch open, AC Partner will receive IR signal for 30 seconds, and log in console
+Please note that there's different between AC code and IR code.
+
+*   switch(IR)
 
 | parameter | description | required |
 | --- | --- | --- |
@@ -99,6 +110,17 @@ Please Follow this [document](https://github.com/aholstenson/miio/blob/master/do
 | ``type`` | "switch" | * |
 | ``ip`` | Your AC Partner ip address for this accessory |  |
 | ``token`` | Your AC Partner ip address for this accessory |  |
+| ``data`` | Follow ``Config Example``, must include ``on`` and ``off`` | * |
+
+* switchMulti(Send multi IR code in one switch)
+
+| parameter | description | required |
+| --- | --- | --- |
+| ``name`` | name show in Homekit | * |
+| ``type`` | "switch" | * |
+| ``ip`` | Your AC Partner ip address for this accessory |  |
+| ``token`` | Your AC Partner ip address for this accessory |  |
+| ``interval`` | Send interval(default: 1000) |   |
 | ``data`` | Follow ``Config Example``, must include ``on`` and ``off`` | * |
 
 ### Config Example
@@ -139,6 +161,29 @@ You can also write like this
     ]
 ```
 
+Add AC and Learn switch
+
+```Json
+"platforms": [
+        {
+            "platform": "XiaoMiAcPartner",
+            "ip": "AC_Partner_1",
+            "token": "AC_Partner_1_token",
+            "accessories":[
+                {
+                    "name": "learn",
+                    "type": "learnIR"
+                },{
+                    "name": "Ac Partner",
+                    "type": "climate",
+                    "ip":"AC_Partner_2",
+                    "token":"AC_Partner_2_token"
+                }
+            ]
+        }
+    ]
+```
+
 Add AC and IR switch
 
 ```Json
@@ -154,6 +199,41 @@ Add AC and IR switch
                     "data":{
                         "on": "FE018254234ON",
                         "off": "FE019205313OFF"
+                    }
+                },{
+                    "name": "Ac Partner",
+                    "type": "climate",
+                    "ip":"AC_Partner_2",
+                    "token":"AC_Partner_2_token"
+                }
+            ]
+        }
+    ]
+```
+
+Add AC and switchMulti
+
+```Json
+"platforms": [
+        {
+            "platform": "XiaoMiAcPartner",
+            "ip": "AC_Partner_1",
+            "token": "AC_Partner_1_token",
+            "accessories":[
+                {
+                    "name": "test",
+                    "type": "switchMulti",
+                    "interval": 1500,
+                    "data":{
+                        "on": [
+                            "FE.....",
+                            "FE......",
+                            "FE......"
+                        ],
+                        "off": [
+                            "FE.....",
+                            "FE......"
+                        ]
                     }
                 },{
                     "name": "Ac Partner",
@@ -221,6 +301,14 @@ Most AC command start with "01" and most IR command start with "FE"
 ```
 
 ### Changelog
+
+0.4.3
+
+IR Learner and switchMulti support
+
+0.4.2
+
+add synclock to support multi-device problem
 
 0.4.0
 
