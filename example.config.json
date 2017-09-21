@@ -12,6 +12,9 @@
             "token": "dsasdhe23gda",
             "accessories":[
                 {
+                    "name": "learn",
+                    "type": "learnIR"
+                },{
                     "name": "test",
                     "type": "switch",
                     "data":{
