@@ -7,6 +7,12 @@ Thanks for [takatost's project](https://github.com/takatost/homebridge-mi-ac-par
 
 **WARN: This plugin change to platform after version 0.4.0, please change your config file basic on config and config example.**
 
+### Support
+
+![AcPartner](https://github.com/LASER-Yi/homebridge-mi-acpartner/blob/master/img/two.jpg)
+
+AC Partner v1 & AC Partner v2
+
 ### Feature
 
 * Switch on / off.
@@ -81,8 +87,8 @@ Please Follow this [document](https://github.com/aholstenson/miio/blob/master/do
 | ``maxTemp`` | Set max temperature |   |
 | ``minTemp`` | Set min temperature |  |
 | ``sync`` | "off” (Turn off sync state with AC Partner) |  |
-| ``autoStart`` | "off" (When state is "off", change temperature will not change state) |  |
-| ``sensorSid`` | Your Temperature Sensor Series ID, that sensor must connected with AC Partner(You can find it in Android device) |  |
+| ``autoStart`` | "off" (When AC is off, change temperature will not turn on AC) |  |
+| ``sensorSid`` | Your Temperature Sensor Series ID, that sensor **must** connected with AC Partner(You can find it in Android device) |  |
 
 *   switch(IR)
 
@@ -194,16 +200,16 @@ Most AC command start with "01" and most IR command start with "FE"
                     "name": "Ac Partner",
                     "type": "climate",
                     "customize": {
-                        "off": "关闭信号（必须）",
-                        "on": "有些空调需要这个信号（可选）",
-                        "auto": "自动模式信号（可选）",
+                        "off": "off signal (required)",
+                        "on": "(optional)",
+                        "auto": "auto mode signal (optional)",
                         "heat":{
-                            "30": "（可选信号）",
+                            "30": "（optional）",
                             "29": "",
                             "17": ""
                         },
                         "cool":{
-                            "30": "（必要信号）",
+                            "30": "(required)",
                             "29": "",
                             "17": ""
                         }
@@ -217,6 +223,7 @@ Most AC command start with "01" and most IR command start with "FE"
 ### Changelog
 
 0.4.0
+
 Change to Platform,support basic IR switch
 
 0.3.0

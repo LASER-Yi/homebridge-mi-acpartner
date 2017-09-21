@@ -10,6 +10,11 @@
 
 **注意：此插件于0.4.0版本后修改成platform，请根据本文修改你的配置文件以保证插件可用。**
 
+### Support(支持)
+
+![AcPartner](https://github.com/LASER-Yi/homebridge-mi-acpartner/blob/master/img/two.jpg)
+
+空调伴侣1代 & 空调伴侣2代
 
 ### Feature(功能）
 
@@ -93,6 +98,17 @@
 
 使用这种[方法](https://github.com/aholstenson/miio/blob/master/docs/protocol.md#)来获取你正使用的空调码，然后填入到config，填写方法请参考Config Example。
 
+*   learnIR (红外学习开关)
+
+| 参数 | 说明 | 必填 |
+| --- | --- | --- |
+| ``name`` | 显示在Homekit中的名字 | * |
+| ``type`` | "learnIR" | * |
+| ``ip`` | 你空调伴侣的IP地址，此处没有填写ip均使用上方全局ip设置 |  |
+| ``token`` | 你空调伴侣的token，此处没有填写token均使用上方全局token设置 |  |
+
+打开开关后，直接使用遥控器向空调伴侣发送信号，30秒内接收到的红外信号会直接显示在日志中
+
 *   switch（红外开关）
 
 
@@ -104,9 +120,15 @@
 | ``token`` | 你空调伴侣的token，此处没有填写token均使用上方全局token设置 |  |
 | ``data`` | 请参考``Config Example``,必须要包含on和off | * |
 
+* switchMulti (多重信号红外开关)
 
-
-
+| 参数 | 说明 | 必填 |
+| --- | --- | --- |
+| ``name`` | 显示在Homekit中的名字 | * |
+| ``type`` | "switchMulti" | * |
+| ``ip`` | 你空调伴侣的IP地址，此处没有填写ip均使用上方全局ip设置 |  |
+| ``token`` | 你空调伴侣的token，此处没有填写token均使用上方全局token设置 |  |
+| ``data`` | 请参考``Config Example``,必须要包含``on``和``off`` | * |
 
 ### Config Example（配置例子）
 
@@ -231,6 +253,7 @@
 ### Changelog
 
 0.4.0
+
 Change to Platform,support basic IR switch
 
 0.3.0

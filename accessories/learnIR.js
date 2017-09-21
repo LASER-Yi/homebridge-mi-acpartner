@@ -14,7 +14,6 @@ LearnIRAccessory = function(log, config, platform){
     UUIDGen = platform.UUIDGen;
 
     this.name = config['name'];
-    //this.autoTurnOsff = config['autoTurnOff'] || false;
     if(null != this.config['ip'] && null != this.config['token']){
         this.ip = this.config['ip'];
         this.token = this.config['token'];
@@ -117,7 +116,9 @@ LearnIRAccessory.prototype = {
     showIRCode: function(){
         let p1 = this.device.call('get_ir_learn_result',[])
             .then((ret) =>{
-                this.log.info("[%s]IR Code: %s",this.name,ret['code']);
+                if(ret['result'][0] != '(null)'){
+                    this.log.info("[%s]IR Code: %s",this.name,ret['result'][0]);
+                }
             }).catch((err) =>this.log.error("[LEARN_ERROR]Return error! " + err));
 
         Promise.all([p1])
