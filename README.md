@@ -83,24 +83,26 @@
 *   climate（空调）
 
     
-| 参数 | 说明 | 必填 |
-| --- | --- | --- |
-| ``name`` | 显示在Homekit中的名字 | * |
-| ``type`` | “climate" | * |
-| ``ip`` | 你空调伴侣的IP地址，此处没有填写ip均使用上方全局ip设置 |  |
-| ``token`` | 你空调伴侣的token，此处没有填写token均使用上方全局token设置 |  |
-| ``maxTemp`` | 设置调节温度上限（默认为30度） |   |
-| ``minTemp`` | 设置调节温度下限（默认为17度） |  |
-| ``sync`` | "off”（不与空调伴侣进行同步） |  |
-| ``autoStart`` | "off"（当在关机状态下调整温度时，不会自动启动空调） |  |
-| ``sensorSid`` | 填写你的温湿度传感器ID，此温湿度传感器**必须**绑定在空调伴侣下（可在安卓设备下查到） |  |
+| 参数 | 说明 | 示例 | 默认 | 必须 |
+| --- | --- | --- | --- | --- |
+| ``name`` | 显示在Homekit中的名字 | "AcPartner" | - | * |
+| ``type`` | 设置为，必须填写 | "climate" | - | * |
+| ``ip`` | 你空调伴侣的IP地址，此处没有填写ip均使用上方全局ip设置| "192.168.31.99" | - |  |
+| ``token`` | 你空调伴侣的token，此处没有填写token均使用上方全局token设置 | "token_as_hex" | - |  |
+| ``maxTemp`` | 设置调节温度上限 | 28 | 30 |  |
+| ``minTemp`` | 设置调节温度下限 | 16 | 17 |  |
+| ``sync`` | 是否与空调伴侣进行同步(false为关闭） | false | true |  |
+| ``syncInterval`` | 同步间隔（毫秒） | 30000 | 60000 |  |
+| ``autoStart`` | 当在关机状态下调整温度时，不会自动启动空调 | "off" | "on" |  |
+| ``oscillate`` | 开关扫风（false为关闭） | false | true |  |
+| ``sensorSid`` | 填写你的温湿度传感器ID，此温湿度传感器**必须**绑定在空调伴侣下（可在安卓设备下查到）| "lumi.158d000156e667" |  |  |
 
 
 使用这种[方法](https://github.com/aholstenson/miio/blob/master/docs/protocol.md#)来获取你正使用的空调码，然后填入到config，填写方法请参考Config Example。
 
 *   learnIR (红外学习开关)
 
-| 参数 | 说明 | 必填 |
+| 参数 | 说明 | 必须 |
 | --- | --- | --- |
 | ``name`` | 显示在Homekit中的名字 | * |
 | ``type`` | "learnIR" | * |
@@ -114,7 +116,7 @@
 *   switch（红外开关）
 
 
-| 参数 | 说明 | 必填 |
+| 参数 | 说明 | 必须 |
 | --- | --- | --- |
 | ``name`` | 显示在Homekit中的名字 | * |
 | ``type`` | "switch" | * |
@@ -124,7 +126,7 @@
 
 * switchMulti (多重信号红外开关)
 
-| 参数 | 说明 | 必填 |
+| 参数 | 说明 | 必须 |
 | --- | --- | --- |
 | ``name`` | 显示在Homekit中的名字 | * |
 | ``type`` | "switchMulti" | * |

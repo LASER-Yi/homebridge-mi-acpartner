@@ -19,8 +19,9 @@ ClimateAccessory = function(log, config, platform){
     this.minTemp = parseInt(config.minTemp) || 17;
     this.outerSensor = config.sensorSid;
     this.wiSync = config.sync;
-    this.autoStart = config.autoStart;
     this.syncInterval = config.syncInterval || 60000;
+    this.autoStart = config.autoStart;
+    this.oscillate = config.oscillate || true;
     if (config.customize) {
         this.customi = config.customize;
         this.log.debug("[DEBUG]Using customized AC signal...");
@@ -305,6 +306,7 @@ ClimateAccessory.prototype = {
         this.log.debug("[DEBUG]Current TargetHeatingCoolingState: " + this.TargetHeatingCoolingState);
         if (!this.customi) {
             this.data.model = this.model;
+            this.data.oscillate = this.oscillate;
             this.data.TargetTemperature = this.TargetTemperature;
             this.data.TargetHeatingCoolingState = this.TargetHeatingCoolingState;
             this.data.LastHeatingCoolingState = this.LastHeatingCoolingState;
@@ -315,7 +317,7 @@ ClimateAccessory.prototype = {
             }
             //this.log.debug("[DEBUG] Get code: " + retCode.data);
             if (retCode.auto) {
-                this.log('[CLIMATE]You are using auto_gen code, if your AC don\'t response, please use customize method to control your AC.')
+                this.log.debug('[CLIMATE]You are using auto_gen code, if your AC don\'t response, please use customize method to control your AC.')
             }else{
                 this.log.debug('[CLIMATE]Using preset: %s',retCode.model);
             }
@@ -432,7 +434,7 @@ ClimateAccessory.prototype = {
             .catch(err => this.log.error("[CLIMATE_ERROR]Rediscover fail, error: " + err))
             .then(() => {
                 this.log.debug("[CLIMATE]Sync complete")
-                setTimeout(this.getACState.bind(this), 60000)
+                setTimeout(this.getACState.bind(this), this.syncInterval)
             });
     }
 };

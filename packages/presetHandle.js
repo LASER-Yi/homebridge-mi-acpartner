@@ -2,8 +2,9 @@ var presets = require('../presets.json');
 
 /* INPUT_DATA
 "data":{
-  "model": "this.acModel"
-  "LastHeatingCoolingState": "this.LastHeatingCoolingState"
+  "model": "this.acModel",
+  "oscillate": "this.oscillate",
+  "LastHeatingCoolingState": "this.LastHeatingCoolingState",
   "TargetTemperature": "Characteristic",
   "TargetHeatingCoolingState": "Characteristic.TargetHeatingCoolingState.OFF@example",
   "defaultState": "Characteristic.TargetHeatingCoolingState"
@@ -50,7 +51,7 @@ module.exports = function(data){
           mainCode = mainCode.replace(/wi/g, codeConfig.wi.auto);
           break;
         case "sw":
-          mainCode = mainCode.replace(/sw/g, codeConfig.sw.on);
+          mainCode = mainCode.replace(/sw/g, data.oscillate ? codeConfig.sw.on : codeConfig.sw.off);
           break;
         case "li":
           mainCode = mainCode.replace(/li/g, codeConfig.li.on);
