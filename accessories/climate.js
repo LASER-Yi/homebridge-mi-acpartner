@@ -112,7 +112,7 @@ ClimateAccessory = function(log, config, platform){
 ClimateAccessory.prototype = {
     doRestThing: function(){
 
-        if (!this.wiSync) {
+        if (this.wiSync == true) {
             this.log.info("[CLIMATE]Auto sync on");
             this.getACState();  
         }else{
