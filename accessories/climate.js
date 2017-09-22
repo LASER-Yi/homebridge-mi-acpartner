@@ -48,6 +48,7 @@ ClimateAccessory = function(log, config, platform){
                 this.device = new Array();
                 this.device = that.platform.device;
                 this.log.debug("[%s]Global device connected",this.name);
+                this.doRestThing();
             })
     }else{
         this.log.error("[%s]Cannot find device infomation",this.name);

@@ -99,7 +99,8 @@ Please Follow this [document](https://github.com/aholstenson/miio/blob/master/do
 | ``ip`` | Your AC Partner ip address for this accessory |  |
 | ``token`` | Your AC Partner token address for this accessory |  |
 
-When switch open, AC Partner will receive IR signal for 30 seconds, and log in console
+When switch open, AC Partner will receive IR signal for 30 seconds, and log in console.
+
 Please note that there's different between AC code and IR code.
 
 *   switch(IR)

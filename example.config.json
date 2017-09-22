@@ -22,6 +22,10 @@
                         "off": "FE01920531312"
                     }
                 },{
+                    "name": "test",
+                    "type": "switchRepeat",
+                    "data":"FE......"
+                },{
                     "name": "Ac Partner",
                     "type": "climate",
                     "sensorSid": "lumi.158d000156e667"

@@ -1,7 +1,8 @@
 const miio = require('miio')
 
-require('./accessories/switch');
 require('./accessories/climate');
+require('./accessories/switch');
+require('./accessories/switchRepeat');
 require('./accessories/learnIR');
 require('./accessories/switchMulti');
 
@@ -77,6 +78,10 @@ XiaoMiAcPartner.prototype = {
                     this.log.info("[INFO]Register acc type:switch, name:%s",configAcc['name']);
                     var switchAcc = new SwitchAccessory(this.log, configAcc, this);
                     myAccessories.push(switchAcc);
+                }else if(configAcc['type'] == "switchRepeat"){
+                    this.log.info("[INFO]Register acc type:switchRepeat, name:%s",configAcc['name']);
+                    var swMultiAcc = new SwitchRepeatAccessory(this.log, configAcc, this);
+                    myAccessories.push(swMultiAcc);
                 }else if(configAcc['type'] == "learnIR"){
                     this.log.info("[INFO]Register acc type:learnIR, name:%s",configAcc['name']);
                     var learnIRAcc = new LearnIRAccessory(this.log, configAcc, this);
