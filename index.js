@@ -5,6 +5,7 @@ require('./accessories/switch');
 require('./accessories/switchRepeat');
 require('./accessories/learnIR');
 require('./accessories/switchMulti');
+require('./accessories/heaterCooler');
 
 var Accessory, PlatformAccessory, Service, Characteristic, UUIDGen;
 
@@ -68,7 +69,6 @@ XiaoMiAcPartner.prototype = {
                 if(null == configAcc['type'] || "" == configAcc['type'] || null == configAcc['name'] || "" == configAcc['name']){
                     continue;
                 }
-                
                 //Register
                 if(configAcc['type'] == "climate"){
                     this.log.info("[INFO]Register acc type:climate, name:%s",configAcc['name']);
@@ -80,8 +80,8 @@ XiaoMiAcPartner.prototype = {
                     myAccessories.push(switchAcc);
                 }else if(configAcc['type'] == "switchRepeat"){
                     this.log.info("[INFO]Register acc type:switchRepeat, name:%s",configAcc['name']);
-                    var swMultiAcc = new SwitchRepeatAccessory(this.log, configAcc, this);
-                    myAccessories.push(swMultiAcc);
+                    var swRepAcc = new SwitchRepeatAccessory(this.log, configAcc, this);
+                    myAccessories.push(swRepAcc);
                 }else if(configAcc['type'] == "learnIR"){
                     this.log.info("[INFO]Register acc type:learnIR, name:%s",configAcc['name']);
                     var learnIRAcc = new LearnIRAccessory(this.log, configAcc, this);
@@ -90,6 +90,10 @@ XiaoMiAcPartner.prototype = {
                     this.log.info("[INFO]Register acc type:switchMulti, name:%s",configAcc['name']);
                     var swMultiAcc = new SwitchMultiAccessory(this.log, configAcc, this);
                     myAccessories.push(swMultiAcc);
+                }else if(configAcc['type'] == "heaterCooler"){
+                    this.log.info("[INFO]Register acc type:HeaterCooler, name:%s",configAcc['name']);
+                    var hcAcc = new HeaterCoolerAccessory(this.log, configAcc, this);
+                    myAccessories.push(hcAcc);
                 }
             }
             this.log.info("[INFO]Register complete");
