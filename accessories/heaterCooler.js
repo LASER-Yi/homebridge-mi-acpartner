@@ -39,7 +39,11 @@ HeaterCoolerAccessory = function(log, config, platform){
         Promise.all([this.platform.globalDevice])
             .then(() => {
                 this.device = new Array();
+<<<<<<< HEAD
                 this.device = that.platform.device;
+=======
+                this.device = this.platform.device;
+>>>>>>> ba05ef18bed82ffb5a96cbd670c8c87adc0e3f3e
                 this.log.debug("[%s]Global device connected",this.name);
             })
     }else{
@@ -197,16 +201,25 @@ HeaterCoolerAccessory.prototype = {
 
         this.log.debug("[DEBUG]Sending AC code: " + code);
         this.device.call('send_cmd', [code])
+<<<<<<< HEAD
             .then(data =>{
+=======
+            .catch(err =>{
+                this.log.error("[ERROR]Send code fail! Error: " + err);
+            }).then(data =>{
+>>>>>>> ba05ef18bed82ffb5a96cbd670c8c87adc0e3f3e
                 if (data[0] == "ok") {
                     this.log.debug("[DEBUG]Change Successful");
                 }else{
                     this.log.debug("[DEBUG]Unsuccess! Maybe invaild AC Code?");
                 }
                 this.localSyncLock = false;
+<<<<<<< HEAD
             }).catch(err =>{
                 this.log.error("[ERROR]Send code fail! Error: " + err);
                 this.localSyncLock = false;
+=======
+>>>>>>> ba05ef18bed82ffb5a96cbd670c8c87adc0e3f3e
             })
     },
 
@@ -275,7 +288,11 @@ HeaterCoolerAccessory.prototype = {
                         if (temperature <= this.maxTemp || temperature >= this.minTemp) {
                             this.HeatingThresholdTemperature.updateValue(temperature);   
                         }else{
+<<<<<<< HEAD
                             this.log("[ERROR]Temperature out of range");
+=======
+                            this.log.error("[ERROR]Temperature out of range");
+>>>>>>> ba05ef18bed82ffb5a96cbd670c8c87adc0e3f3e
                             this.HeatingThresholdTemperature.updateValue(this.maxTemp);
                         }
                         break;
@@ -284,7 +301,11 @@ HeaterCoolerAccessory.prototype = {
                         if (temperature <= this.maxTemp || temperature >= this.minTemp) {
                             this.CoolingThresholdTemperature.updateValue(temperature);
                         }else{
+<<<<<<< HEAD
                             this.log("[ERROR]Temperature out of range");
+=======
+                            this.log.error("[ERROR]Temperature out of range");
+>>>>>>> ba05ef18bed82ffb5a96cbd670c8c87adc0e3f3e
                             this.CoolingThresholdTemperature.updateValue(this.maxTemp);
                         }
                         break;
@@ -295,7 +316,11 @@ HeaterCoolerAccessory.prototype = {
                             this.CoolingThresholdTemperature.updateValue(temperature);
                             this.HeatingThresholdTemperature.updateValue(temperature);
                         }else{
+<<<<<<< HEAD
                             this.log("[ERROR]Temperature out of range");
+=======
+                            this.log.error("[ERROR]Temperature out of range");
+>>>>>>> ba05ef18bed82ffb5a96cbd670c8c87adc0e3f3e
                             this.CoolingThresholdTemperature.updateValue(this.maxTemp);
                             this.HeatingThresholdTemperature.updateValue(this.maxTemp);
                         }
@@ -388,4 +413,8 @@ HeaterCoolerAccessory.prototype = {
 
         this.hc_SendCmdAsync();
     }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> ba05ef18bed82ffb5a96cbd670c8c87adc0e3f3e
