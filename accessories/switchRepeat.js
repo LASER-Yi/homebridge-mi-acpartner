@@ -125,6 +125,6 @@ SwitchRepeatAccessory.prototype = {
     },
 
     getSwitchState: function(callback){
-        callback(false);
+        callback(null, false);
     }
 }

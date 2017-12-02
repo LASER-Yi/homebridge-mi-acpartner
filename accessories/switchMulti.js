@@ -147,6 +147,6 @@ SwitchMultiAccessory.prototype = {
     },
 
     getSwitchState: function(callback){
-        callback(this.onState);
+        callback(null, this.onState);
     }
 }
