@@ -330,6 +330,10 @@
 
 ### Changelog
 
+0.5.1
+
+修复部分配件无响应的问题（感谢qqshfox）
+
 0.5.0
 
 Support Heater Cooler for AC
