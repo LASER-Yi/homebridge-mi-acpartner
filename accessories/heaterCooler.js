@@ -39,7 +39,7 @@ HeaterCoolerAccessory = function(log, config, platform){
         Promise.all([this.platform.globalDevice])
             .then(() => {
                 this.device = new Array();
-                this.device = that.platform.device;
+                this.device = this.platform.device;
                 this.log.debug("[%s]Global device connected",this.name);
             })
     }else{
