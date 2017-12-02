@@ -302,8 +302,6 @@ ClimateAccessory.prototype = {
 
         var accessory = this;
         var code;
-        this.log.debug("[DEBUG]Last TargetHeatingCoolingState: " + this.LastHeatingCoolingState);
-        this.log.debug("[DEBUG]Current TargetHeatingCoolingState: " + this.TargetHeatingCoolingState);
         if (!this.customi) {
             this.data.model = this.model;
             this.data.oscillate = this.oscillate;

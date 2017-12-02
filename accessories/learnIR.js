@@ -34,8 +34,6 @@ LearnIRAccessory = function(log, config, platform){
 
     //State
     this.onState = Characteristic.On.NO;
-    this.staLearn = false;
-    this.LastLearn = null;
 
     this.services = [];
 
@@ -117,9 +115,9 @@ LearnIRAccessory.prototype = {
     showIRCode: function(){
         let p1 = this.device.call('get_ir_learn_result',[])
             .then((ret) =>{
-                if(ret[0] != '(null)' && ret[0] != this.LastLearn){
-                    this.LastLearn = ret[0];
+                if(ret[0] != '(null)'){
                     this.log.info("[%s]IR Code: %s",this.name,ret[0]);
+                    this.autoClo();
                 }
             }).catch((err) =>this.log.error("[LEARN_ERROR]Return error! " + err));
 

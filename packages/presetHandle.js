@@ -3,8 +3,9 @@ var presets = require('../presets.json');
 /* INPUT_DATA
 "data":{
   "model": "this.acModel",
-  "oscillate": "this.oscillate",
-  "LastHeatingCoolingState": "this.LastHeatingCoolingState",
+  "power": "this.active",
+  "swingMode": "this.swingMode",
+  "RotationSpeed": "this.swingMode",
   "TargetTemperature": "Characteristic",
   "TargetHeatingCoolingState": "Characteristic.TargetHeatingCoolingState.OFF@example",
   "defaultState": "Characteristic.TargetHeatingCoolingState"
@@ -34,7 +35,11 @@ module.exports = function(data){
           mainCode = mainCode.replace(/tt/g, temp);
           break;
         case "po":
-          mainCode = mainCode.replace(/po/g, ((data.TargetHeatingCoolingState != data.defaultState.OFF) ? codeConfig.po.on : codeConfig.po.off));
+          if (data.power == null) {
+            mainCode = mainCode.replace(/po/g, ((data.TargetHeatingCoolingState != data.defaultState.OFF) ? codeConfig.po.on : codeConfig.po.off)); 
+          }else{
+            mainCode = mainCode.replace(/po/g, data.power);
+          }
           break;
         case "mo":
           var mode;
@@ -48,10 +53,10 @@ module.exports = function(data){
           mainCode = mainCode.replace(/mo/g, mode);
           break;
         case "wi":
-          mainCode = mainCode.replace(/wi/g, codeConfig.wi.auto);
+          mainCode = mainCode.replace(/wi/g, !data.RotationSpeed ? codeConfig.wi.auto : data.RotationSpeed);
           break;
         case "sw":
-          mainCode = mainCode.replace(/sw/g, data.oscillate ? codeConfig.sw.on : codeConfig.sw.off);
+          mainCode = mainCode.replace(/sw/g, data.swing ? codeConfig.sw.on : codeConfig.sw.off);
           break;
         case "li":
           mainCode = mainCode.replace(/li/g, codeConfig.li.on);
