@@ -57,7 +57,7 @@ HeaterCoolerAccessory = function(log, config, platform){
     this.TargetTemperature = (this.maxTemp + this.minTemp) / 2;
     this.CurrentHeaterCoolerState = Characteristic.CurrentHeaterCoolerState.AUTO;
     this.CurrentTemperature;
-    this.CurrentRelativeHumidity = 0;
+    this.CurrentRelativeHumidity;
 
     //Add Service
     this.service = [];
@@ -82,7 +82,7 @@ HeaterCoolerAccessory.prototype = {
         this.Active = this.hc_Service.getCharacteristic(Characteristic.Active)
             .on('set', this.hc_SetActive.bind(this));
 
-        this.TargetHeatingCoolingState = this.hc_Service.getCharacteristic(Characteristic.TargetHeaterCoolerState)
+        this.TargetHeaterCoolerState = this.hc_Service.getCharacteristic(Characteristic.TargetHeaterCoolerState)
             .on('set', this.hc_SetTargetHeaterCoolerState.bind(this));
 
         this.CoolingThresholdTemperature = this.hc_Service.addCharacteristic(Characteristic.CoolingThresholdTemperature)
@@ -125,12 +125,13 @@ HeaterCoolerAccessory.prototype = {
             .updateValue((this.maxTemp + this.minTemp) / 2);
 
         if (this.outerSensor) {
-            this.acPartnerService.getCharacteristic(Characteristic.CurrentRelativeHumidity)
+            this.CurrentRelativeHumidity = this.hc_Service.getCharacteristic(Characteristic.CurrentRelativeHumidity)
                 .setProps({
                     maxValue: 100,
                     minValue: 0,
                     minStep: 1
-                });
+                })
+                .updateValue(50);
         }
     },
 
@@ -241,10 +242,11 @@ HeaterCoolerAccessory.prototype = {
 
         //Update CurrentTemperature
         let p1 = this.outerSensor && this.device.call('get_device_prop_exp', [[this.outerSensor, "temperature", "humidity"]])
-        .then(senRet =>{
+        .then((senRet) =>{
             if (senRet[0][0] == null) {
                 this.log.error("[ERROR]Invaild sensorSid!")
             }else{
+                this.log.debug("[DEBUG]Update Temperature to " + senRet[0][0] / 100.0);
                 this.CurrentTemperature.updateValue(senRet[0][0] / 100.0);
                 this.CurrentRelativeHumidity.updateValue(senRet[0][1] / 100.0);
             }
@@ -311,19 +313,13 @@ HeaterCoolerAccessory.prototype = {
                 if (this.outerSensor == null) {
                     this.CurrentTemperature.updateValue(temperature);
                 }
-            }).catch(function(err){
+            }).catch((err) => {
                 this.log.error("[ERROR]AC State Sync fail!Error:" + err);
             });
 
         Promise.all([p1,p2])
             .then(() => {
                 this.log.debug("[HC]Sync complete");
-                if (this.syncInterval > 0) {
-                    setTimeout(this.hc_Sync.bind(this), this.syncInterval);
-                }
-            })
-            .catch(err => {
-                this.log.error("[ERROR]Sync failed, error: " + err);
                 if (this.syncInterval > 0) {
                     setTimeout(this.hc_Sync.bind(this), this.syncInterval);
                 }

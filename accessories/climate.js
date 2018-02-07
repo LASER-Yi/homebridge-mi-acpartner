@@ -429,7 +429,6 @@ ClimateAccessory.prototype = {
             });
 
         Promise.all([p1,p2])
-            .catch(err => this.log.error("[CLIMATE_ERROR]Rediscover fail, error: " + err))
             .then(() => {
                 this.log.debug("[CLIMATE]Sync complete")
                 setTimeout(this.getACState.bind(this), this.syncInterval)

@@ -330,6 +330,10 @@
 
 ### Changelog
 
+0.5.3
+
+修复HeaterCooler类型中的大量BUG
+
 0.5.1
 
 修复部分配件无响应的问题（感谢qqshfox）
