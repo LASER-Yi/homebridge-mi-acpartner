@@ -20,6 +20,8 @@
 
 如需要使用空调伴侣中的网关功能，请使用[YinHangCode](https://github.com/YinHangCode/homebridge-mi-aqara)提供的Mi-Aqara插件。
 
+如果遇到插件导致Mi-aqara无响应的问题，请将miio降级至0.14.1版本。
+
 ### Feature(功能）
 
 * 开关空调
