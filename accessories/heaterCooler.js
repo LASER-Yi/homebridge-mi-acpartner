@@ -1,8 +1,9 @@
 //Thanks to jayqizone
 const miio = require('miio');
-const pack_SignalHandle = require("../packages/presetHandle");
+const presets = require("../presets.json");
+const pack_SignalHandle = require("../packages/newPresetHandle");
 
-var Accessory, PlatformAccessory, Service, Characteristic, UUIDGen;
+var Service, Characteristic, Accessory;
 
 HeaterCoolerAccessory = function(log, config, platform){
     this.log = log;
@@ -10,25 +11,25 @@ HeaterCoolerAccessory = function(log, config, platform){
     this.config = config;
 
     Accessory = platform.Accessory;
-    PlatformAccessory = platform.PlatformAccessory;
     Service = platform.Service;
     Characteristic = platform.Characteristic;
-    UUIDGen = platform.UUIDGen;
 
     //Config
     this.maxTemp = parseInt(config.maxTemp) || 30;
     this.minTemp = parseInt(config.minTemp) || 17;
+    this.LightState = config.lightState || false;
     this.outerSensor = config.sensorSid;
     this.syncInterval = config.syncInterval || 60000;
     this.autoStart = config.autoStart;
     this.data = JSON;
-    this.data.defaultState = Characteristic.TargetHeaterCoolerState;
+    this.data.defaultPresets = presets.default;
     this.name = config['name'];
 
     //Connection
     this.device;
     this.localSyncLock = false;
     this.model;
+    this.preset;
     this.hc_SendCmdTimeoutHandle;
     if(null != this.config['ip'] && null != this.config['token']){
         this.ip = this.config['ip'];
@@ -41,6 +42,7 @@ HeaterCoolerAccessory = function(log, config, platform){
                 this.device = new Array();
                 this.device = this.platform.device;
                 this.log.debug("[%s]Global device connected",this.name);
+                this.hc_Sync();
             })
     }else{
         this.log.error("[%s]Cannot find device infomation",this.name);
@@ -181,20 +183,34 @@ HeaterCoolerAccessory.prototype = {
             return;
         }
         if(this.model == null){
-            this.log('[INFO]Waiting for Sync state, please try again');
+            this.log('[INFO]Waiting for Sync state, please try again later');
             return;
         }
 
         let code;
 
+        this.data.preset = this.preset;
         this.data.model = this.model;
-        this.data.SwingMode = this.SwingMode;
-        this.data.TargetTemperature = this.TargetTemperature;
-        this.data.TargetHeatingCoolingState = this.TargetHeaterCoolerState;
         this.data.power = this.Active.value;
+        this.data.mode;
+        switch(this.TargetHeaterCoolerState.value){
+            case Characteristic.TargetHeaterCoolerState.AUTO:
+                this.data.mode = presets.default.mo.auto;
+                this.data.tempera = this.TargetTemperature;
+                break;
+            case Characteristic.TargetHeaterCoolerState.COOL:
+                this.data.mode = presets.default.mo.cooler;
+                this.data.tempera = this.CoolingThresholdTemperature.value
+                break;
+            case Characteristic.TargetHeaterCoolerState.HEAT:
+                this.data.mode = presets.default.mo.heater;
+                this.data.tempera = this.HeatingThresholdTemperature.value;
+                break;
+        }
+        this.data.SwingMode = this.SwingMode;
         this.data.RotationSpeed = this.RotationSpeed.value;
-        var retCode = pack_SignalHandle(this.data);
-        code = retCode.data;
+        this.data.LightState = this.LightState;
+        code = pack_SignalHandle(this.data);
 
         this.log.debug("[DEBUG]Sending AC code: " + code);
         this.device.call('send_cmd', [code])
@@ -233,11 +249,11 @@ HeaterCoolerAccessory.prototype = {
 
     //Sync Function
     hc_Sync: function(){
-        if (!this.device) {
-            this.log.error("[ERROR]Sync failed!(Device not exists)");
+        if (!this.device && this.platform.syncLock) {
+            setTimeout(this.hc_Sync.bind(this), 3000);
             return;
         }
-
+        this.platform.syncLock = true;
         this.log.debug("[%s]Syncing...",this.name);
 
         //Update CurrentTemperature
@@ -257,15 +273,23 @@ HeaterCoolerAccessory.prototype = {
         //Update AC state
         let p2 = this.device.call('get_model_and_state', [])
             .then(ret =>{
-                this.acPower = ret[2];
-                this.model = ret[0].substr(0,2) + ret[0].substr(8,8);
+                let model = ret[0],
+                    state = ret[1],
+                    power = ret[2];
+
+                this.acPower = power;
+
+                if (this.model !== model) {
+                    this.model = model;
+                    this.preset = presets[model.substr(0,2) + model.substr(8,8)];
+                }
 
                 let active, mode, speed, swing, temperature, led;
-                active = ret[1].substr(2,1) - 0;
-                speed = ret[1].substr(4,1) - 0 + 1;
-                swing = 1 - ret[1].substr(5,1);
-                temperature = parseInt(ret[1].substr(6,2),16);
-                led = ret[1].substr(8,1);
+                active = state.substr(2,1) - 0;
+                speed = state.substr(4,1) - 0 + 1;
+                swing = 1 - state.substr(5,1);
+                temperature = parseInt(state.substr(6,2),16);
+                led = state.substr(8,1);
                 
                 this.TargetTemperature = temperature;
 
@@ -314,11 +338,12 @@ HeaterCoolerAccessory.prototype = {
                     this.CurrentTemperature.updateValue(temperature);
                 }
             }).catch((err) => {
-                this.log.error("[ERROR]AC State Sync fail!Error:" + err);
+                this.log.error("[ERROR]AC State Sync fail! Error:" + err);
             });
 
         Promise.all([p1,p2])
             .then(() => {
+                this.platform.syncLock = false;
                 this.log.debug("[HC]Sync complete");
                 if (this.syncInterval > 0) {
                     setTimeout(this.hc_Sync.bind(this), this.syncInterval);

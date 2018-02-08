@@ -8,13 +8,17 @@
 
 感谢[takatost](https://github.com/takatost/homebridge-mi-ac-partner)，[miio](https://github.com/aholstenson/miio)，[YinHangCode](https://github.com/YinHangCode/homebridge-mi-aqara)和所有测试开发人员提供支持。
 
-**注意：此插件于0.4.0版本后修改成platform，请根据本文修改你的配置文件以保证插件可用。**
+**注意：此插件于0.4.0版本后修改成platform，请根据本文修改你的配置文件使插件正常工作。**
 
 ### Support(支持)
 
 ![AcPartner](https://github.com/LASER-Yi/homebridge-mi-acpartner/raw/master/img/two.jpg)
 
 空调伴侣2代 & 空调伴侣1代
+
+继电器空调伴侣的插件支持还处于开发阶段。
+
+如需要使用空调伴侣中的网关功能，请使用[YinHangCode](https://github.com/YinHangCode/homebridge-mi-aqara)提供的Mi-Aqara插件。
 
 ### Feature(功能）
 
@@ -26,13 +30,13 @@
   - 在17-30度之间调整空调温度（默认情况）。
   - 制冷，制热，自动模式支持。
   - 改变风力，改变扫风状态。（请将空调定义成heaterCooler）
-  - 自定义红外码以控制你的其他电器。~~（即将上线）~~
+  - 使用红外控制其他电器。~~（即将上线）~~
 
-* 如果我们没有提供预设，可自定义你的空调码
+* 如果我们没有提供预设，可自定义你的空调码（请将空调定义成climate）
 
 * 在空调伴侣和Homekit中同步信息。~~(即将上线)~~
 
-* 自动获取你的空调码。(并不支持所有空调)
+* 自动获取你的空调码。(只支持部分空调空调)
 
 * 米家温湿度传感器支持。~~(即将上线)~~
 
@@ -70,13 +74,13 @@
 | 参数 | 说明 | 必填 |
 | --- | --- | --- |
 | ``platform`` | “XiaoMiAcPartner" | * |
-| ``ip`` | 你空调伴侣的IP地址，下方设备(accessories)中没有填写ip的均使用本ip设置 |  |
-| ``token`` | 你空调伴侣的token，下方设备(accessories)中没有填写token的均使用本token设置 |  |
+| ``ip`` | 空调伴侣的IP地址，下方设备(accessories)中没有填写ip的均使用此处ip |  |
+| ``token`` | 空调伴侣的token，下方设备(accessories)中没有填写token的均使用此处token |  |
 
 
 参考这篇[文章](https://github.com/aholstenson/miio/blob/master/docs/management.md#getting-the-token-of-a-device)获得空调伴侣的token。
 
-如果你正使用安卓手机，你可以直接从米家App中拿到token
+如果你有一台安卓手机，也可以直接从安卓版米家App中拿到token
 
 **设备配置**
 
@@ -86,19 +90,18 @@
 | 参数 | 说明 | 示例 | 默认 | 必须 |
 | --- | --- | --- | --- | --- |
 | ``name`` | 显示在Homekit中的名字 | "AcPartner" | - | * |
-| ``type`` | 设置为，必须填写 | "climate" | - | * |
-| ``ip`` | 你空调伴侣的IP地址，此处没有填写ip均使用上方全局ip设置| "192.168.31.99" | - |  |
-| ``token`` | 你空调伴侣的token，此处没有填写token均使用上方全局token设置 | "token_as_hex" | - |  |
+| ``type`` | 必须填写 | "climate" | - | * |
+| ``ip`` | 空调伴侣的IP地址，此处没有填写ip均使用上方全局ip设置| "192.168.31.99" | - |  |
+| ``token`` | 空调伴侣的token，此处没有填写token均使用上方全局token设置 | "token_as_hex" | - |  |
 | ``maxTemp`` | 设置调节温度上限 | 28 | 30 |  |
 | ``minTemp`` | 设置调节温度下限 | 16 | 17 |  |
-| ``sync`` | 是否与空调伴侣进行同步(false为关闭） | false | true |  |
-| ``syncInterval`` | 同步间隔（毫秒） | 30000 | 60000 |  |
+| ``syncInterval`` | 同步间隔（毫秒），设置为0关闭同步 | 30000 | 60000 |  |
 | ``autoStart`` | 当在关机状态下调整温度时，不会自动启动空调 | "off" | "on" |  |
-| ``oscillate`` | 开关扫风（false为关闭） | false | true |  |
+| ``SwingMode`` | 开关扫风（false为关闭） | false | true |  |
 | ``sensorSid`` | 填写你的温湿度传感器ID，此温湿度传感器**必须**绑定在空调伴侣下（可在安卓设备下查到）| "lumi.158d000156e667" |  |  |
 
 
-使用这种[方法](https://github.com/aholstenson/miio/blob/master/docs/protocol.md#)来获取你正使用的空调码，然后填入到config，填写方法请参考Config Example。
+使用此[方法](https://github.com/aholstenson/miio/blob/master/docs/protocol.md#)来获取你正使用的空调码，然后填入到config，填写方法请参考Config Example。
 
 *   heaterCooler（Beta）
 
@@ -107,9 +110,9 @@
 | 参数 | 说明 | 示例 | 默认 | 必须 |
 | --- | --- | --- | --- | --- |
 | ``name`` | 显示在Homekit中的名字 | "AcPartner" | - | * |
-| ``type`` | 设置为，必须填写 | "heaterCooler" | - | * |
-| ``ip`` | 你空调伴侣的IP地址，此处没有填写ip均使用上方全局ip设置| "192.168.31.99" | - |  |
-| ``token`` | 你空调伴侣的token，此处没有填写token均使用上方全局token设置 | "token_as_hex" | - |  |
+| ``type`` | 必须填写 | "heaterCooler" | - | * |
+| ``ip`` | 空调伴侣的IP地址，此处没有填写ip均使用上方全局ip设置| "192.168.31.99" | - |  |
+| ``token`` | 空调伴侣的token，此处没有填写token均使用上方全局token设置 | "token_as_hex" | - |  |
 | ``maxTemp`` | 设置调节温度上限 | 28 | 30 |  |
 | ``minTemp`` | 设置调节温度下限 | 16 | 17 |  |
 | ``syncInterval`` | 同步间隔（毫秒），设置为0关闭同步 | 30000 | 60000 |  |
@@ -122,10 +125,10 @@
 | --- | --- | --- |
 | ``name`` | 显示在Homekit中的名字 | * |
 | ``type`` | "learnIR" | * |
-| ``ip`` | 你空调伴侣的IP地址，此处没有填写ip均使用上方全局ip设置 |  |
-| ``token`` | 你空调伴侣的token，此处没有填写token均使用上方全局token设置 |  |
+| ``ip`` | 空调伴侣的IP地址，此处没有填写ip均使用上方全局ip设置 |  |
+| ``token`` | 空调伴侣的token，此处没有填写token均使用上方全局token设置 |  |
 
-打开开关后，直接使用遥控器向空调伴侣发送信号，30秒内接收到的红外信号会直接显示在日志中。
+打开开关后，使用遥控器向空调伴侣发送信号，30秒内接收到的红外信号会显示在日志中。
 
 请注意空调码仍然需要自己抓包，且空调码和红外码是有区别的。
 
@@ -136,8 +139,8 @@
 | --- | --- | --- |
 | ``name`` | 显示在Homekit中的名字 | * |
 | ``type`` | "switch" | * |
-| ``ip`` | 你空调伴侣的IP地址，此处没有填写ip均使用上方全局ip设置 |  |
-| ``token`` | 你空调伴侣的token，此处没有填写token均使用上方全局token设置 |  |
+| ``ip`` | 空调伴侣的IP地址，此处没有填写ip均使用上方全局ip设置 |  |
+| ``token`` | 空调伴侣的token，此处没有填写token均使用上方全局token设置 |  |
 | ``data`` | 请参考``Config Example``,必须要包含``on``和``off`` | * |
 
 * switchMulti (多重信号红外开关)
@@ -146,14 +149,14 @@
 | --- | --- | --- |
 | ``name`` | 显示在Homekit中的名字 | * |
 | ``type`` | "switchMulti" | * |
-| ``ip`` | 你空调伴侣的IP地址，此处没有填写ip均使用上方全局ip设置 |  |
-| ``token`` | 你空调伴侣的token，此处没有填写token均使用上方全局token设置 |  |
+| ``ip`` | 空调伴侣的IP地址，此处没有填写ip均使用上方全局ip设置 |  |
+| ``token`` | 空调伴侣的token，此处没有填写token均使用上方全局token设置 |  |
 | ``interval`` | 发送延时，单位为毫秒（默认1000） |   |
 | ``data`` | 请参考``Config Example``,必须要包含``on``和``off`` | * |
 
 ### Config Example（配置例子）
 
-基本插件配置
+基本插件配置（推荐）
 
 ```Json
 "platforms": [
@@ -312,12 +315,12 @@
                         "on": "有些空调需要这个信号（可选）",
                         "auto": "自动模式信号（可选）",
                         "heat":{
-                            "30": "（可选信号）",
+                            "30": "（可选）",
                             "29": "",
                             "17": ""
                         },
                         "cool":{
-                            "30": "（必要信号）",
+                            "30": "（必须）",
                             "29": "",
                             "17": ""
                         }
@@ -330,9 +333,9 @@
 
 ### Changelog
 
-0.5.3
+0.5.4
 
-修复HeaterCooler类型中的大量BUG
+修复BUG
 
 0.5.1
 

@@ -1,13 +1,11 @@
-var presets = require('../presets.json');
-
 /* INPUT_DATA
 "data":{
   "model": "this.acModel",
   "power": "this.active",
   "swingMode": "this.swingMode",
-  "RotationSpeed": "this.swingMode",
+  "RotationSpeed": "this.RotationSpeed",
   "TargetTemperature": "Characteristic",
-  "TargetHeatingCoolingState": "Characteristic.TargetHeatingCoolingState.OFF@example",
+  "TargetHeatingCoolingState": "Characteristic.TargetHeatingCoolingState.OFF@Example",
   "defaultState": "Characteristic.TargetHeatingCoolingState"
 }*/
 

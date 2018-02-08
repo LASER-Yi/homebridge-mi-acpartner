@@ -1,6 +1,6 @@
 {
   "name": "homebridge-mi-acpartner",
-  "version": "0.5.3",
+  "version": "0.5.5",
   "description": "homebridge plugin for Xiaomi AC Partner",
   "main": "index.js",
   "repository": {
@@ -20,7 +20,9 @@
   "engines": {
     "node": ">=0.12.0",
     "homebridge": ">=0.4.1",
-    "miio": ">= 0.15.0"
+    "miio": ">= 0.14.0"
   },
-  "dependencies": {}
+  "dependencies": {
+    "miio": "<0.15.0"
+  }
 }

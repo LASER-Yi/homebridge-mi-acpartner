@@ -4,15 +4,13 @@
         "defaultMain": "AC model(10)+po+mo+wi+sw+tt",
         "VALUE": ["po","mo","wi","sw","tt","li"],
         "po": {
-            "on": "1",
-            "off": "0"
+            "off": "0",
+            "on": "1"
         },
         "mo":{
             "heater": "0",
             "cooler": "1",
-            "auto": "2",
-            "dehum": "3",
-            "airSup": "4"
+            "auto": "2"
         },
         "wi":{
             "1": "0",
@@ -26,7 +24,8 @@
         },
         "tt": "1",
         "li": {
-            "off": "a0"
+            "off": "0",
+            "on": "a"
         }
 
     },
