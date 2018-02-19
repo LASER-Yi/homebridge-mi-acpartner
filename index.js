@@ -20,9 +20,7 @@ module.exports = function (homebridge) {
 }
 
 function XiaoMiAcPartner(log, config, api) {
-    if (null == config) {
-        return;
-    }
+    if (null == config) return;
     //Init
     this.log = log;
     this.config = config;
@@ -34,7 +32,7 @@ function XiaoMiAcPartner(log, config, api) {
     this.UUIDGen = UUIDGen;
 
     //miio device
-    this.device;
+    this.device[];
 
     this.syncLock = false; //true: something using; false: free to use
 
