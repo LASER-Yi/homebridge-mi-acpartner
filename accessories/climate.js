@@ -114,7 +114,7 @@ ClimateAccessory = function(log, config, platform){
 
 ClimateAccessory.prototype = {
     doRestThing: function(){
-        if (syncInterval > 0) {
+        if (this.syncInterval > 0) {
             this.log.info("[CLIMATE]Auto sync on");
             this.getACState();  
         }else{
@@ -423,7 +423,7 @@ ClimateAccessory.prototype = {
         Promise.all([p1,p2])
             .then(() => {
                 that.log.debug("[CLIMATE]Sync complete")
-                setTimeout(this.getACState.bind(this), that.syncInterval)
+                setTimeout(this.getACState.bind(this), this.syncInterval)
             });
     }
 };
