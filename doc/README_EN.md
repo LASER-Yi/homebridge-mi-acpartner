@@ -22,7 +22,7 @@ AC Partner v1 & AC Partner v2
   - Use AC signal or IR signal to control your AC.
   - Change temperature between 17 - 30(default).
   - HEAT mode, COOL mode, AUTO mode support.
-  - Wind Force, Wind Sweep control support.(Basic on iOS 11, Coming sooooon)
+  - Wind Force, Swing Mode control support.~~(Basic on iOS 11, Coming sooooon)~~
   - Customize IR Signal Support.~~(Coming sooooooooon)~~
 
 * Customize your AC's Signal
@@ -53,7 +53,7 @@ npm install -g homebridge-mi-acpartner miio
 Support:
 
     Gree: 1,2,8
-    Most no.1 presets in MIJIA app.
+    Almost any no.1 presets in MIJIA app.
 
 You can change your preset in MIJIA app.
 
@@ -76,19 +76,35 @@ Please Follow this [document](https://github.com/aholstenson/miio/blob/master/do
 
 **accessories**
 
+*   heaterCooler（Beta）
+
+可以更改风力和扫风的空调，还处于测试阶段
+    
+| parameter | description | example | default | required |
+| --- | --- | --- | --- | --- |
+| ``name`` | name show in Homekit | "AcPartner" | - | * |
+| ``type`` |  | "heaterCooler" | - | * |
+| ``ip`` | Your AC Partner ip address for this accessory | "192.168.31.99" | - |  |
+| ``token`` | Your AC Partner token for this accessory | "token_as_hex" | - |  |
+| ``maxTemp`` | Set max temperature | 28 | 30 |  |
+| ``minTemp`` | Set min temperature | 16 | 17 |  |
+| ``syncInterval`` | "Sync interval(ms). Set to '0' to turn off sync function | 30000 | 60000 |  |
+| ``sensorSid`` | Your Temperature Sensor Series ID, that sensor **must** connected to AC Partner | "lumi.158d000156e667" |  |  |
+
 *   climate(Basic partner function)
 
-| parameter | description | required |
+| parameter | description | required(default value) |
 | --- | --- | --- |
 | ``name`` | name show in Homekit | * |
 | ``type`` | “climate" | * |
 | ``ip`` | Your AC Partner ip address for this accessory |  |
-| ``token`` | Your AC Partner ip address for this accessory |  |
-| ``maxTemp`` | Set max temperature |   |
-| ``minTemp`` | Set min temperature |  |
-| ``sync`` | "off” (Turn off sync state with AC Partner) |  |
-| ``autoStart`` | "off" (When AC is off, change temperature will not turn on AC) |  |
-| ``sensorSid`` | Your Temperature Sensor Series ID, that sensor **must** connected with AC Partner(You can find it in Android device) |  |
+| ``token`` | Your AC Partner token for this accessory |  |
+| ``maxTemp`` | Set max temperature | 28 |
+| ``minTemp`` | Set min temperature | 16 |
+| ``syncInterval`` | "Sync interval(ms). Set to '0' to turn off sync function | 60000 |
+| ``autoStart`` | "off" (When AC is off, change temperature will not turn on AC) | "off" |
+| ``SwingMode`` | Change AC Swing mode | true |
+| ``sensorSid`` | Your Temperature Sensor Series ID, that sensor **must** connected to AC Partner |  |
 
 *   learnIR (Learn IR code)
 
@@ -97,7 +113,7 @@ Please Follow this [document](https://github.com/aholstenson/miio/blob/master/do
 | ``name`` | name show in Homekit | * |
 | ``type`` | "learnIR" | * |
 | ``ip`` | Your AC Partner ip address for this accessory |  |
-| ``token`` | Your AC Partner token address for this accessory |  |
+| ``token`` | Your AC Partner token for this accessory |  |
 
 When switch open, AC Partner will receive IR signal for 30 seconds, and log in console.
 
@@ -110,17 +126,17 @@ Please note that there's different between AC code and IR code.
 | ``name`` | name show in Homekit | * |
 | ``type`` | "switch" | * |
 | ``ip`` | Your AC Partner ip address for this accessory |  |
-| ``token`` | Your AC Partner ip address for this accessory |  |
+| ``token`` | Your AC Partner token for this accessory |  |
 | ``data`` | Follow ``Config Example``, must include ``on`` and ``off`` | * |
 
-* switchMulti(Send multi IR code in one switch)
+*   switchMulti(Send multi IR code in one switch)
 
 | parameter | description | required |
 | --- | --- | --- |
 | ``name`` | name show in Homekit | * |
 | ``type`` | "switch" | * |
 | ``ip`` | Your AC Partner ip address for this accessory |  |
-| ``token`` | Your AC Partner ip address for this accessory |  |
+| ``token`` | Your AC Partner token for this accessory |  |
 | ``interval`` | Send interval(default: 1000) |   |
 | ``data`` | Follow ``Config Example``, must include ``on`` and ``off`` | * |
 
@@ -302,6 +318,23 @@ Most AC command start with "01" and most IR command start with "FE"
 ```
 
 ### Changelog
+
+0.5.6
+
+修复了一个导致Climate无法工作的问题
+Fix a problem cause climate crash
+
+0.5.4
+
+BUG fix
+
+0.5.1
+
+Fix no respnose for some accessories
+
+0.5.0
+
+Support Heater Cooler for AC
 
 0.4.4
 

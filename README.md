@@ -63,9 +63,7 @@
 
 你可以在米家App中更改预设信息
 
-如果没有定义``customize``，其他空调会使用自动生成的空调码，不保证可用性。
-
-如果你有预设信息，请于[issues](https://github.com/LASER-Yi/homebridge-mi-acpartner/issues)中分享给我。
+如果没有定义``customize``，插件会使用自动生成的空调码，不保证可用性。
 
 ### Config（配置）
 
@@ -98,7 +96,7 @@
 | ``syncInterval`` | 同步间隔（毫秒），设置为0关闭同步 | 30000 | 60000 |  |
 | ``autoStart`` | 当在关机状态下调整温度时，不会自动启动空调 | "off" | "on" |  |
 | ``SwingMode`` | 开关扫风（false为关闭） | false | true |  |
-| ``sensorSid`` | 填写你的温湿度传感器ID，此温湿度传感器**必须**绑定在空调伴侣下（可在安卓设备下查到）| "lumi.158d000156e667" |  |  |
+| ``sensorSid`` | 填写你的温湿度传感器ID，此温湿度传感器**必须**绑定在空调伴侣下 | "lumi.158d000156e667" |  |  |
 
 
 使用此[方法](https://github.com/aholstenson/miio/blob/master/docs/protocol.md#)来获取你正使用的空调码，然后填入到config，填写方法请参考Config Example。
@@ -116,7 +114,6 @@
 | ``maxTemp`` | 设置调节温度上限 | 28 | 30 |  |
 | ``minTemp`` | 设置调节温度下限 | 16 | 17 |  |
 | ``syncInterval`` | 同步间隔（毫秒），设置为0关闭同步 | 30000 | 60000 |  |
-| ``autoStart`` | 当在关机状态下调整温度时，不会自动启动空调 | "off" | "on" |  |
 | ``sensorSid`` | 填写你的温湿度传感器ID，此温湿度传感器**必须**绑定在空调伴侣下（可在安卓设备下查到）| "lumi.158d000156e667" |  |  |
 
 *   learnIR (红外学习开关)
@@ -333,6 +330,10 @@
 
 ### Changelog
 
+0.5.6
+
+修复了一个导致climate无法工作的问题
+
 0.5.4
 
 修复BUG
@@ -343,35 +344,35 @@
 
 0.5.0
 
-Support Heater Cooler for AC
+支持使用heaterCooler定义空调
 
 0.4.4
 
-IR Learner and switchMulti support
+可以设置红外学习开关和更多的开关类型
 
 0.4.2
 
-add synclock to support multi-device problem
+添加同步锁来解决多设备导致的问题
 
 0.4.0
 
-Change to Platform,support basic IR switch
+插件转移成Platform，支持基础的红外开关
 
 0.3.0
 
-Auto reconnect support, add presets
+支持自动重连，增加预设
 
 0.2.9
 
-Relative Humidity data support.
+支持湿度信息显示
 
 0.2.8
 
-Deeper customize support
+支持深度自定义
 
 0.2.7
 
-Temperature sensor that connected with AC Partner support.
+支持连接到空调伴侣的温湿度传感器
 
 0.2.6
 

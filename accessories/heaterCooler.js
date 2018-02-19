@@ -20,7 +20,6 @@ HeaterCoolerAccessory = function(log, config, platform){
     this.LightState = config.lightState || false;
     this.outerSensor = config.sensorSid;
     this.syncInterval = config.syncInterval || 60000;
-    this.autoStart = config.autoStart;
     this.data = JSON;
     this.data.defaultPresets = presets.default;
     this.name = config['name'];
