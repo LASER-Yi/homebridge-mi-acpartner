@@ -1,7 +1,7 @@
 //Thanks to jayqizone
 const miio = require('miio');
 const presets = require("../presets.json");
-const pack_SignalHandle = require("../packages/newPresetHandle");
+const pack_SignalHandle = require("../lib/newPresetHandle");
 
 var Service, Characteristic, Accessory;
 
@@ -39,10 +39,12 @@ HeaterCoolerAccessory = function(log, config, platform){
     }else if(this.platform.globalDevice){
         Promise.all([this.platform.globalDevice])
             .then(() => {
-                this.device = new Array();
-                this.device = this.platform.device;
-                this.log.debug("[%s]Global device connected",this.name);
-                this.hc_Sync();
+                if (this.platform.device !== undefined) {
+                    this.device = new Array();
+                    this.device = this.platform.device;
+                    this.log.debug("[%s]Global device connected", this.name);
+                    this.hc_Sync();
+                }
             })
     }else{
         this.log.error("[%s]Cannot find device infomation",this.name);

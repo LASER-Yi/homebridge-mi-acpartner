@@ -1,5 +1,5 @@
 const miio = require('miio');
-const outputSignal = require("../packages/presetHandle");
+const outputSignal = require("../lib/presetHandle");
 
 var Accessory, PlatformAccessory, Service, Characteristic, UUIDGen;
 
@@ -19,7 +19,7 @@ ClimateAccessory = function(log, config, platform){
     this.minTemp = parseInt(config.minTemp) || 17;
     this.outerSensor = config.sensorSid;
     this.syncInterval = config.syncInterval || 60000;
-    this.autoStart = config.autoStart;
+    this.autoStart = config.autoStart || 1;
     this.SwingMode = config.SwingMode || true;
     if (config.customize) {
         this.customi = config.customize;
@@ -31,11 +31,13 @@ ClimateAccessory = function(log, config, platform){
     }
     this.name = config['name'];
 
-    //Init charact
+    //Characteristic
     this.LastHeatingCoolingState = this.TargetHeatingCoolingState = Characteristic.TargetHeatingCoolingState.OFF;
     this.CurrentTemperature = 0;
     this.TargetTemperature = 0;
     this.CurrentRelativeHumidity = 0;
+
+    //Miio connection
     this.model = null;
     if(null != this.config['ip'] && null != this.config['token']){
         this.ip = this.config['ip'];
@@ -45,10 +47,12 @@ ClimateAccessory = function(log, config, platform){
     }else if(this.platform.globalDevice){
         Promise.all([this.platform.globalDevice])
             .then(() => {
-                this.device = new Array();
-                this.device = that.platform.device;
-                this.log.debug("[%s]Global device connected",this.name);
-                this.doRestThing();
+                if (that.platform.device !== undefined) {
+                    this.device = new Array();
+                    this.device = that.platform.device;
+                    this.log.debug("[%s]Global device connected", this.name);
+                    this.doRestThing();
+                }
             })
     }else{
         this.log.error("[%s]Cannot find device infomation",this.name);
@@ -110,7 +114,6 @@ ClimateAccessory = function(log, config, platform){
 
 ClimateAccessory.prototype = {
     doRestThing: function(){
-
         if (syncInterval > 0) {
             this.log.info("[CLIMATE]Auto sync on");
             this.getACState();  
@@ -204,7 +207,7 @@ ClimateAccessory.prototype = {
 
     getCurrentTemperature: function(callback) {
         if (!this.outerSensor) {
-            this.log("[CLIMATE]Set CurrentTemperature %s", this.TargetTemperature);
+            this.log("[CLIMATE]Update CurrentTemperature %s", this.TargetTemperature);
             callback(null, parseFloat(this.TargetTemperature));
         }else{
             callback(null, parseFloat(this.CurrentTemperature));
@@ -257,13 +260,13 @@ ClimateAccessory.prototype = {
         if (this.TargetHeatingCoolingState != Characteristic.TargetHeatingCoolingState.OFF) {
             if (this.TargetHeatingCoolingState == Characteristic.TargetHeatingCoolingState.HEAT) {
                 if (!this.customi||!this.customi.heat||!this.customi.heat[this.TargetTemperature]) {
-                    this.log.error('[CLIMATE]HEAT Signal not define!');
+                    this.log.debug('[CLIMATE]HEAT Signal not define!');
                     return;
                 }
                 code = this.customi.heat[this.TargetTemperature];
             }else if (this.TargetHeatingCoolingState == Characteristic.TargetHeatingCoolingState.COOL){
                 if (!this.customi||!this.customi.cool||!this.customi.cool[this.TargetTemperature]) {
-                    this.log.error('[CLIMATE]COOL Signal not define!');
+                    this.log.debug('[CLIMATE]COOL Signal not define!');
                     return;
                 }
                 code = this.customi.cool[this.TargetTemperature];
@@ -290,13 +293,14 @@ ClimateAccessory.prototype = {
     },
 
     SendCmd: function() {
-        if (!this.device) {
-            this.log.error('[CLIMATE]Send code failed!(Device not exists)');
+        if (this.device == null) {
+            this.log('[CLIMATE]Waiting for miio connection, please try again later');
             return;
         }
 
-        if(this.model == null){
-            this.getACState();
+        if (this.model == null) {
+            this.log('[CLIMATE]Waiting for Sync state, please try again later');
+            return;
         }
 
         var accessory = this;
@@ -307,25 +311,14 @@ ClimateAccessory.prototype = {
             this.data.TargetTemperature = this.TargetTemperature;
             this.data.TargetHeatingCoolingState = this.TargetHeatingCoolingState;
             this.data.LastHeatingCoolingState = this.LastHeatingCoolingState;
-            var retCode = outputSignal(this.data);
+            code = outputSignal(this.data);
             if (!retCode) {
                 this.log.error('[CLIMATE]Cannot get command code.')
                 return;
             }
-            //this.log.debug("[DEBUG] Get code: " + retCode.data);
-            if (retCode.auto) {
-                this.log.debug('[CLIMATE]You are using auto_gen code, if your AC don\'t response, please use customize method to control your AC.')
-            }else{
-                this.log.debug('[CLIMATE]Using preset: %s',retCode.model);
-            }
-            code = retCode.data;
-            delete retCode;
-
         }else{
             code = this.cusCodeHandle();
-            if (!code) {
-                return;
-            }
+            if (!code) return;
         }
         
         if (code.substr(0,2) == "01") {
@@ -337,12 +330,12 @@ ClimateAccessory.prototype = {
                         accessory.log.debug("[DEBUG]Change Successful");
                     }else{
                         accessory.log.debug("[DEBUG]Unsuccess! Maybe invaild AC Code?");
-                        if (accessory.wiSync) {
+                        if (accessory.syncInterval > 0) {
                             accessory.getACState();   
                         }
                     }
                 }).catch(function(err){
-                    that.log.error("[CLIMATE]Send code fail! Error: " + err);
+                    that.log.error("[CLIMATE]Send code failed! " + err);
                 });
         }else{
             this.log.debug("[DEBUG]Sending IR code: " + code);
@@ -353,7 +346,7 @@ ClimateAccessory.prototype = {
                         accessory.log.debug("[DEBUG]Send Successful");
                     }else{
                         accessory.log.debug("[DEBUG]Unsuccess! Maybe invaild IR Code?");
-                        if (accessory.wiSync) {
+                        if (accessory.syncInterval > 0) {
                             accessory.getACState();   
                         }
                     }
@@ -370,7 +363,7 @@ ClimateAccessory.prototype = {
         }
 
         var that = this;
-        this.log.debug("[CLIMATE_%s]Syncing...",this.name);
+        this.log.debug("[%s]Syncing...",this.name);
 
         //Update CurrentTemperature
         let p1 = this.outerSensor && this.device.call('get_device_prop_exp', [[this.outerSensor, "temperature", "humidity"]])
@@ -424,13 +417,13 @@ ClimateAccessory.prototype = {
                 that.acPartnerService.getCharacteristic(Characteristic.TargetTemperature)
                     .updateValue(that.TargetTemperature);
             }).catch(function(err){
-                that.log.error("[CLIMATE]Sync fail! Error:" + err);
+                that.log.error("[CLIMATE]Sync failed! Error:" + err);
             });
 
         Promise.all([p1,p2])
             .then(() => {
-                this.log.debug("[CLIMATE]Sync complete")
-                setTimeout(this.getACState.bind(this), this.syncInterval)
+                that.log.debug("[CLIMATE]Sync complete")
+                setTimeout(this.getACState.bind(this), that.syncInterval)
             });
     }
 };
