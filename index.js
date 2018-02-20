@@ -4,7 +4,7 @@ const events = require('events');
 const connectUtil = require('./lib/connectUtil');
 
 require('./accessories/climate');
-require('./accessories/switch');
+const SwitchAccessory = require('./accessories/switch');
 require('./accessories/switchRepeat');
 require('./accessories/learnIR');
 require('./accessories/switchMulti');
@@ -64,57 +64,48 @@ function XiaoMiAcPartner(log, config, api) {
 
 XiaoMiAcPartner.prototype = {
     accessories: function (callback) {
+        /**Start register accessories */
         var accessories = [];
-        var GlobalConfig = this.config['accessories'];
-        if (GlobalConfig instanceof Array) {
-            for (var i = 0; i < GlobalConfig.length; i++) {
-                var configAcc = GlobalConfig[i];
-                if (null == configAcc['type'] || "" == configAcc['type'] || null == configAcc['name'] || "" == configAcc['name']) {
-                    continue;
-                }
+
+        this.config['accessories'].forEach(element => {
+            if (undefined != element['type'] || undefined != element['name']) {
                 //Register
-                switch (configAcc['type']) {
+                this.log("[INFO]Register accessory type:%s, name:%s", element['type'], element['name']);
+                switch (element['type']) {
                     case "switch":
-                        this.log.info("[INFO]Register acc type:switch, name:%s", configAcc['name']);
-                        var switchAcc = new SwitchAccessory(this.log, configAcc, this);
-                        accessories.push(switchAcc);
+                        accessories.push(new SwitchAccessory(element, this));
                         break;
                     case "switchRepeat":
-                        this.log.info("[INFO]Register acc type:switchRepeat, name:%s", configAcc['name']);
-                        var swRepAcc = new SwitchRepeatAccessory(this.log, configAcc, this);
+                        var swRepAcc = new SwitchRepeatAccessory(this.log, element, this);
                         accessories.push(swRepAcc);
                         break;
                     case "learnIR":
-                        this.log.info("[INFO]Register acc type:learnIR, name:%s", configAcc['name']);
-                        var learnIRAcc = new LearnIRAccessory(this.log, configAcc, this);
+                        var learnIRAcc = new LearnIRAccessory(this.log, element, this);
                         accessories.push(learnIRAcc);
                         break;
                     case "switchMulti":
-                        this.log.info("[INFO]Register acc type:switchMulti, name:%s", configAcc['name']);
-                        var swMultiAcc = new SwitchMultiAccessory(this.log, configAcc, this);
+                        var swMultiAcc = new SwitchMultiAccessory(this.log, element, this);
                         accessories.push(swMultiAcc);
                         break;
                     case "heaterCooler":
-                        this.log.info("[INFO]Register acc type:HeaterCooler, name:%s", configAcc['name']);
-                        var hcAcc = new HeaterCoolerAccessory(this.log, configAcc, this);
+                        var hcAcc = new HeaterCoolerAccessory(this.log, element, this);
                         accessories.push(hcAcc);
                         break;
                     default:
-                        /* Define as climate */    
-                        this.log.info("[INFO]Register acc type:climate, name:%s", configAcc['name']);
-                        var climateAcc = new ClimateAccessory(this.log, configAcc, this);
+                        /* Define as climate */
+                        var climateAcc = new ClimateAccessory(this.log, element, this);
                         accessories.push(climateAcc);
                         break;
                 }
             }
             this.log("[INFO]Register complete");
-        }
+        });
         callback(accessories);
     },
     _enterSyncState: function () {
         if (syncCounter >= 2) {
             return false;
-        } else if(this.commSyncLock == false){
+        } else if (this.commSyncLock == false) {
             this.commSyncLock = true;
             syncCounter++;
             return true;

@@ -1,135 +1,71 @@
 const miio = require('miio');
+const util = require('util');
 
-var Accessory, PlatformAccessory, Service, Characteristic, UUIDGen;
+const baseSwitch = require('./baseSwitch');
 
-SwitchAccessory = function(log, config, platform){
-    this.log = log;
-    this.platform = platform;
-    this.config = config;
+var Service, Characteristic, Accessory;
 
-    Accessory = platform.Accessory;
-    PlatformAccessory = platform.PlatformAccessory;
-    Service = platform.Service;
-    Characteristic = platform.Characteristic;
-    UUIDGen = platform.UUIDGen;
-    this.name = config['name'];
+class SwitchAccessory {
+    constructor(config, platform) {
+        this.init(config, platform);
+        Accessory = platform.Accessory;
+        Service = platform.Service;
+        Characteristic = platform.Characteristic;
 
-    if(null != this.config['ip'] && null != this.config['token']){
-        this.ip = this.config['ip'];
-        this.token = this.config['token'];
-        this.connectService = setInterval(this.search.bind(this),3500);
-        setTimeout(this.refresh.bind(this),600000);
-    }else if(this.platform.globalDevice){
-        Promise.all([this.platform.globalDevice])
-            .then(() =>{
-                this.device = new Array();
-                this.device = this.platform.device;
-                this.log.debug("[%s]Global device connected",this.name);
-            }).catch((err) =>{
-                this.log.debug("[SWITCH_ERROR]Connect to global device fail! "+ err);
-            })
-    }else{
-        this.log.error("[%s]Cannot find device infomation",this.name);
+        //Config reader
+        this.onCode = this.offCode = undefined;
+        //Characteristic
+        this.onState = Characteristic.On.NO;
+        this.lastState = this.onState;
+        //value
+        this.device = undefined;
+
+        if (!config.data || !config.data.on || !config.data.off) {
+            this.log.error("[%s]'data' not defined! Please check your 'config.json' file", this.name);
+        } else {
+            this.onCode = config.data.on;
+            this.offCode = config.data.off;
+        }
     }
 
-    this.onState = Characteristic.On.NO;
+    getServices() {
+        this.services = [];
 
-    if(!config.data || !config.data.on || !config.data.off){
-        this.log.error("[SWITCH_ERROR]IR code no defined!");
-    }else{
-        this.onCode = config.data.on;
-        this.offCode = config.data.off;
-    }
+        this.infoService = new Service.AccessoryInformation();
+        this.infoService
+            .setCharacteristic(Characteristic.Manufacturer, "XiaoMi")
+            .setCharacteristic(Characteristic.Model, "AC Partner IR Switch")
+            .setCharacteristic(Characteristic.SerialNumber, "Undefined");
+        this.services.push(this.infoService);
 
-    this.services = [];
+        this.switchService = new Service.Switch(this.name);
 
-    platform.log.debug("[%s]Initializing switch",this.name);
+        this.activeState = this.switchService.getCharacteristic(Characteristic.On)
+            .on('set', this.setSwitchState.bind(this))
+            .updateValue(this.onState);
+        this.services.push(this.switchService);
 
-    this.infoService = new Service.AccessoryInformation();
-    this.infoService
-        .setCharacteristic(Characteristic.Manufacturer, "XiaoMi")
-        .setCharacteristic(Characteristic.Model, "AC Partner IR Switch")
-        .setCharacteristic(Characteristic.SerialNumber, "Undefined");
-    this.services.push(this.infoService);
-
-    this.switchService = new Service.Switch(this.name);
-
-    this.switchService
-        .getCharacteristic(Characteristic.On)
-        .on('set', this.setSwitchState.bind(this))
-        .on('get', this.getSwitchState.bind(this));
-    this.services.push(this.switchService);
-
-    platform.log.debug("[%s]Initialized successful",this.name);
-
-}
-
-SwitchAccessory.prototype = {
-    search: function(){
-        if(this.platform.syncLock == true){
-            return;
-        }else{
-            this.platform.syncLock = true;
-            this.log.debug("[%s]Searching...",this.name);
-            miio.device({ address: this.ip, token: this.token })
-                .then((device) =>{
-                    this.device = device;
-                    this.log("[%s]Discovered Device!",this.name);
-                    clearInterval(this.connectService);
-                    this.platform.syncLock = false;
-                }).catch((err) =>{
-                    this.log.error("[SWITCH_ERROR]Cannot connect to AC Partner. " + err);
-                    this.platform.syncLock = false;
-                });
-        }
-    },
-
-    refresh: function(){
-        if (this.platform.syncLock == true) {
-            return;
-        }
-        this.platform.syncLock = true;
-
-        this.log.debug("[%s]Refreshing...",this.name);
-        miio.device({ address: this.ip, token: this.token })
-            .then((device) =>{
-                this.device = device;
-                this.log("[%s]Device refreshed",this.name);
-                this.platform.syncLock = false;
-            }).catch((err) =>{
-                this.log.error("[SWITCH_ERROR]Refresh fail. " + err);
-                this.platform.syncLock = false;
-            })
-
-    },
-
-    doRestThing: function(){
-        //waiting
-    },
-
-    getServices: function(){
         return this.services;
-    },
-
-    setSwitchState: function(value, callback){
-        if(!this.device || !this.device.call || !this.onCode || !this.offCode){
-            return;
-        }
-
+    }
+    setSwitchState(value, callback) {
         this.onState = value;
+        let code = value ? this.onCode : this.offCode;
 
-        this.log.debug("[%s]Sending IR code: %s",this.name,value ? this.onCode : this.offCode);
-        this.device.call('send_ir_code',[value ? this.onCode : this.offCode])
-            .then((ret) =>{
-                this.log.debug("[%s]Return result: %s",this.name,ret);
-            }).catch((err) =>{
-                this.log.error("[SWITCH_ERROR]Send fail! " + err);
-            });
-
-        callback();
-    },
-
-    getSwitchState: function(callback){
-        callback(null, this.onState);
+        this.log.debug("[%s]Sending IR code: %s", this.name, code);
+        this.platform.conUtil.getDeviceByIndex(this.deviceIndex, ((device) => {
+            device.call('send_ir_code', [code])
+                .then((ret) => {
+                    this._switchUpdateState();
+                    this.log.debug("[%s]Result: %s", this.name, ret);
+                    callback();
+                }).catch((err) => {
+                    this._switchRevertState();
+                    this.log.error("[%s]Failed! " + err, this.name);
+                    callback();
+                });
+        }));
     }
 }
+
+util.inherits(SwitchAccessory, baseSwitch);
+module.exports = SwitchAccessory;
