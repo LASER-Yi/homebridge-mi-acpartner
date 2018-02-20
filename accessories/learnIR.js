@@ -1,4 +1,5 @@
-const miio = require('miio');
+const util = require('util');
+
 const baseSwitch = require('./baseSwitch');
 
 var Service, Characteristic, Accessory;
@@ -11,17 +12,18 @@ class LearnIRAccessory {
         Characteristic = platform.Characteristic;
 
         //Characteristic
+        this.activeState = null;
         this.onState = Characteristic.On.NO;
         this.lastState = this.onState;
 
         //value
         this.lastIRCode = undefined;
         this.closeTimer;
-    }
-    getServices() {
-        this.services = [];
 
-        platform.log.debug("[%s]Initializing learnIR", this.name);
+        this.setCharacteristic();
+    }
+    setCharacteristic() {
+        this.services = [];
 
         this.infoService = new Service.AccessoryInformation();
         this.infoService
@@ -32,15 +34,49 @@ class LearnIRAccessory {
 
         this.switchService = new Service.Switch(this.name);
 
-        this.activeState = this.switchService
-            .getCharacteristic(Characteristic.On)
+        this.activeState = this.switchService.getCharacteristic(Characteristic.On)
             .on('set', this.setSwitchState.bind(this))
             .updateValue(this.onState);
 
         this.services.push(this.switchService);
     }
+    setSwitchState(value, callback) {
+        if (!this.platform._enterSyncState()) {
+            this.platform.syncLockEvent.once("lockDrop", (() => {
+                this.setSwitchState(value, callback);
+            }));
+            return;
+        }
+        this.onState = value;
+
+        if (value) {
+            //Switch on
+            this.platform.devices[this.deviceIndex].call('start_ir_learn', [30])
+                .then(() => {
+                    this.log("[%s]Start Learning...Auto stop after 30 seconds", this.name);
+                    this.showIRCode();
+                    this.closeTimer = setTimeout(this.showIRCode.bind(this), 30 * 1000);
+                })
+                .catch((err) => this.log.error("[ERROR]Start failed! " + err))
+                .then(() => {
+                    callback();
+                    this.platform._exitSyncState();
+                });
+        } else {
+            //Switch off
+            this.platform.devices[this.deviceIndex].call('end_ir_learn', [])
+                .then(() => {
+                    this.log("[%s]Stop Learning...", this.name);
+                    clearTimeout(this.closeTimer);
+                }).catch((err) => this.log.error("[ERROR]End failed! " + err))
+                .then(() => {
+                    callback();
+                    this.platform._exitSyncState();
+                });
+        }
+    }
     showIRCode() {
-        this.device.call('get_ir_learn_result', [])
+        this.platform.devices[this.deviceIndex].call('get_ir_learn_result', [])
             .then((ret) => {
                 let code = ret[0];
                 if (code != '(null)' || code !== this.lastIRCode) {
@@ -50,34 +86,5 @@ class LearnIRAccessory {
             }).catch((err) => this.log.error("[ERROR]Learn Switch error! " + err));
     }
 }
-
-LearnIRAccessory.prototype = {
-
-    autoClo: function () {
-        this.log.info("[%s]Auto Stop Learning...", this.name);
-        clearInterval(this.autoStop);
-        this.onState = false;
-        this.switchService.getCharacteristic(Characteristic.On).updateValue(false);
-    },
-
-    setSwitchState: function (value, callback) {
-        this.onState = value;
-
-        if (value) {
-            this.device.call('start_ir_learn', [30])
-                .then(() => {
-                    this.log.info("[%s]Start Learning...Auto stop after 30 seconds", this.name);
-                    this.showIRCode();
-                    this.closeTimer = setInterval(this.autoClo.bind(this), 30000);
-                    callback();
-                }).catch((err) => this.log.error("[ERROR]Start fail! " + err));
-        } else {
-            this.device.call('end_ir_learn', [])
-                .then(() => {
-                    this.log.info("[%s]Stop Learning...", this.name);
-                    clearInterval(this.autoStop);
-                    callback();
-                }).catch((err) => this.log.error("[ERROR]End fail! " + err))
-        }
-    }
-}
+util.inherits(LearnIRAccessory, baseSwitch);
+module.exports = LearnIRAccessory;

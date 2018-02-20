@@ -24,31 +24,6 @@ HeaterCoolerAccessory = function(log, config, platform){
     this.data.defaultPresets = presets.default;
     this.name = config['name'];
 
-    //Connection
-    this.device;
-    this.localSyncLock = false;
-    this.model;
-    this.preset;
-    this.hc_SendCmdTimeoutHandle;
-    if(null != this.config['ip'] && null != this.config['token']){
-        this.ip = this.config['ip'];
-        this.token = this.config['token'];
-        this.connectService = setInterval(this.search.bind(this),3000);
-        setTimeout(this.refresh.bind(this),600000);
-    }else if(this.platform.globalDevice){
-        Promise.all([this.platform.globalDevice])
-            .then(() => {
-                if (this.platform.device !== undefined) {
-                    this.device = new Array();
-                    this.device = this.platform.device;
-                    this.log.debug("[%s]Global device connected", this.name);
-                    this.hc_Sync();
-                }
-            })
-    }else{
-        this.log.error("[%s]Cannot find device infomation",this.name);
-    }
-
     //Characteristics
     this.Active = Characteristic.Active.INACTIVE;
     this.TargetHeaterCoolerState = Characteristic.TargetHeaterCoolerState.AUTO;
@@ -62,17 +37,7 @@ HeaterCoolerAccessory = function(log, config, platform){
     this.CurrentTemperature;
     this.CurrentRelativeHumidity;
 
-    //Add Service
-    this.service = [];
-    this.hc_Service = new Service.HeaterCooler(this.name);
-    this.service.push(this.hc_Service);
-    this.serviceInfo = new Service.AccessoryInformation();
-    this.serviceInfo
-        .setCharacteristic(Characteristic.Manufacturer, 'XiaoMi')
-        .setCharacteristic(Characteristic.Model, 'AC Partner')
-        .setCharacteristic(Characteristic.SerialNumber, "Undefined");
-    this.service.push(this.serviceInfo);
-
+    //Add Characteristic
     this.hc_SetCharacteristic();
 }
 
@@ -81,6 +46,16 @@ HeaterCoolerAccessory.prototype = {
     //Set Characteristic
     hc_SetCharacteristic: function(){
         var that = this;
+
+        this.service = [];
+        this.serviceInfo = new Service.AccessoryInformation();
+        this.serviceInfo
+            .setCharacteristic(Characteristic.Manufacturer, 'XiaoMi')
+            .setCharacteristic(Characteristic.Model, 'AC Partner')
+            .setCharacteristic(Characteristic.SerialNumber, "Undefined");
+        this.service.push(this.serviceInfo);
+
+        this.hc_Service = new Service.HeaterCooler(this.name);
 
         this.Active = this.hc_Service.getCharacteristic(Characteristic.Active)
             .on('set', this.hc_SetActive.bind(this));
@@ -136,10 +111,8 @@ HeaterCoolerAccessory.prototype = {
                 })
                 .updateValue(50);
         }
-    },
-
-    identify: function(callback) {
-        callback();
+        
+        this.service.push(this.hc_Service);
     },
 
     //Return this service to Homebridge
@@ -148,25 +121,7 @@ HeaterCoolerAccessory.prototype = {
     },
 
     //Search AC Partner
-    search: function(){
-        if(this.platform.syncLock == true){
-            return;
-        }else{
-            this.platform.syncLock = true;
-            this.log.debug("[%s]Searching...",this.name);
-            miio.device({ address: this.ip, token: this.token })
-                .then((device) =>{
-                    this.device = device;
-                    this.log("[%s]Discovered Device!",this.name);
-                    clearInterval(this.connectService);
-                    this.platform.syncLock = false;
-                    this.hc_Sync();
-                }).catch((err) =>{
-                    this.log.error("[ERROR]Cannot connect to AC Partner. " + err);
-                    this.platform.syncLock = false;
-                });
-        }
-    },
+
 
     hc_SendCmdAsync: function(){
         this.localSyncLock = true;

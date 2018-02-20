@@ -13,6 +13,9 @@ class Base{
         this.name = config['name'];
         this.deviceIndex = this.config['deviceIndex'] || 0;
     }
+    getServices() {
+        return this.services;
+    }
     identify(callback) {
         callback();
     }

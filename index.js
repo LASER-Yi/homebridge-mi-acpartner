@@ -1,4 +1,3 @@
-const miio = require('miio')
 const events = require('events');
 
 const connectUtil = require('./lib/connectUtil');
@@ -6,7 +5,7 @@ const connectUtil = require('./lib/connectUtil');
 require('./accessories/climate');
 const SwitchAccessory = require('./accessories/switch');
 require('./accessories/switchRepeat');
-require('./accessories/learnIR');
+const LearnIRAccessory = require('./accessories/learnIR');
 require('./accessories/switchMulti');
 require('./accessories/heaterCooler');
 
@@ -34,6 +33,9 @@ function XiaoMiAcPartner(log, config, api) {
     this.Characteristic = Characteristic;
     this.UUIDGen = UUIDGen;
 
+    //Miio devices
+    this.devices = [];
+
     //Config Reader
     this.refreshInterval = config.refreshInterval || 10 * 60 * 1000;
     if (!this.config['accessories']) {
@@ -43,7 +45,7 @@ function XiaoMiAcPartner(log, config, api) {
 
     //Connection util init;
     if (config.devices) {
-        this.conUtil = new connectUtil(config.devices, log);
+        this.conUtil = new connectUtil(config.devices, log, this);
         setInterval((() => {
             this.conUtil.refresh();
         }), this.refreshInterval);
@@ -53,9 +55,8 @@ function XiaoMiAcPartner(log, config, api) {
     }
 
     //Global command syncLock
-    this.commSyncLock = false;
-    this.syncLockEvent = new events.EventEmitter();
     this.syncCounter = 0;
+    this.syncLockEvent = new events.EventEmitter();
 
     if (api) {
         this.api = api;
@@ -76,25 +77,20 @@ XiaoMiAcPartner.prototype = {
                         accessories.push(new SwitchAccessory(element, this));
                         break;
                     case "switchRepeat":
-                        var swRepAcc = new SwitchRepeatAccessory(this.log, element, this);
-                        accessories.push(swRepAcc);
+                        accessories.push(new SwitchRepeatAccessory(element, this));
                         break;
                     case "learnIR":
-                        var learnIRAcc = new LearnIRAccessory(this.log, element, this);
-                        accessories.push(learnIRAcc);
+                        accessories.push(new LearnIRAccessory(element, this));
                         break;
                     case "switchMulti":
-                        var swMultiAcc = new SwitchMultiAccessory(this.log, element, this);
-                        accessories.push(swMultiAcc);
+                        accessories.push(new SwitchMultiAccessory(element, this));
                         break;
                     case "heaterCooler":
-                        var hcAcc = new HeaterCoolerAccessory(this.log, element, this);
-                        accessories.push(hcAcc);
+                        accessories.push(new HeaterCoolerAccessory(element, this));
                         break;
                     default:
-                        /* Define as climate */
-                        var climateAcc = new ClimateAccessory(this.log, element, this);
-                        accessories.push(climateAcc);
+                        /* Register default to climate */
+                        accessories.push(ClimateAccessory(element, this));
                         break;
                 }
             }
@@ -103,21 +99,21 @@ XiaoMiAcPartner.prototype = {
         callback(accessories);
     },
     _enterSyncState: function () {
-        if (syncCounter >= 2) {
+        if (this.syncCounter >= 5) {
             return false;
-        } else if (this.commSyncLock == false) {
-            this.commSyncLock = true;
-            syncCounter++;
+        } else {
+            this.syncCounter++;
+            this.log.debug("[DEBUG]Enter sync state #%s", this.syncCounter);
             return true;
         }
     },
     _exitSyncState: function () {
-        this.commSyncLock = false;
         this.syncLockEvent.emit("lockDrop");
-        if (syncCounter > 0) {
-            syncCounter--;
+        this.log.debug("[DEBUG]Exit sync state #%s", this.syncCounter);
+        if (this.syncCounter > 0) {
+            this.syncCounter--;
         } else {
-            syncCounter = 0;
+            this.syncCounter = 0;
         }
     }
 }
