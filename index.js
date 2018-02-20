@@ -1,4 +1,7 @@
 const miio = require('miio')
+const events = require('events');
+
+const connectUtil = require('./lib/connectUtil');
 
 require('./accessories/climate');
 require('./accessories/switch');
@@ -21,7 +24,7 @@ module.exports = function (homebridge) {
 
 function XiaoMiAcPartner(log, config, api) {
     if (null == config) return;
-    //Init
+
     this.log = log;
     this.config = config;
 
@@ -31,34 +34,31 @@ function XiaoMiAcPartner(log, config, api) {
     this.Characteristic = Characteristic;
     this.UUIDGen = UUIDGen;
 
-    //miio device
-    this.device[];
+    //Config Reader
+    this.refreshInterval = config.refreshInterval || 10 * 60 * 1000;
+    if (!this.config['accessories']) {
+        this.log.error("[ERROR]'accessories' not defined! Please check your 'config.json' file.");
+        return;
+    }
 
-    this.syncLock = false; //true: something using; false: free to use
+    //Connection util init;
+    if (config.devices) {
+        this.conUtil = new connectUtil(config.devices, log);
+        setInterval((() => {
+            this.conUtil.refresh();
+        }), this.refreshInterval);
+    } else {
+        this.log.error("[ERROR]'devices' not defined! Please check your 'config.json' file.");
+        return;
+    }
+
+    //Global command syncLock
+    this.commSyncLock = false;
+    this.syncLockEvent = new events.EventEmitter();
+    this.syncCounter = 0;
 
     if (api) {
         this.api = api;
-    }
-
-    /*Try to connect to device */
-    if (null != this.config['ip'] && null != this.config['token']) {
-        this.syncLock = true;
-        setTimeout(this.refresh.bind(this), 600000);
-        this.globalDevice = !this.device && miio.device({
-                address: this.config['ip'],
-                token: this.config['token']
-            })
-            .then((device) => {
-                this.device = device;
-                this.log("[GLOBAL]Connected!");
-                this.syncLock = false;
-            }).catch((err) => {
-                this.log.error("[GLOBAL]Cannot connect to AC Partner. " + err);
-                this.syncLock = false;
-            });
-
-        this.log("[GLOBAL]Connecting...")
-        Promise.all([this.globalDevice]);
     }
 }
 
@@ -74,11 +74,6 @@ XiaoMiAcPartner.prototype = {
                 }
                 //Register
                 switch (configAcc['type']) {
-                    case "climate":
-                        this.log.info("[INFO]Register acc type:climate, name:%s", configAcc['name']);
-                        var climateAcc = new ClimateAccessory(this.log, configAcc, this);
-                        accessories.push(climateAcc);
-                        break;
                     case "switch":
                         this.log.info("[INFO]Register acc type:switch, name:%s", configAcc['name']);
                         var switchAcc = new SwitchAccessory(this.log, configAcc, this);
@@ -104,32 +99,34 @@ XiaoMiAcPartner.prototype = {
                         var hcAcc = new HeaterCoolerAccessory(this.log, configAcc, this);
                         accessories.push(hcAcc);
                         break;
+                    default:
+                        /* Define as climate */    
+                        this.log.info("[INFO]Register acc type:climate, name:%s", configAcc['name']);
+                        var climateAcc = new ClimateAccessory(this.log, configAcc, this);
+                        accessories.push(climateAcc);
+                        break;
                 }
             }
             this.log("[INFO]Register complete");
         }
         callback(accessories);
     },
-    refresh: function () {
-        if (this.syncLock == true) return;
-        this.syncLock = true;
-
-        this.log.debug("[GLOBAL]Refreshing connection...");
-        this.connectCounter = 0;
-        miio.device({
-                address: this.config['ip'],
-                token: this.config['token']
-            })
-            .then((device) => {
-                this.device = device;
-                this.log.debug("[GLOBAL]Connection refreshed.");
-                this.syncLock = false;
-            }).catch((err) => {
-                this.log.error("[ERROR]Cannot connect to AC Partner, trying to connect after 600000ms.");
-                this.log.error("[ERROR]Add '-D' parameter to show more information.")
-                this.log.debug(err);
-                this.syncLock = false;
-            })
-
+    _enterSyncState: function () {
+        if (syncCounter >= 2) {
+            return false;
+        } else if(this.commSyncLock == false){
+            this.commSyncLock = true;
+            syncCounter++;
+            return true;
+        }
+    },
+    _exitSyncState: function () {
+        this.commSyncLock = false;
+        this.syncLockEvent.emit("lockDrop");
+        if (syncCounter > 0) {
+            syncCounter--;
+        } else {
+            syncCounter = 0;
+        }
     }
 }

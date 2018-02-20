@@ -8,8 +8,10 @@
     "platforms": [
         {
             "platform": "XiaoMiAcPartner",
-            "ip": "192.168.31.1",
-            "token": "dsasdhe23gda",
+            "devices":{
+                "192.168.31.146":"your_token_here",
+                "192.168.31.201":"your_token_here"
+            },
             "accessories":[
                 {
                     "name": "learn",
@@ -32,8 +34,7 @@
                 },{
                     "name": "Ac Partner 2",
                     "type": "climate",
-                    "ip":"192.168.1.3",
-                    "token":"asdgwedsfds",
+                    "device": 1,
                     "maxTemp": "30",
                     "minTemp": "17",
                     "customize": {
