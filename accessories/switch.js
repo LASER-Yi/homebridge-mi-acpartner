@@ -70,7 +70,7 @@ class SwitchAccessory {
                 /**Callback and exit sync state */
                 callback();
                 this.platform._exitSyncState();
-            })
+            });
     }
 }
 
