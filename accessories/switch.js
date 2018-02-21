@@ -1,5 +1,4 @@
 const util = require('util');
-
 const baseSwitch = require('./baseSwitch');
 
 var Service, Characteristic, Accessory;

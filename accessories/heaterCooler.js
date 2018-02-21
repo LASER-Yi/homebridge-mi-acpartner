@@ -5,11 +5,8 @@ const pack_SignalHandle = require("../lib/newPresetHandle");
 
 var Service, Characteristic, Accessory;
 
-HeaterCoolerAccessory = function(log, config, platform){
-    this.log = log;
-    this.platform = platform;
-    this.config = config;
-
+HeaterCoolerAccessory = function(config, platform){
+    this.init(config, platform);
     Accessory = platform.Accessory;
     Service = platform.Service;
     Characteristic = platform.Characteristic;
@@ -38,13 +35,13 @@ HeaterCoolerAccessory = function(log, config, platform){
     this.CurrentRelativeHumidity;
 
     //Add Characteristic
-    this.hc_SetCharacteristic();
+    this._setCharacteristic();
 }
 
 HeaterCoolerAccessory.prototype = {
 
     //Set Characteristic
-    hc_SetCharacteristic: function(){
+    _setCharacteristic: function(){
         var that = this;
 
         this.service = [];
@@ -111,25 +108,9 @@ HeaterCoolerAccessory.prototype = {
                 })
                 .updateValue(50);
         }
-        
+
         this.service.push(this.hc_Service);
     },
-
-    //Return this service to Homebridge
-    getServices: function() {
-        return this.service;
-    },
-
-    //Search AC Partner
-
-
-    hc_SendCmdAsync: function(){
-        this.localSyncLock = true;
-
-        clearTimeout(this.hc_SendCmdTimeoutHandle);
-        this.hc_SendCmdTimeoutHandle = setTimeout(this.hc_SendCmd.bind(this), 50);
-    },
-
     hc_SendCmd: function(){
         this.localSyncLock = true;
 
@@ -180,27 +161,6 @@ HeaterCoolerAccessory.prototype = {
                 }
                 this.localSyncLock = false;
             })
-    },
-
-    //Refresh AC Partner Connection
-    refresh: function(){
-        if (this.platform.syncLock == true) {
-            return;
-        }
-        this.platform.syncLock = true;
-
-        this.log.debug("[%s]Refreshing...",this.name);
-        miio.device({ address: this.ip, token: this.token })
-            .then((device) =>{
-                this.device = device;
-                this.log("[%s]Device refreshed",this.name);
-                this.platform.syncLock = false;
-                this.hc_Sync();
-            }).catch((err) =>{
-                this.log.error("[ERROR]Refresh fail. " + err);
-                this.platform.syncLock = false;
-            })
-
     },
 
     //Sync Function

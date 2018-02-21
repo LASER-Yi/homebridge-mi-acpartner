@@ -1,12 +1,10 @@
 const events = require('events');
-
 const connectUtil = require('./lib/connectUtil');
 
 require('./accessories/climate');
 const SwitchAccessory = require('./accessories/switch');
-require('./accessories/switchRepeat');
+const SwitchRepeatAccessory = require('./accessories/switchRepeat');
 const LearnIRAccessory = require('./accessories/learnIR');
-require('./accessories/switchMulti');
 require('./accessories/heaterCooler');
 
 var PlatformAccessory, Accessory, Service, Characteristic, UUIDGen;
@@ -71,26 +69,22 @@ XiaoMiAcPartner.prototype = {
         this.config['accessories'].forEach(element => {
             if (undefined != element['type'] || undefined != element['name']) {
                 //Register
-                this.log("[INFO]Register accessory type:%s, name:%s", element['type'], element['name']);
+                this.log("[INFO]Register %s -> type:%s", element['name'], element['type']);
                 switch (element['type']) {
                     case "switch":
                         accessories.push(new SwitchAccessory(element, this));
-                        break;
-                    case "switchRepeat":
-                        accessories.push(new SwitchRepeatAccessory(element, this));
                         break;
                     case "learnIR":
                         accessories.push(new LearnIRAccessory(element, this));
                         break;
                     case "switchMulti":
-                        accessories.push(new SwitchMultiAccessory(element, this));
+                        accessories.push(new SwitchRepeatAccessory(element, this));
                         break;
                     case "heaterCooler":
                         accessories.push(new HeaterCoolerAccessory(element, this));
                         break;
-                    default:
-                        /* Register default to climate */
-                        accessories.push(ClimateAccessory(element, this));
+                    case "climate":
+                        accessories.push(new ClimateAccessory(element, this));
                         break;
                 }
             }
