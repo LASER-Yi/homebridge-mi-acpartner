@@ -97,13 +97,13 @@ XiaoMiAcPartner.prototype = {
             return false;
         } else {
             this.syncCounter++;
-            this.log.debug("[DEBUG]syncState #%s", this.syncCounter);
+            this.log.debug("[DEBUG]Enter SyncState #%s", this.syncCounter);
             return true;
         }
     },
     _exitSyncState: function () {
         this.syncLockEvent.emit("lockDrop");
-        this.log.debug("[DEBUG]syncState #%s", this.syncCounter);
+        this.log.debug("[DEBUG]Exit SyncState #%s", this.syncCounter);
         if (this.syncCounter > 0) {
             this.syncCounter--;
         } else {
