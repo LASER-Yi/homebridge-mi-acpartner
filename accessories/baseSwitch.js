@@ -1,12 +1,9 @@
 const base = require('./base');
 const util = require('util');
 
-var Service, Characteristic, Accessory;
-
 class baseSwitch {
-    constructor(config, platform) {
-
-    }
+    constructor(config, platform) { }
+    
     _switchRevertState() {
         /**Revert last state */
         setTimeout(() => {

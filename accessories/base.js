@@ -1,6 +1,3 @@
-
-var Service, Characteristic, Accessory;
-
 class Base{
     constructor(config, platform) {
         this.init(config,platform);

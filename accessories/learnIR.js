@@ -55,9 +55,11 @@ class LearnIRAccessory {
                 .then(() => {
                     this._switchUpdateState();
                     this.log("[%s]Start IR learn", this.name);
-                    this.showIRCode();
+                    this.closeTimer = setInterval(() => {
+                        this.showIRCode();
+                    }, 500);
                     setTimeout(() => {
-                        this.setSwitchOff();
+                        clearInterval(this.closeTimer);
                     }, 30 * 1000);
                 })
                 .catch((err) => {
@@ -70,26 +72,22 @@ class LearnIRAccessory {
                 });
         } else {
             //Switch off
-            this.setSwitchOff(() => {
-                callback();
-            })
+            this.platform.devices[this.deviceIndex].call('end_ir_learn', [])
+                .then(() => {
+                    this.log("[%s]End IR learn", this.name);
+                    this._switchUpdateState();
+                    clearTimeout(this.closeTimer);
+                }).catch((err) => {
+                    this.log.error("[ERROR]End failed! " + err);
+                    this._switchRevertState();
+                })
+                .then(() => {
+                    this.platform._exitSyncState();
+                    callback();
+                });
         }
     }
-    setSwitchOff(callback) {
-        this.platform.devices[this.deviceIndex].call('end_ir_learn', [])
-            .then(() => {
-                this.log("[%s]End IR learn", this.name);
-                this._switchUpdateState();
-                clearTimeout(this.closeTimer);
-            }).catch((err) => {
-                this.log.error("[ERROR]End failed! " + err);
-                this._switchRevertState();
-            })
-            .then(() => {
-                callback();
-                this.platform._exitSyncState();
-            });
-    }
+
     showIRCode() {
         this.platform.devices[this.deviceIndex].call('get_ir_learn_result', [])
             .then((ret) => {
@@ -97,9 +95,6 @@ class LearnIRAccessory {
                 if (code != '(null)' && code !== this.lastIRCode) {
                     this.lastIRCode = code;
                     this.log("[%s]IR code: %s", this.name, code);
-                    this.closeTimer = setTimeout(() => {
-                        this.showIRCode();
-                    }, 500);
                 }
             }).catch((err) => this.log.error("[ERROR]Learn Switch error! " + err));
     }

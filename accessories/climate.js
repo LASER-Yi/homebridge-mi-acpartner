@@ -38,9 +38,7 @@ class ClimateAccessory {
         this.led;
 
         //Sync control
-        setImmediate(() => {
-            this._stateSync();
-        })
+        setImmediate(() => this._stateSync());
         this.syncTimer = setInterval(() => {
             this._stateSync();
         }, this.syncInterval);
@@ -97,11 +95,11 @@ class ClimateAccessory {
 
         this.services.push(this.climateService);
     }
-    _updateState(active, mode, speed, swing, temperature, led, power) {
+    _updateState() {
         //Update AC mode and active state
         let chara_mode;
         if (this.active == 1) {
-            switch (mode) {
+            switch (this.mode) {
                 case 0:
                     //HEAT
                     chara_mode = Characteristic.TargetHeatingCoolingState.HEAT;
@@ -121,28 +119,7 @@ class ClimateAccessory {
         }
         this.TargetHeatingCoolingState.updateValue(chara_mode);
         //Update TargetTemperature
-        this.TargetTemperature.updateValue(temperature);
-    }
-    _syncBack() {
-        this.temperature = this.TargetTemperature.value;
-        if (this.TargetHeatingCoolingState !== Characteristic.TargetHeatingCoolingState.OFF) {
-            //active
-            this.active = 1;
-        } else {
-            //Inactive
-            this.active = 0;
-        }
-        switch (this.TargetHeatingCoolingState) {
-            case Characteristic.TargetHeatingCoolingState.HEAT:
-                this.mode = 0;
-                break;
-            case Characteristic.TargetHeatingCoolingState.COOL:
-                this.mode = 1;
-                break;
-            case Characteristic.TargetHeatingCoolingState.AUTO:
-                this.mode = 2;
-                break;
-        }
+        this.TargetTemperature.updateValue(this.temperature);
     }
     customiUtil() {
         if (!this.customi) return null;
@@ -187,7 +164,22 @@ class ClimateAccessory {
     }
     setTargetHeatingCoolingState(TargetHeatingCoolingState, callback) {
         //Note: Some AC need 'on' signal to active. Add later.
-
+        //Change AC state value
+        this.active = 1;
+        switch (TargetHeatingCoolingState) {
+            case Characteristic.TargetHeatingCoolingState.HEAT:
+                this.mode = 0;
+                break;
+            case Characteristic.TargetHeatingCoolingState.COOL:
+                this.mode = 1;
+                break;
+            case Characteristic.TargetHeatingCoolingState.AUTO:
+                this.mode = 2;
+                break;
+            case Characteristic.TargetHeatingCoolingState.OFF:
+                this.active = 0;
+                break;
+        }
         this._sendCmdAsync(() => {
             callback();
         });
@@ -197,6 +189,7 @@ class ClimateAccessory {
         if (!this.outerSensor) {
             this.CurrentTemperature.updateValue(TargetTemperature);
         }
+        this.temperature = TargetTemperature;
 
         this._sendCmdAsync(() => {
             callback();   

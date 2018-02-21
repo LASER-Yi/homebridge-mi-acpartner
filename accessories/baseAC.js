@@ -3,8 +3,6 @@ const util = require('util');
 
 const presetUtil = require("../lib/presetUtil");
 
-var Service, Characteristic, Accessory;
-
 class baseAC {
     constructor(config, platform) { }
     
@@ -36,31 +34,33 @@ class baseAC {
         }
         if (!this.platform._enterSyncState()) {
             this.platform.syncLockEvent.once("lockDrop", (() => {
-                this._sendCmd(callback);
+                this._sendCmdAsync(callback);
             }));
             return;
         }
+
+        //Start generate code
         let code;
-        //Sync current state back to value;
-        this._syncBack();
 
         if (!this.customi) {
             //presets
             code = presetUtil(this.model, this.active, this.mode, this.temperature, this.swing, this.speed, this.led);
         } else {
-            //customi
+            //customize
             code = customiUtil();
         }
         if (code == null) callback();
-        let code_comm;
+
+        //Start send code
+        let command;
         if (code.substr(0, 2) == "FE") {
             this.log.debug("[DEBUG]Sending IR code: " + code);
-            code_comm = 'send_ir_code';
+            command = 'send_ir_code';
         } else {
             this.log.debug("[DEBUG]Sending AC code: " + code);
-            code_comm = 'send_cmd';
+            command = 'send_cmd';
         }
-        this.platform.devices[this.deviceIndex].call(code_comm, [code])
+        this.platform.devices[this.deviceIndex].call(command, [code])
             .then((data) => {
                 if (data[0] == "ok") {
                     this.log.debug("[DEBUG]Success");
@@ -116,7 +116,7 @@ class baseAC {
                 this.led = state.substr(8, 1);
 
                 //Use independence function to update accessory state
-                this._updateState(this.active, this.mode, this.speed, this.swing, this.temperature, this.led, this.power);
+                this._updateState();
 
                 if (this.outerSensor == null) {
                     this.CurrentTemperature.updateValue(this.temperature);
@@ -128,7 +128,7 @@ class baseAC {
         Promise.all([p1, p2])
             .then(() => {
                 this.platform._exitSyncState();
-                this.log.debug("[%s]Sync complete",this.name);
+                this.log.debug("[%s]Complete",this.name);
             });
     }
 }
