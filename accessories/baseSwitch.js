@@ -3,14 +3,16 @@ const util = require('util');
 
 var Service, Characteristic, Accessory;
 
-class baseSwitch{
+class baseSwitch {
     constructor(config, platform) {
-        
+
     }
     _switchRevertState() {
         /**Revert last state */
-        this.onState = this.lastState;
-        this.activeState.updateValue(this.onState);
+        setTimeout(() => {
+            this.onState = this.lastState;
+            this.activeState.updateValue(this.onState);
+        }, 100);
     }
     _switchUpdateState() {
         this.lastState = this.onState;

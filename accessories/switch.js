@@ -23,9 +23,9 @@ class SwitchAccessory {
             this.onCode = config.data.on;
             this.offCode = config.data.off;
         }
-        this.setCharacteristic();
+        this._setCharacteristic();
     }
-    setCharacteristic() {
+    _setCharacteristic() {
         this.services = [];
 
         this.infoService = new Service.AccessoryInformation();

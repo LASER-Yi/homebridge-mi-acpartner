@@ -1,7 +1,7 @@
 const events = require('events');
 const connectUtil = require('./lib/connectUtil');
 
-require('./accessories/climate');
+const ClimateAccessory = require('./accessories/climate');
 const SwitchAccessory = require('./accessories/switch');
 const SwitchRepeatAccessory = require('./accessories/switchRepeat');
 const LearnIRAccessory = require('./accessories/learnIR');
@@ -77,7 +77,7 @@ XiaoMiAcPartner.prototype = {
                     case "learnIR":
                         accessories.push(new LearnIRAccessory(element, this));
                         break;
-                    case "switchMulti":
+                    case "switchRepeat":
                         accessories.push(new SwitchRepeatAccessory(element, this));
                         break;
                     case "heaterCooler":
@@ -88,8 +88,8 @@ XiaoMiAcPartner.prototype = {
                         break;
                 }
             }
-            this.log("[INFO]Register complete");
         });
+        this.log("[INFO]Register complete");
         callback(accessories);
     },
     _enterSyncState: function () {
@@ -97,13 +97,13 @@ XiaoMiAcPartner.prototype = {
             return false;
         } else {
             this.syncCounter++;
-            this.log.debug("[DEBUG]Enter sync state #%s", this.syncCounter);
+            this.log.debug("[DEBUG]syncState #%s", this.syncCounter);
             return true;
         }
     },
     _exitSyncState: function () {
         this.syncLockEvent.emit("lockDrop");
-        this.log.debug("[DEBUG]Exit sync state #%s", this.syncCounter);
+        this.log.debug("[DEBUG]syncState #%s", this.syncCounter);
         if (this.syncCounter > 0) {
             this.syncCounter--;
         } else {

@@ -20,9 +20,9 @@ class LearnIRAccessory {
         this.lastIRCode = undefined;
         this.closeTimer;
 
-        this.setCharacteristic();
+        this._setCharacteristic();
     }
-    setCharacteristic() {
+    _setCharacteristic() {
         this.services = [];
 
         this.infoService = new Service.AccessoryInformation();
@@ -53,35 +53,53 @@ class LearnIRAccessory {
             //Switch on
             this.platform.devices[this.deviceIndex].call('start_ir_learn', [30])
                 .then(() => {
-                    this.log("[%s]Start Learning...Auto stop after 30 seconds", this.name);
+                    this._switchUpdateState();
+                    this.log("[%s]Start IR learn", this.name);
                     this.showIRCode();
-                    this.closeTimer = setTimeout(this.showIRCode.bind(this), 30 * 1000);
+                    setTimeout(() => {
+                        this.setSwitchOff();
+                    }, 30 * 1000);
                 })
-                .catch((err) => this.log.error("[ERROR]Start failed! " + err))
+                .catch((err) => {
+                    this.log.error("[ERROR]Start failed! " + err);
+                    this._switchRevertState();
+                })
                 .then(() => {
                     callback();
                     this.platform._exitSyncState();
                 });
         } else {
             //Switch off
-            this.platform.devices[this.deviceIndex].call('end_ir_learn', [])
-                .then(() => {
-                    this.log("[%s]Stop Learning...", this.name);
-                    clearTimeout(this.closeTimer);
-                }).catch((err) => this.log.error("[ERROR]End failed! " + err))
-                .then(() => {
-                    callback();
-                    this.platform._exitSyncState();
-                });
+            this.setSwitchOff(() => {
+                callback();
+            })
         }
+    }
+    setSwitchOff(callback) {
+        this.platform.devices[this.deviceIndex].call('end_ir_learn', [])
+            .then(() => {
+                this.log("[%s]End IR learn", this.name);
+                this._switchUpdateState();
+                clearTimeout(this.closeTimer);
+            }).catch((err) => {
+                this.log.error("[ERROR]End failed! " + err);
+                this._switchRevertState();
+            })
+            .then(() => {
+                callback();
+                this.platform._exitSyncState();
+            });
     }
     showIRCode() {
         this.platform.devices[this.deviceIndex].call('get_ir_learn_result', [])
             .then((ret) => {
                 let code = ret[0];
-                if (code != '(null)' || code !== this.lastIRCode) {
+                if (code != '(null)' && code !== this.lastIRCode) {
                     this.lastIRCode = code;
-                    this.log("[%s]IR Code: %s", this.name, code);
+                    this.log("[%s]IR code: %s", this.name, code);
+                    this.closeTimer = setTimeout(() => {
+                        this.showIRCode();
+                    }, 500);
                 }
             }).catch((err) => this.log.error("[ERROR]Learn Switch error! " + err));
     }

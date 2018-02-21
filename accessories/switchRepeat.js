@@ -3,7 +3,7 @@ const baseSwitch = require('./baseSwitch');
 
 var Service, Characteristic, Accessory;
 
-class SwitchRepeatAccessory{
+class SwitchRepeatAccessory {
     constructor(config, platform) {
         this.init(config, platform);
         Accessory = platform.Accessory;
@@ -18,24 +18,23 @@ class SwitchRepeatAccessory{
         this.lastState = this.onState;
 
         //Code control
-        this.code = null;
+        this.code = [];
         this.codeIndex = 0;
+        this.codeTimer;
 
         if (!config.data || !config.data.on || !config.data.off) {
             this.log.error("[ERROR]IR code no defined!");
-        } else {
-            this.log.debug("[%s]Code length: %s + %s", this.name, config.data.on.length, config.data.off.length);
         }
-        this.setCharacteristic();
+        this._setCharacteristic();
     }
 
-    setCharacteristic() {
+    _setCharacteristic() {
         this.services = [];
 
         this.infoService = new Service.AccessoryInformation();
         this.infoService
             .setCharacteristic(Characteristic.Manufacturer, "XiaoMi")
-            .setCharacteristic(Characteristic.Model, "AC Partner IR Switch(M)")
+            .setCharacteristic(Characteristic.Model, "AC Partner IR Repeat Switch")
             .setCharacteristic(Characteristic.SerialNumber, "Undefined");
         this.services.push(this.infoService);
 
@@ -44,28 +43,44 @@ class SwitchRepeatAccessory{
         this.activeState = this.switchService.getCharacteristic(Characteristic.On)
             .on('set', this.setSwitchState.bind(this))
             .updateValue(this.onState);
-        
+
         this.services.push(this.switchService);
     }
 
-    setSwitchState(value,callback) {
+    setSwitchState(value, callback) {
+        //Judge code define
+        if (!this.platform._enterSyncState()) {
+            this.platform.syncLockEvent.once("lockDrop", (() => {
+                this.setSwitchState(value, callback);
+            }));
+            return;
+        }
+
         this.onState = value;
+        //Init code
         this.code = value ? this.config.data.on : this.config.data.off;
-        this.code.forEach(element => {
-            
-        });
-        callback();
+        this.codeIndex = 0;
+
+        this.codeTimer = setInterval(() => {
+            this._sendCmd(this.code[this.codeIndex++]);
+            if (this.codeIndex >= this.code.length) {
+                //If send code fin, disable timer and callback;
+                setTimeout(() => {
+                    clearInterval(this.codeTimer);
+                    this.platform._exitSyncState();
+                    callback();
+                }, this.sendInterval / 2);
+            }
+        }, this.sendInterval);
     }
 
-    sendCmd(code, callback) {
+    _sendCmd(code) {
         this.platform.devices[this.deviceIndex].call('send_ir_code', [code])
             .then((ret) => {
                 this.log.debug("[%s]Return result: %s", this.name, ret);
             }).catch((err) => {
                 this.log.error("[ERROR]Send failed! " + err);
-            }).then(() => {
-                callback();
-            })
+            });
     }
 }
 util.inherits(SwitchRepeatAccessory, baseSwitch);

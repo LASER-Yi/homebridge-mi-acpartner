@@ -1,7 +1,7 @@
 //Thanks to jayqizone
 const miio = require('miio');
 const presets = require("../presets.json");
-const pack_SignalHandle = require("../lib/newPresetHandle");
+const pack_SignalHandle = require("../lib/presetUtil");
 
 var Service, Characteristic, Accessory;
 
@@ -106,7 +106,7 @@ HeaterCoolerAccessory.prototype = {
                     minValue: 0,
                     minStep: 1
                 })
-                .updateValue(50);
+                .updateValue(0);
         }
 
         this.service.push(this.hc_Service);
