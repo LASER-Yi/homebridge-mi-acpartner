@@ -62,12 +62,13 @@ class SwitchAccessory {
             .then((ret) => {
                 this._switchUpdateState();
                 this.log.debug("[%s]Result: %s", this.name, ret);
+                callback();
             }).catch((err) => {
                 this._switchRevertState();
                 this.log.error("[%s]Failed! " + err, this.name);
+                callback(err);
             }).then(() => {
                 /**Callback and exit sync state */
-                callback();
                 this.platform._exitSyncState();
             });
     }

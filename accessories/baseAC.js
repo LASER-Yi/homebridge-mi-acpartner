@@ -63,10 +63,11 @@ class baseAC {
         this.platform.devices[this.deviceIndex].call(command, [code])
             .then((data) => {
                 if (data[0] == "ok") this.log.debug("[DEBUG]Success");
+                callback();
             }).catch((err) => {
                 this.log.error("[%s]Send code failed! " + err, this.name);
+                callback(err);
             }).then(() => {
-                callback();
                 this.platform._exitSyncState();
             });
     }
