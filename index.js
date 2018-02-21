@@ -5,7 +5,7 @@ const ClimateAccessory = require('./accessories/climate');
 const SwitchAccessory = require('./accessories/switch');
 const SwitchRepeatAccessory = require('./accessories/switchRepeat');
 const LearnIRAccessory = require('./accessories/learnIR');
-require('./accessories/heaterCooler');
+const HeaterCoolerAccessory = require('./accessories/heaterCooler');
 
 var PlatformAccessory, Accessory, Service, Characteristic, UUIDGen;
 
@@ -97,13 +97,13 @@ XiaoMiAcPartner.prototype = {
             return false;
         } else {
             this.syncCounter++;
-            this.log.debug("[DEBUG]Enter SyncState #%s", this.syncCounter);
+            //this.log.debug("[DEBUG]Enter SyncState #%s", this.syncCounter);
             return true;
         }
     },
     _exitSyncState: function () {
         this.syncLockEvent.emit("lockDrop");
-        this.log.debug("[DEBUG]Exit SyncState #%s", this.syncCounter);
+        //this.log.debug("[DEBUG]Exit SyncState #%s", this.syncCounter);
         if (this.syncCounter > 0) {
             this.syncCounter--;
         } else {

@@ -1,97 +1,108 @@
-//Thanks to jayqizone
-const miio = require('miio');
-const presets = require("../presets.json");
-const pack_SignalHandle = require("../lib/presetUtil");
+const util = require('util');
+const baseAC = require('./baseAC');
 
 var Service, Characteristic, Accessory;
 
-HeaterCoolerAccessory = function(config, platform){
-    this.init(config, platform);
-    Accessory = platform.Accessory;
-    Service = platform.Service;
-    Characteristic = platform.Characteristic;
+class HeaterCoolerAccessory {
+    constructor(config, platform) {
+        this.init(config, platform);
+        Accessory = platform.Accessory;
+        Service = platform.Service;
+        Characteristic = platform.Characteristic;
 
-    //Config
-    this.maxTemp = parseInt(config.maxTemp) || 30;
-    this.minTemp = parseInt(config.minTemp) || 17;
-    this.LightState = config.lightState || false;
-    this.outerSensor = config.sensorSid;
-    this.syncInterval = config.syncInterval || 60000;
-    this.data = JSON;
-    this.data.defaultPresets = presets.default;
-    this.name = config['name'];
+        //Config
+        this.maxTemp = parseInt(config.maxTemp) || 30;
+        this.minTemp = parseInt(config.minTemp) || 17;
+        this.syncInterval = config.syncInterval || 60000;
+        this.autoStart = config.autoStart || "cool";
+        this.outerSensor = config.sensorSid;
 
-    //Characteristics
-    this.Active = Characteristic.Active.INACTIVE;
-    this.TargetHeaterCoolerState = Characteristic.TargetHeaterCoolerState.AUTO;
-    this.CoolingThresholdTemperature = (this.maxTemp + this.minTemp) / 2;
-    this.HeatingThresholdTemperature = (this.maxTemp + this.minTemp) / 2;
-    this.SwingMode = 0;
-    this.RotationSpeed = 0;
+        //Characteristic
+        this.CActive;
+        this.TargetHeaterCoolerState;
+        this.CurrentHeaterCoolerState;
+        this.CoolingThresholdTemperature;
+        this.HeatingThresholdTemperature;
+        this.SwingMode;
+        this.RotationSpeed;
+        this.CurrentTemperature;
+        this.CurrentRelativeHumidity;
 
-    this.TargetTemperature = (this.maxTemp + this.minTemp) / 2;
-    this.CurrentHeaterCoolerState = Characteristic.CurrentHeaterCoolerState.AUTO;
-    this.CurrentTemperature;
-    this.CurrentRelativeHumidity;
+        //AC state
+        this.model;
+        this.active;
+        this.mode;
+        this.temperature;
+        this.speed;
+        this.swing;
+        this.led;
 
-    //Add Characteristic
-    this._setCharacteristic();
-}
+        //Sync control
+        setImmediate(() => this._stateSync());
+        this.syncTimer = setInterval(() => {
+            this._stateSync();
+        }, this.syncInterval);
 
-HeaterCoolerAccessory.prototype = {
+        //Add Characteristic
+        this._setCharacteristic();
+    }
+    _setCharacteristic() {
+        this.services = [];
 
-    //Set Characteristic
-    _setCharacteristic: function(){
-        var that = this;
-
-        this.service = [];
         this.serviceInfo = new Service.AccessoryInformation();
         this.serviceInfo
             .setCharacteristic(Characteristic.Manufacturer, 'XiaoMi')
-            .setCharacteristic(Characteristic.Model, 'AC Partner')
+            .setCharacteristic(Characteristic.Model, 'AC Partner(HeaterCooler)')
             .setCharacteristic(Characteristic.SerialNumber, "Undefined");
-        this.service.push(this.serviceInfo);
+        this.services.push(this.serviceInfo);
 
-        this.hc_Service = new Service.HeaterCooler(this.name);
+        this.hcService = new Service.HeaterCooler(this.name);
 
-        this.Active = this.hc_Service.getCharacteristic(Characteristic.Active)
-            .on('set', this.hc_SetActive.bind(this));
+        this.CActive = this.hcService.getCharacteristic(Characteristic.Active)
+            .on('set', this._setCActive.bind(this));
 
-        this.TargetHeaterCoolerState = this.hc_Service.getCharacteristic(Characteristic.TargetHeaterCoolerState)
-            .on('set', this.hc_SetTargetHeaterCoolerState.bind(this));
+        this.TargetHeaterCoolerState = this.hcService
+            .getCharacteristic(Characteristic.TargetHeaterCoolerState)
+            .on('set', this._setTargetHeaterCoolerState.bind(this));
 
-        this.CoolingThresholdTemperature = this.hc_Service.addCharacteristic(Characteristic.CoolingThresholdTemperature)
+        this.CoolingThresholdTemperature = this.hcService
+            .addCharacteristic(Characteristic.CoolingThresholdTemperature)
             .setProps({
-                maxValue: that.maxTemp,
-                minValue: that.minTemp,
+                maxValue: this.maxTemp,
+                minValue: this.minTemp,
                 minStep: 1
             })
-            .on('set', this.hc_SetCoolingThresholdTemperature.bind(this))
-            .updateValue(this.TargetTemperature);
+            .on('set', this._setCoolingThresholdTemperature.bind(this))
+            .updateValue((this.minTemp + this.maxTemp) / 2);
 
-        this.HeatingThresholdTemperature = this.hc_Service.addCharacteristic(Characteristic.HeatingThresholdTemperature)
+        this.HeatingThresholdTemperature = this.hcService
+            .addCharacteristic(Characteristic.HeatingThresholdTemperature)
             .setProps({
-                maxValue: that.maxTemp,
-                minValue: that.minTemp,
+                maxValue: this.maxTemp,
+                minValue: this.minTemp,
                 minStep: 1
             })
-            .on('set', this.hc_SetHeatingThresholdTemperature.bind(this))
-            .updateValue(this.TargetTemperature);
+            .on('set', this._setHeatingThresholdTemperature.bind(this))
+            .updateValue((this.minTemp + this.maxTemp) / 2);
 
-        this.SwingMode = this.hc_Service.addCharacteristic(Characteristic.SwingMode)
-            .on('set', this.hc_SetSwingMode.bind(this));
+        this.SwingMode = this.hcService
+            .addCharacteristic(Characteristic.SwingMode)
+            .on('set', this._setSwingMode.bind(this));
 
-        this.RotationSpeed = this.hc_Service.addCharacteristic(Characteristic.RotationSpeed)
+        this.RotationSpeed = this.hcService
+            .addCharacteristic(Characteristic.RotationSpeed)
             .setProps({
                 maxValue: 3,
                 minValue: 0,
                 minStep: 1
             })
-            .on('set', this.hc_SetRotationSpeed.bind(this));
+            .on('set', this._setRotationSpeed.bind(this));
 
-        this.CurrentHeaterCoolerState = this.hc_Service.getCharacteristic(Characteristic.CurrentHeaterCoolerState);
-            
-        this.CurrentTemperature = this.hc_Service.getCharacteristic(Characteristic.CurrentTemperature)
+        this.CurrentHeaterCoolerState = this.hcService
+            .getCharacteristic(Characteristic.CurrentHeaterCoolerState);
+
+        this.CurrentTemperature = this.hcService
+            .getCharacteristic(Characteristic.CurrentTemperature)
             .setProps({
                 maxValue: 60,
                 minValue: -20,
@@ -100,7 +111,8 @@ HeaterCoolerAccessory.prototype = {
             .updateValue((this.maxTemp + this.minTemp) / 2);
 
         if (this.outerSensor) {
-            this.CurrentRelativeHumidity = this.hc_Service.getCharacteristic(Characteristic.CurrentRelativeHumidity)
+            this.CurrentRelativeHumidity = this.hcService
+                .addCharacteristic(Characteristic.CurrentRelativeHumidity)
                 .setProps({
                     maxValue: 100,
                     minValue: 0,
@@ -109,219 +121,101 @@ HeaterCoolerAccessory.prototype = {
                 .updateValue(0);
         }
 
-        this.service.push(this.hc_Service);
-    },
-    hc_SendCmd: function(){
-        this.localSyncLock = true;
-
-        if (!this.device) {
-            this.log.error('[ERROR]Send code failed!(Device not exists)');
-            this.localSyncLock = false;
-            return;
-        }
-        if(this.model == null){
-            this.log('[INFO]Waiting for Sync state, please try again later');
-            return;
-        }
-
-        let code;
-
-        this.data.preset = this.preset;
-        this.data.model = this.model;
-        this.data.power = this.Active.value;
-        this.data.mode;
-        switch(this.TargetHeaterCoolerState.value){
-            case Characteristic.TargetHeaterCoolerState.AUTO:
-                this.data.mode = presets.default.mo.auto;
-                this.data.tempera = this.TargetTemperature;
+        this.services.push(this.hcService);
+    }
+    _setCActive(Active, callback) {
+        this.active = (Active == Characteristic.Active.ACTIVE ? 1 : 0);
+        this._sendCmdAsync(() => {
+            callback();
+        });
+    }
+    _setTargetHeaterCoolerState(TargetHeaterCoolerState, callback) {
+        //this.CurrentHeaterCoolerState.updateValue(TargetHeaterCoolerState);
+        switch (TargetHeaterCoolerState) {
+            case Characteristic.TargetHeaterCoolerState.HEAT:
+                this.mode = 0;
                 break;
             case Characteristic.TargetHeaterCoolerState.COOL:
-                this.data.mode = presets.default.mo.cooler;
-                this.data.tempera = this.CoolingThresholdTemperature.value
+                this.mode = 1;
                 break;
-            case Characteristic.TargetHeaterCoolerState.HEAT:
-                this.data.mode = presets.default.mo.heater;
-                this.data.tempera = this.HeatingThresholdTemperature.value;
+            case Characteristic.TargetHeaterCoolerState.AUTO:
+                this.mode = 2;
                 break;
         }
-        this.data.SwingMode = this.SwingMode;
-        this.data.RotationSpeed = this.RotationSpeed.value;
-        this.data.LightState = this.LightState;
-        code = pack_SignalHandle(this.data);
-
-        this.log.debug("[DEBUG]Sending AC code: " + code);
-        this.device.call('send_cmd', [code])
-            .catch(err =>{
-                this.log.error("[ERROR]Send code fail! Error: " + err);
-            }).then(data =>{
-                if (data[0] == "ok") {
-                    this.log.debug("[DEBUG]Change Successful");
-                }else{
-                    this.log.debug("[DEBUG]Unsuccess! Maybe invaild AC Code?");
-                }
-                this.localSyncLock = false;
-            })
-    },
-
-    //Sync Function
-    hc_Sync: function(){
-        if (!this.device && this.platform.syncLock) {
-            setTimeout(this.hc_Sync.bind(this), 3000);
-            return;
-        }
-        this.platform.syncLock = true;
-        this.log.debug("[%s]Syncing...",this.name);
-
-        //Update CurrentTemperature
-        let p1 = this.outerSensor && this.device.call('get_device_prop_exp', [[this.outerSensor, "temperature", "humidity"]])
-        .then((senRet) =>{
-            if (senRet[0][0] == null) {
-                this.log.error("[ERROR]Invaild sensorSid!")
-            }else{
-                this.log.debug("[DEBUG]Update Temperature to " + senRet[0][0] / 100.0);
-                this.CurrentTemperature.updateValue(senRet[0][0] / 100.0);
-                this.CurrentRelativeHumidity.updateValue(senRet[0][1] / 100.0);
-            }
-        }).catch((err) =>{
-            this.log.error("[ERROR]Current Temperature sync fail! " + err);
+        this._sendCmdAsync(() => {
+            callback();
         });
+    }
 
-        //Update AC state
-        let p2 = this.device.call('get_model_and_state', [])
-            .then(ret =>{
-                let model = ret[0],
-                    state = ret[1],
-                    power = ret[2];
-
-                this.acPower = power;
-
-                if (this.model !== model) {
-                    this.model = model;
-                    this.preset = presets[model.substr(0,2) + model.substr(8,8)];
-                }
-
-                let active, mode, speed, swing, temperature, led;
-                active = state.substr(2,1) - 0;
-                speed = state.substr(4,1) - 0 + 1;
-                swing = 1 - state.substr(5,1);
-                temperature = parseInt(state.substr(6,2),16);
-                led = state.substr(8,1);
-                
-                this.TargetTemperature = temperature;
-
-                //Update State
-                switch (ret[1].substr(3,1)) {
-                    case '0':
-                        mode = Characteristic.TargetHeaterCoolerState.HEAT;
-                        if (temperature <= this.maxTemp || temperature >= this.minTemp) {
-                            this.HeatingThresholdTemperature.updateValue(temperature);   
-                        }else{
-                            this.log.error("[ERROR]Temperature out of range");
-                            this.HeatingThresholdTemperature.updateValue(this.maxTemp);
-                        }
-                        break;
-                    case '1':
-                        mode = Characteristic.TargetHeaterCoolerState.COOL;
-                        if (temperature <= this.maxTemp || temperature >= this.minTemp) {
-                            this.CoolingThresholdTemperature.updateValue(temperature);
-                        }else{
-                            this.log.error("[ERROR]Temperature out of range");
-                            this.CoolingThresholdTemperature.updateValue(this.maxTemp);
-                        }
-                        break;
-                    case '2':
-                        mode = Characteristic.TargetHeaterCoolerState.AUTO;
-                        //Both Update
-                        if (temperature <= this.maxTemp || temperature >= this.minTemp) {
-                            this.CoolingThresholdTemperature.updateValue(temperature);
-                            this.HeatingThresholdTemperature.updateValue(temperature);
-                        }else{
-                            this.log.error("[ERROR]Temperature out of range");
-                            this.CoolingThresholdTemperature.updateValue(this.maxTemp);
-                            this.HeatingThresholdTemperature.updateValue(this.maxTemp);
-                        }
-                        break;
-                    default:
-                        break;
-                }
-
-                this.Active.updateValue(active);
-                this.TargetHeaterCoolerState.updateValue(mode);
-                this.RotationSpeed.updateValue(speed);
-                this.SwingMode.updateValue(swing);
-
-                if (this.outerSensor == null) {
-                    this.CurrentTemperature.updateValue(temperature);
-                }
-            }).catch((err) => {
-                this.log.error("[ERROR]AC State Sync fail! Error:" + err);
-            });
-
-        Promise.all([p1,p2])
-            .then(() => {
-                this.platform.syncLock = false;
-                this.log.debug("[HC]Sync complete");
-                if (this.syncInterval > 0) {
-                    setTimeout(this.hc_Sync.bind(this), this.syncInterval);
-                }
-            });
-    },
-
-    hc_SetActive(Active, callback){
-        callback();
-
-        this.hc_SendCmdAsync();
-    },
-
-    hc_SetTargetHeaterCoolerState(TargetHeaterCoolerState, callback){
-        callback();
-
-        this.CurrentHeaterCoolerState.updateValue(TargetHeaterCoolerState);
-
-        this.hc_SendCmdAsync();
-    },
-
-    hc_SetCoolingThresholdTemperature(CoolingThresholdTemperature, callback){
-        if (this.CoolingThresholdTemperature.value !== CoolingThresholdTemperature) {
-            this.TargetTemperature = CoolingThresholdTemperature;
-        }
-        callback();
-
-        //Power on
-        this.Active.updateValue(Characteristic.Active.ACTIVE);
-
+    _setCoolingThresholdTemperature(CoolingThresholdTemperature, callback) {
         if (!this.outerSensor) {
             this.CurrentTemperature.updateValue(CoolingThresholdTemperature);
         }
+        this.temperature = CoolingThresholdTemperature;
 
-        this.hc_SendCmdAsync();
-    },
+        this._sendCmdAsync(() => {
+            callback();
+        });
+    }
 
-    hc_SetHeatingThresholdTemperature(HeatingThresholdTemperature, callback){
-        if (this.HeatingThresholdTemperature.value !== HeatingThresholdTemperature) {
-            this.TargetTemperature = HeatingThresholdTemperature;
-        }
-        callback();
-
-        //Power on
-        this.Active.updateValue(Characteristic.Active.ACTIVE);
-
+    _setHeatingThresholdTemperature(HeatingThresholdTemperature, callback) {
         if (!this.outerSensor) {
             this.CurrentTemperature.updateValue(HeatingThresholdTemperature);
         }
+        this.temperature = HeatingThresholdTemperature;
 
-        this.hc_SendCmdAsync();
-    },
+        this._sendCmdAsync(() => {
+            callback();
+        });
+    }
 
-    hc_SetSwingMode(SwingMode, callback){
-        callback();
+    _setSwingMode(SwingMode, callback) {
+        this.swing = (SwingMode == Characteristic.SwingMode.SWING_ENABLE ? 1 : 0);
+        this._sendCmdAsync(() => {
+            callback();
+        });
+    }
 
-        this.hc_SendCmdAsync();
-    },
-
-    hc_SetRotationSpeed(RotationSpeed, callback){
-        callback();
-
-        this.hc_SendCmdAsync();
+    _setRotationSpeed(RotationSpeed, callback) {
+        this.speed = RotationSpeed;
+        this._sendCmdAsync(() => {
+            callback();
+        });
+    }
+    _updateState() {
+        //Update Active
+        if (this.active == 1) {
+            this.CActive.updateValue(Characteristic.Active.ACTIVE);
+        } else {
+            this.CActive.updateValue(Characteristic.Active.INACTIVE);
+        }
+        //Update Mode and Temperature
+        let chara_mode;
+        switch (this.mode) {
+            case 0:
+                //HEAT
+                chara_mode = Characteristic.TargetHeaterCoolerState.HEAT;
+                this.HeatingThresholdTemperature.updateValue(this.temperature);
+                break;
+            case 1:
+                //COOL
+                chara_mode = Characteristic.TargetHeaterCoolerState.COOL;
+                this.CoolingThresholdTemperature.updateValue(this.temperature);
+                break;
+            case 2:
+                //AUTO
+                chara_mode = Characteristic.TargetHeaterCoolerState.AUTO;
+                this.HeatingThresholdTemperature.updateValue(this.temperature + 2);
+                this.CoolingThresholdTemperature.updateValue(this.temperature - 2);
+                break;
+        }
+        this.TargetHeaterCoolerState.updateValue(chara_mode);
+        //Update SwingMode
+        this.SwingMode.updateValue(this.swing == 1 ? Characteristic.SwingMode.SWING_ENABLE : Characteristic.SwingMode.SWING_DISABLED);
+        //Update RotationSpeed
+        this.RotationSpeed.updateValue(this.speed);
     }
 }
+
+util.inherits(HeaterCoolerAccessory, baseAC);
+module.exports = HeaterCoolerAccessory;

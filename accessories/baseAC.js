@@ -6,7 +6,7 @@ const presetUtil = require("../lib/presetUtil");
 class baseAC {
     constructor(config, platform) { }
     
-    /**Need _syncBack() and _updateState() function in child object*/
+    /**Need _updateState() function in child object*/
     _sendCmd(code) {
         if (code.substr(0, 2) == "FE") {
             this.log.debug("[DEBUG]Sending IR code: " + code);
@@ -62,11 +62,7 @@ class baseAC {
         }
         this.platform.devices[this.deviceIndex].call(command, [code])
             .then((data) => {
-                if (data[0] == "ok") {
-                    this.log.debug("[DEBUG]Success");
-                } else {
-                    this.log.debug("[DEBUG]Failed!(Maybe invaild code?)");
-                }
+                if (data[0] == "ok") this.log.debug("[DEBUG]Success");
             }).catch((err) => {
                 this.log.error("[%s]Send code failed! " + err, this.name);
             }).then(() => {

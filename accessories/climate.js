@@ -1,5 +1,4 @@
 const util = require('util');
-
 const baseAC = require('./baseAC');
 
 var Service, Characteristic, Accessory;
@@ -190,6 +189,22 @@ class ClimateAccessory {
             this.CurrentTemperature.updateValue(TargetTemperature);
         }
         this.temperature = TargetTemperature;
+        if (this.active == 0) {
+            switch (this.autoStart) {
+                case "cool":
+                    this.TargetHeatingCoolingState.updateValue(Characteristic.TargetHeatingCoolingState.COOL);
+                    this.model = 1;
+                    break;
+                case "heat":
+                    this.TargetHeatingCoolingState.updateValue(Characteristic.TargetHeatingCoolingState.HEAT);
+                    this.model = 0;
+                    break;
+                case "auto":
+                    this.TargetHeatingCoolingState.updateValue(Characteristic.TargetHeatingCoolingState.AUTO);
+                    this.model = 2;
+                    break;
+            }
+        }
 
         this._sendCmdAsync(() => {
             callback();   
