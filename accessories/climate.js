@@ -13,9 +13,18 @@ class ClimateAccessory {
         //Config
         this.maxTemp = parseInt(config.maxTemp) || 30;
         this.minTemp = parseInt(config.minTemp) || 17;
-        this.syncInterval = config.syncInterval || 60*1000;
         this.autoStart = config.autoStart || "cool";
         this.outerSensor = config.sensorSid;
+        //Sync
+        setImmediate(() => this._stateSync());
+        if (config.syncInterval > 0) {
+            this.syncInterval = config.syncInterval || 60 * 1000;
+            this.syncTimer = setInterval(() => {
+                this._stateSync();
+            }, this.syncInterval);
+        }
+
+        //customize
         if (config.customize) {
             this.customi = config.customize;
             this.log.debug("[DEBUG]Using customized AC signal...");
@@ -35,12 +44,6 @@ class ClimateAccessory {
         this.speed;
         this.swing;
         this.led;
-
-        //Sync control
-        setImmediate(() => this._stateSync());
-        this.syncTimer = setInterval(() => {
-            this._stateSync();
-        }, this.syncInterval);
 
         this._setCharacteristic();
     }

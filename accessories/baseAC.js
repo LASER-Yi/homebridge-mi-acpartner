@@ -113,7 +113,7 @@ class baseAC {
                 }
                 this.log.debug("Model -> %s", this.model);
 
-                //Save active, mode, temperature parameter to global
+                //Save all parameter to global
                 this.active = state.substr(2, 1);
                 this.mode = state.substr(3, 1);
                 this.temperature = parseInt(state.substr(6, 2), 16);
@@ -142,7 +142,9 @@ class baseAC {
             .then(() => {
                 this.platform._exitSyncState();
                 this.log.debug("[%s]Complete", this.name);
-            });
+            }).catch((err) => {
+                this.log.error("[%s]Sync failed!"+err,this.name);
+            })
     }
 }
 

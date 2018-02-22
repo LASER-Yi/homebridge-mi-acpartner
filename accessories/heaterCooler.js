@@ -13,9 +13,16 @@ class HeaterCoolerAccessory {
         //Config
         this.maxTemp = parseInt(config.maxTemp) || 30;
         this.minTemp = parseInt(config.minTemp) || 17;
-        this.syncInterval = config.syncInterval || 60*1000;
         this.autoStart = config.autoStart || "cool";
         this.outerSensor = config.sensorSid;
+        //Sync
+        setImmediate(() => this._stateSync());
+        if (config.syncInterval > 0) {
+            this.syncInterval = config.syncInterval || 60 * 1000;
+            this.syncTimer = setInterval(() => {
+                this._stateSync();
+            }, this.syncInterval);
+        }
 
         //Characteristic
         this.CActive;
@@ -36,12 +43,6 @@ class HeaterCoolerAccessory {
         this.speed;
         this.swing;
         this.led;
-
-        //Sync control
-        setImmediate(() => this._stateSync());
-        this.syncTimer = setInterval(() => {
-            this._stateSync();
-        }, this.syncInterval);
 
         //Add Characteristic
         this._setCharacteristic();
