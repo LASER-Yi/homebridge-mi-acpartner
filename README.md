@@ -1,14 +1,14 @@
 # homebridge-mi-acpartner
 [![npm version](https://badge.fury.io/js/homebridge-mi-acpartner.svg)](https://badge.fury.io/js/homebridge-mi-acpartner)
 
-[English Ver. Here](https://github.com/LASER-Yi/homebridge-mi-acpartner/blob/master/doc/README_EN.md#)
+[English Version](https://github.com/LASER-Yi/homebridge-mi-acpartner/blob/master/doc/README_EN.md#) | 中文版
 
 
 小米空调伴侣的Homebridge插件
 
 感谢[takatost](https://github.com/takatost/homebridge-mi-ac-partner)，[miio](https://github.com/aholstenson/miio)，[YinHangCode](https://github.com/YinHangCode/homebridge-mi-aqara)和所有测试开发人员提供支持。
 
-**注意：此插件于0.4.0版本后修改成platform，请根据本文修改你的配置文件使插件正常工作。**
+**注意：此插件于0.6.0版本后修改了配置文件，请根据本文修改你的配置文件使插件正常工作。**
 
 ### Support(支持)
 
@@ -16,9 +16,7 @@
 
 空调伴侣2代 & 空调伴侣1代
 
-继电器空调伴侣的插件支持还处于开发阶段。
-
-如需要使用空调伴侣中的网关功能，请使用[YinHangCode](https://github.com/YinHangCode/homebridge-mi-aqara)提供的Mi-Aqara插件。
+如需要使用空调伴侣中的网关功能，请使用``YinHangCode``提供的[Homebridge-Mi-Aqara](https://github.com/YinHangCode/homebridge-mi-aqara)插件。
 
 ### Feature(功能）
 
@@ -26,44 +24,46 @@
 
 * 控制模式：
 
-  - 使用空调码或红外码控制你的空调。
-  - 在17-30度之间调整空调温度（默认情况）。
-  - 制冷，制热，自动模式支持。
-  - 改变风力，改变扫风状态。（请将空调定义成heaterCooler）
-  - 使用红外控制其他电器。~~（即将上线）~~
+  - 使用空调码或红外码控制你的空调
+  - 默认情况下，在17-30度之间调整空调温度
+  - 更改空调模式：制冷，制热，自动模式
+  - 改变风力和扫风状态。（请定义成heaterCooler）
+  - 使用红外功能学习红外码，并控制其他电器
 
-* 如果我们没有提供预设，可自定义你的空调码（请将空调定义成climate）
+* 如果空调控制没有响应，可自定义你的空调码
 
-* 在空调伴侣和Homekit中同步信息。~~(即将上线)~~
+* 在米家App和Homekit中同步信息~~(即将上线)~~
 
-* 自动获取你的空调码。(只支持部分空调空调)
+* 自动生成空调码(请查看预设栏)
 
-* 米家温湿度传感器支持。~~(即将上线)~~
+* 支持使用温湿度传感器显示温度和湿度~~(即将上线)~~
 
 
 ### Installation（安装）
 
 1. 安装[Homebridge](https://github.com/nfarina/homebridge)
 
-2. 安装此插件和依赖包(miio)
+2. 安装此插件
 
-           npm install -g  homebridge-mi-acpartner miio
+```
+sudo npm install -g homebridge-mi-acpartner
+```
 
 
-3. 在**config.json**中加入你的配置信息，请参考下方的``Config``和``Config Example``添加
+3. 在**config.json**中加入你的配置信息，请参考下方的``Config``和``Config Example``
 
-4. 启动Homebridge.
+4. 启动Homebridge
 
 ### Preset（预设）
 
 此插件目前支持的预设：
 
-    格力：1，2，8
+    格力：2，8
     大部分空调的1号预设
 
 你可以在米家App中更改预设信息
 
-如果没有定义``customize``，插件会使用自动生成的空调码，不保证可用性。
+如果没有定义``customize``，插件会使用自动生成的空调码，空调可能不会响应。
 
 ### Config（配置）
 
@@ -72,98 +72,199 @@
 | 参数 | 说明 | 必填 |
 | --- | --- | --- |
 | ``platform`` | “XiaoMiAcPartner" | * |
-| ``ip`` | 空调伴侣的IP地址，下方设备(accessories)中没有填写ip的均使用此处ip |  |
-| ``token`` | 空调伴侣的token，下方设备(accessories)中没有填写token的均使用此处token |  |
+| ``devices`` | 此处写入空调伴侣的**IP地址**和**Token** | * |
+
+```Json
+"platforms": [
+        {
+            "platform": "XiaoMiAcPartner",
+            "devices":{
+                "192.168.31.120":"your_token_here",
+                "192.168.31.121":"your_token_here",
+            }
+            "accessories":[
+
+            ]
+        }
+    ]
+```
 
 
-参考这篇[文章](https://github.com/aholstenson/miio/blob/master/docs/management.md#getting-the-token-of-a-device)获得空调伴侣的token。
+空调绑定至米家后，可以在空调伴侣页面选择：
 
-如果你有一台安卓手机，也可以直接从安卓版米家App中拿到token
+**关于 -> 然后点击空白部分数次 -> 网关信息**
+
+即可看到空调伴侣的IP地址和Token
 
 **设备配置**
 
 *   climate（空调）
 
+如果没有特别的需求，推荐使用这种类型来设定空调
+
+**更改风速、扫风和灯光请使用米家App，更改后会自动同步到插件中**
     
 | 参数 | 说明 | 示例 | 默认 | 必须 |
 | --- | --- | --- | --- | --- |
-| ``name`` | 显示在Homekit中的名字 | "AcPartner" | - | * |
+| ``name`` | 显示在Homekit中的名字 | "AC Partner" | - | * |
 | ``type`` | 必须填写 | "climate" | - | * |
-| ``ip`` | 空调伴侣的IP地址，此处没有填写ip均使用上方全局ip设置| "192.168.31.99" | - |  |
-| ``token`` | 空调伴侣的token，此处没有填写token均使用上方全局token设置 | "token_as_hex" | - |  |
-| ``maxTemp`` | 设置调节温度上限 | 28 | 30 |  |
-| ``minTemp`` | 设置调节温度下限 | 16 | 17 |  |
-| ``syncInterval`` | 同步间隔（毫秒），设置为0关闭同步 | 30000 | 60000 |  |
-| ``autoStart`` | 当在关机状态下调整温度时，不会自动启动空调 | "off" | "on" |  |
-| ``SwingMode`` | 开关扫风（false为关闭） | false | true |  |
-| ``sensorSid`` | 填写你的温湿度传感器ID，此温湿度传感器**必须**绑定在空调伴侣下 | "lumi.158d000156e667" |  |  |
+| ``deviceIp`` | 空调伴侣的IP地址，使用单个空调伴侣无需填写 | "192.168.31.120" | 使用第一个填写的空调伴侣 |  |
+| ``customize`` | 自定义空调伴侣发送信号 | 参考下方的插件配置使用 |  |  |
+| ``maxTemp`` | 调节温度上限 | 28 | 30 |  |
+| ``minTemp`` | 调节温度下限 | 16 | 17 |  |
+| ``syncInterval`` | 同步间隔（毫秒），设置为0会关闭同步 | 30000 | 60000 |  |
+| ``autoStart`` | 关机状态下调节温度时启动的模式，设置成"off"不会启动空调 | "heat" | "cool" |  |
+| ``sensorSid`` | 填写你的温湿度传感器ID，此温湿度传感器**必须**绑定在空调伴侣下，可在米家空调伴侣中的**子设备信息**中查到 | "lumi.158d000156e667" |  |  |
 
 
-使用此[方法](https://github.com/aholstenson/miio/blob/master/docs/protocol.md#)来获取你正使用的空调码，然后填入到config，填写方法请参考Config Example。
+如果空调没有响应，可以使用此[方法](https://github.com/aholstenson/miio/blob/master/docs/protocol.md#)来获取你正使用的空调码，然后填入到config中。
 
-*   heaterCooler（Beta）
+大部分空调码以01开头，且能与空调伴侣同步信息；大部分红外码以FE开头，能否同步信息未知，所以在使用红外码控制空调时，请关闭插件的同步功能
 
-可以更改风力和扫风的空调，还处于测试阶段
+```Json
+"accessories":[
+                {
+                    "name": "Ac Partner",
+                    "type": "climate",
+                    "customize": {
+                        "off": "关闭信号（必须）",
+                        "on": "有些空调需要这个信号（可不填写）",
+                        "auto": "自动模式信号（可不填写）",
+                        "heat":{
+                            "30": "（可不填写）",
+                            "29": "",
+                            "17": ""
+                        },
+                        "cool":{
+                            "30": "（必须）",
+                            "29": "",
+                            "17": ""
+                        }
+                    }
+                }
+            ]
+```
+
+*   heaterCooler（空调）
+
+可以更改风速和扫风模式的空调
+
+**更改灯光请使用米家App，更改后会自动同步到插件中**
     
 | 参数 | 说明 | 示例 | 默认 | 必须 |
 | --- | --- | --- | --- | --- |
 | ``name`` | 显示在Homekit中的名字 | "AcPartner" | - | * |
 | ``type`` | 必须填写 | "heaterCooler" | - | * |
-| ``ip`` | 空调伴侣的IP地址，此处没有填写ip均使用上方全局ip设置| "192.168.31.99" | - |  |
-| ``token`` | 空调伴侣的token，此处没有填写token均使用上方全局token设置 | "token_as_hex" | - |  |
-| ``maxTemp`` | 设置调节温度上限 | 28 | 30 |  |
-| ``minTemp`` | 设置调节温度下限 | 16 | 17 |  |
-| ``syncInterval`` | 同步间隔（毫秒），设置为0关闭同步 | 30000 | 60000 |  |
-| ``sensorSid`` | 填写你的温湿度传感器ID，此温湿度传感器**必须**绑定在空调伴侣下（可在安卓设备下查到）| "lumi.158d000156e667" |  |  |
+| ``deviceIp`` | 空调伴侣的IP地址，使用单个空调伴侣无需填写 | "192.168.31.120" | 使用第一个填写的空调伴侣 |  |
+| ``maxTemp`` | 调节温度上限 | 28 | 30 |  |
+| ``minTemp`` | 调节温度下限 | 16 | 17 |  |
+| ``syncInterval`` | 同步间隔（毫秒），设置为0会关闭同步 | 30000 | 60000 |  |
+| ``autoStart`` | 关机状态下调节温度时启动的模式，设置成"off"不会启动空调 | "heat" | "cool" |  |
+| ``sensorSid`` | 填写你的温湿度传感器ID，此温湿度传感器**必须**绑定在空调伴侣下，可在米家空调伴侣中的**子设备信息**中查到 | "lumi.158d000156e667" |  |  |
+
+**注意：此方法不支持自定义空调码**
+
+```Json
+"accessories":[
+                {
+                    "name": "AC Partner",
+                    "type": "heaterCooler"
+                }
+            ]
+```
 
 *   learnIR (红外学习开关)
+
+打开开关后，使用遥控器向空调伴侣发送信号，30秒内接收到的红外信号会显示在日志中。
 
 | 参数 | 说明 | 必须 |
 | --- | --- | --- |
 | ``name`` | 显示在Homekit中的名字 | * |
 | ``type`` | "learnIR" | * |
-| ``ip`` | 空调伴侣的IP地址，此处没有填写ip均使用上方全局ip设置 |  |
-| ``token`` | 空调伴侣的token，此处没有填写token均使用上方全局token设置 |  |
+| ``deviceIp`` | 空调伴侣的IP地址，使用单个空调伴侣无需填写 |  |
 
-打开开关后，使用遥控器向空调伴侣发送信号，30秒内接收到的红外信号会显示在日志中。
+请注意空调码仍然需要自己抓包，且可以使用相同的方法抓到红外码
 
-请注意空调码仍然需要自己抓包，且空调码和红外码是有区别的。
+```Json
+"accessories":[
+                {
+                    "name": "learnir_switch",
+                    "type": "learnIR"
+                }
+            ]
+```
 
 *   switch（红外开关）
+
+标准红外开关
 
 
 | 参数 | 说明 | 必须 |
 | --- | --- | --- |
 | ``name`` | 显示在Homekit中的名字 | * |
 | ``type`` | "switch" | * |
-| ``ip`` | 空调伴侣的IP地址，此处没有填写ip均使用上方全局ip设置 |  |
-| ``token`` | 空调伴侣的token，此处没有填写token均使用上方全局token设置 |  |
-| ``data`` | 请参考``Config Example``,必须要包含``on``和``off`` | * |
+| ``deviceIp`` | 空调伴侣的IP地址，使用单个空调伴侣无需填写 |  |
+| ``data`` | 发送的红外信号，必须要包含``on``和``off`` | * |
 
-* switchMulti (多重信号红外开关)
+```Json
+"accessories":[
+                {
+                    "name": "ir_switch",
+                    "type": "switch",
+                    "data":{
+                        "on": "FE018254234ON",
+                        "off": "FE019205313OFF"
+                    }
+                }
+            ]
+```
+
+* switchRepeat (红外开关)
+
+使用此开关可以在设定的间隔下连续发送红外信号
 
 | 参数 | 说明 | 必须 |
 | --- | --- | --- |
 | ``name`` | 显示在Homekit中的名字 | * |
-| ``type`` | "switchMulti" | * |
-| ``ip`` | 空调伴侣的IP地址，此处没有填写ip均使用上方全局ip设置 |  |
-| ``token`` | 空调伴侣的token，此处没有填写token均使用上方全局token设置 |  |
-| ``interval`` | 发送延时，单位为毫秒（默认1000） |   |
-| ``data`` | 请参考``Config Example``,必须要包含``on``和``off`` | * |
+| ``type`` | "switchRepeat" | * |
+| ``deviceIp`` | 空调伴侣的IP地址，使用单个空调伴侣无需填写 |   |
+| ``sendInterval`` | 发送间隔，单位为ms（默认为200ms） |   |
+| ``data`` | 发送的红外信号，必须要包含``on``和``off`` | * |
 
-### Config Example（配置例子）
+```Json
+"accessories":[
+                {
+                    "name": "repeat_switch",
+                    "type": "switchRepeat",
+                    "data":{
+                        "on": [
+                            "FE.....",
+                            "FE......",
+                            "FE......"
+                        ],
+                        "off": [
+                            "FE.....",
+                            "FE......"
+                        ]
+                    }
+                }
+            ]
+```
 
-基本插件配置（推荐）
+### Config Example（配置举例）
+
+配置单个空调伴侣
 
 ```Json
 "platforms": [
         {
             "platform": "XiaoMiAcPartner",
-            "ip": "your_ac_partner_ip",
-            "token": "your_ac_partner_token",
+            "devices":{
+                "192.168.31.120":"your_token_here"
+            }
             "accessories":[
                 {
-                    "name": "Ac Partner",
+                    "name": "AC Partner",
                     "type": "climate"
                 }
             ]
@@ -171,68 +272,75 @@
     ]
 ```
 
-也可以写成这样
-
+配置多个空调伴侣
 ```Json
 "platforms": [
         {
             "platform": "XiaoMiAcPartner",
+            "devices":{
+                "192.168.31.120":"your_token_here",
+                "192.168.31.121":"your_token_here"
+            }
             "accessories":[
                 {
-                    "name": "Ac Partner",
+                    "name": "AC Partner 1",
                     "type": "climate",
-                    "ip": "your_ac_partner_token",
-                    "token": "your_ac_partner_token"
+                    "deviceIp":"192.168.31.120"
+                },
+                {
+                    "name": "AC Partner 2",
+                    "type": "climate",
+                    "deviceIp":"192.168.31.121"
                 }
             ]
         }
     ]
 ```
 
-加入空调和红外学习开关
+空调和红外学习开关
 
 ```Json
 "platforms": [
         {
             "platform": "XiaoMiAcPartner",
-            "ip": "AC_Partner_1",
-            "token": "AC_Partner_1_token",
+            "devices":{
+                "192.168.31.120":"your_token_here"
+            }
             "accessories":[
                 {
-                    "name": "learn",
+                    "name": "AC Partner",
+                    "type": "climate"
+                },
+                {
+                    "name": "learnir_switch",
                     "type": "learnIR"
-                },{
-                    "name": "Ac Partner",
-                    "type": "climate",
-                    "ip":"AC_Partner_2",
-                    "token":"AC_Partner_2_token"
                 }
             ]
         }
     ]
 ```
 
-加入空调和开关
+空调和开关
 
 ```Json
 "platforms": [
         {
             "platform": "XiaoMiAcPartner",
-            "ip": "AC_Partner_1",
-            "token": "AC_Partner_1_token",
+            "devices":{
+                "192.168.31.120":"your_token_here"
+            }
             "accessories":[
                 {
-                    "name": "test",
+                    "name": "AC Partner",
+                    "type": "climate"
+                },
+                {
+                    "name": "ir_switch",
                     "type": "switch",
                     "data":{
                         "on": "FE018254234ON",
                         "off": "FE019205313OFF"
                     }
-                },{
-                    "name": "Ac Partner",
-                    "type": "climate",
-                    "ip":"AC_Partner_2",
-                    "token":"AC_Partner_2_token"
                 }
             ]
         }
@@ -245,13 +353,17 @@
 "platforms": [
         {
             "platform": "XiaoMiAcPartner",
-            "ip": "AC_Partner_1",
-            "token": "AC_Partner_1_token",
+            "devices":{
+                "192.168.31.120":"your_token_here"
+            }
             "accessories":[
                 {
-                    "name": "test",
-                    "type": "switchMulti",
-                    "interval": 1500,
+                    "name": "AC Partner",
+                    "type": "climate"
+                },
+                {
+                    "name": "ir_switch",
+                    "type": "switch",
                     "data":{
                         "on": [
                             "FE.....",
@@ -263,72 +375,18 @@
                             "FE......"
                         ]
                     }
-                },{
-                    "name": "Ac Partner",
-                    "type": "climate",
-                    "ip":"AC_Partner_2",
-                    "token":"AC_Partner_2_token"
                 }
             ]
         }
     ]
 ```
 
-使用外置温湿度传感器
-
-```Json
-"platforms": [
-        {
-            "platform": "XiaoMiAcPartner",
-            "ip": "your_ac_partner_token",
-            "token": "your_ac_partner_token",
-            "accessories":[
-                {
-                    "name": "Ac Partner",
-                    "type": "climate",
-                    "sensorSid": "lumi.158d000156e667"
-                }
-            ]
-        }
-    ]
-```
-
-使用自定义空调码或红外码
-
-大部分空调码以01开头，且能与空调伴侣同步信息；大部分红外码以FE开头，能否同步信息未知
-
-```Json
-"platforms": [
-        {
-            "platform": "XiaoMiAcPartner",
-            "ip": "your_ac_partner_token",
-            "token": "your_ac_partner_token",
-            "accessories":[
-                {
-                    "name": "Ac Partner",
-                    "type": "climate",
-                    "customize": {
-                        "off": "关闭信号（必须）",
-                        "on": "有些空调需要这个信号（可选）",
-                        "auto": "自动模式信号（可选）",
-                        "heat":{
-                            "30": "（可选）",
-                            "29": "",
-                            "17": ""
-                        },
-                        "cool":{
-                            "30": "（必须）",
-                            "29": "",
-                            "17": ""
-                        }
-                    }
-                }
-            ]
-        }
-    ]
-```
 
 ### Changelog
+
+0.6.1
+
+重构几乎所有代码
 
 0.5.6
 

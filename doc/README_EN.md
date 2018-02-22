@@ -1,17 +1,19 @@
 # homebridge-mi-acpartner
 [![npm version](https://badge.fury.io/js/homebridge-mi-acpartner.svg)](https://badge.fury.io/js/homebridge-mi-acpartner)
 
+English Version | [中文版](https://github.com/LASER-Yi/homebridge-mi-acpartner/)
+
 XiaoMi AC Partner plugins for HomeBridge.
 
 Thanks for [takatost's project](https://github.com/takatost/homebridge-mi-ac-partner),  [miio](https://github.com/aholstenson/miio), [YinHangCode's project](https://github.com/YinHangCode/homebridge-mi-aqara) and all other developer and testers.
 
-**WARN: This plugin change to platform after version 0.4.0, please change your config file basic on config and config example.**
+**WARN: This plugin change config.json structure after version 0.6.0, please change your config.json file.**
 
 ### Support
 
 ![AcPartner](https://github.com/LASER-Yi/homebridge-mi-acpartner/raw/master/img/two.jpg)
 
-AC Partner v1 & AC Partner v2
+AC Partner v2 & AC Partner v1
 
 ### Feature
 
@@ -19,32 +21,32 @@ AC Partner v1 & AC Partner v2
 
 * Control modes:
 
-  - Use AC signal or IR signal to control your AC.
-  - Change temperature between 17 - 30(default).
-  - HEAT mode, COOL mode, AUTO mode support.
-  - Wind Force, Swing Mode control support.~~(Basic on iOS 11, Coming sooooon)~~
-  - Customize IR Signal Support.~~(Coming sooooooooon)~~
+  - Use AC signal or IR signal to control your AC
+  - Change temperature between 17 - 30(default state)
+  - HEAT mode, COOL mode, AUTO mode support
+  - Wind Speed, Swing Mode control support~~(set type to 'heaterCooler')~~
+  - Customize IR Signal to control other appliances
 
-* Customize your AC's Signal
+* Customize your AC's Signal if your AC doesn't response your command
 
-* Sync AC State bewteen AC Partner and Home App.~~(Coming soon)~~
+* Sync AC State bewteen Mijia App and Home App
 
-* Auto get AC signal.(may not work for all AC)
+* Auto generate AC signal(Please see ``Preset``)
 
-* Temperature Sensor Support.~~(Coming soon)~~
+* Mijia Temperature Sensor Support
 
 
 ### Installation
 
 1. Install [Homebridge](https://github.com/nfarina/homebridge)
 
-2. Install required packages(include miio).
+2. Install this plugin
 
 ```
-npm install -g homebridge-mi-acpartner miio
+sudo npm install -g homebridge-mi-acpartner
 ```
 
-3. Add plugin configuration to your config.json file, please see ``Config`` and ``Config Example`` for more detail.
+3. Add this plugin configuration to your ``config.json`` file, please see ``Config`` and ``Config Example`` for more detail.
 
 4. Start Homebridge.
 
@@ -52,14 +54,12 @@ npm install -g homebridge-mi-acpartner miio
 
 Support:
 
-    Gree: 1,2,8
-    Almost any no.1 presets in MIJIA app.
+    Gree: 2,8
+    Almost every no.1 AC preset in MIJIA app.
 
 You can change your preset in MIJIA app.
 
-If ``customize`` not exist and we don't support your AC, this plugin will auto generate AC code. 
-
-If you have preset infomation ,you can share with me in [issues](https://github.com/LASER-Yi/homebridge-mi-acpartner/issues).
+If ``customize`` not define, this plugin will auto generate AC code. Your AC may not response your command.
 
 ### Config
 
@@ -68,179 +68,150 @@ If you have preset infomation ,you can share with me in [issues](https://github.
 | parameter | description | required |
 | --- | --- | --- |
 | ``platform`` | “XiaoMiAcPartner" | * |
-| ``ip`` | Your AC Partner ip address in GLOBAL |  |
-| ``token`` | Your AC Partner token in GLOBAL |  |
+| ``devices`` | Define your AC Partner's **IP address** and **Token** here | * |
 
-Please Follow this [document](https://github.com/aholstenson/miio/blob/master/docs/management.md#getting-the-token-of-a-device) to get your AC Parnter's token.
+```Json
+"platforms": [
+        {
+            "platform": "XiaoMiAcPartner",
+            "devices":{
+                "192.168.31.120":"your_token_here",
+                "192.168.31.121":"your_token_here",
+            }
+            "accessories":[
 
+            ]
+        }
+    ]
+```
+
+You can get your Partner's ip address and token in Mijia App.
 
 **accessories**
 
-*   heaterCooler（Beta）
+*   climate(Basic AC function)
 
-可以更改风力和扫风的空调，还处于测试阶段
-    
+Recommand to this type to setup your AC
+
+**Change wind speed, swing mode and LED state in Mijia App, these info will automatic sync back to this plugin.**
+
 | parameter | description | example | default | required |
-| --- | --- | --- | --- | --- |
-| ``name`` | name show in Homekit | "AcPartner" | - | * |
-| ``type`` |  | "heaterCooler" | - | * |
-| ``ip`` | Your AC Partner ip address for this accessory | "192.168.31.99" | - |  |
-| ``token`` | Your AC Partner token for this accessory | "token_as_hex" | - |  |
+| --- | --- | --- |
+| ``name`` | name show in Homekit | "AC Partner" | - | * |
+| ``type`` | - | “climate" | - | * |
+| ``deviceIp`` | IP address of this accessory | "192.168.31.120" | first IP address in "devices" |  |
+| ``customize`` | Customize your AC signal | Example below |  |  |
 | ``maxTemp`` | Set max temperature | 28 | 30 |  |
 | ``minTemp`` | Set min temperature | 16 | 17 |  |
-| ``syncInterval`` | "Sync interval(ms). Set to '0' to turn off sync function | 30000 | 60000 |  |
-| ``sensorSid`` | Your Temperature Sensor Series ID, that sensor **must** connected to AC Partner | "lumi.158d000156e667" |  |  |
+| ``syncInterval`` | "Sync interval(ms). Set to '0' will turn off sync function | 30000 | 60000 |  |
+| ``autoStart`` | when AC turn off, change temperature will set to this mode. If you set this to "off", change temperature will not turn on AC. | "heat" | "cool" |  |
+| ``sensorSid`` | Your Temperature Sensor Series ID, that sensor **must** connected to AC Partner. You can get this in Mijia App | "lumi.158d000156e667" |  |  |
 
-*   climate(Basic partner function)
+If your AC doesn't response your command, you can use this [method](https://github.com/aholstenson/miio/blob/master/docs/protocol.md#)to get your AC Code and fill into config.json file.
 
-| parameter | description | required(default value) |
+Most AC command start with "01" and most IR command start with "FE". If you control your AC by using IR command, please turn off sync function.
+
+```Json
+"accessories":[
+                {
+                    "name": "Ac Partner",
+                    "type": "climate",
+                    "customize": {
+                        "off": "off signal(required)",
+                        "on": "some AC need this signal",
+                        "auto": "auto mode",
+                        "heat":{
+                            "30": "heat mode signal",
+                            "29": "",
+                            "17": ""
+                        },
+                        "cool":{
+                            "30": "cool mode signal(required)",
+                            "29": "",
+                            "17": ""
+                        }
+                    }
+                }
+            ]
+```
+
+*   heaterCooler（Beta）
+
+You can directly change wind speed and swing mode in this type.
+    
+| parameter | description | example | default | required |
 | --- | --- | --- |
-| ``name`` | name show in Homekit | * |
-| ``type`` | “climate" | * |
-| ``ip`` | Your AC Partner ip address for this accessory |  |
-| ``token`` | Your AC Partner token for this accessory |  |
-| ``maxTemp`` | Set max temperature | 28 |
-| ``minTemp`` | Set min temperature | 16 |
-| ``syncInterval`` | "Sync interval(ms). Set to '0' to turn off sync function | 60000 |
-| ``autoStart`` | "off" (When AC is off, change temperature will not turn on AC) | "off" |
-| ``SwingMode`` | Change AC Swing mode | true |
-| ``sensorSid`` | Your Temperature Sensor Series ID, that sensor **must** connected to AC Partner |  |
+| ``name`` | name show in Homekit | "AC Partner" | - | * |
+| ``type`` | - | “climate" | - | * |
+| ``deviceIp`` | IP address of this accessory | "192.168.31.120" | first IP address in "devices" |  |
+| ``maxTemp`` | Set max temperature | 28 | 30 |  |
+| ``minTemp`` | Set min temperature | 16 | 17 |  |
+| ``syncInterval`` | "Sync interval(ms). Set to '0' will turn off sync function | 30000 | 60000 |  |
+| ``autoStart`` | when AC turn off, change temperature will set to this mode. If you set this to "off", change temperature will not turn on AC. | "heat" | "cool" |  |
+| ``sensorSid`` | Your Temperature Sensor Series ID, that sensor **must** connected to AC Partner. You can get this in Mijia App | "lumi.158d000156e667" |  |  |
+
+**Note: This type don't support customize AC signal.**
+
+```Json
+"accessories":[
+                {
+                    "name": "AC Partner",
+                    "type": "heaterCooler"
+                }
+            ]
+```
 
 *   learnIR (Learn IR code)
+
+When switch open, AC Partner will receive IR signal for 30 seconds, and log to console.
 
 | parameter | description | required |
 | --- | --- | --- |
 | ``name`` | name show in Homekit | * |
 | ``type`` | "learnIR" | * |
-| ``ip`` | Your AC Partner ip address for this accessory |  |
-| ``token`` | Your AC Partner token for this accessory |  |
-
-When switch open, AC Partner will receive IR signal for 30 seconds, and log in console.
+| ``deviceIp`` | IP address of this accessory |  |
 
 Please note that there's different between AC code and IR code.
 
-*   switch(IR)
+*   switch(IR switch)
 
 | parameter | description | required |
 | --- | --- | --- |
 | ``name`` | name show in Homekit | * |
 | ``type`` | "switch" | * |
-| ``ip`` | Your AC Partner ip address for this accessory |  |
-| ``token`` | Your AC Partner token for this accessory |  |
-| ``data`` | Follow ``Config Example``, must include ``on`` and ``off`` | * |
-
-*   switchMulti(Send multi IR code in one switch)
-
-| parameter | description | required |
-| --- | --- | --- |
-| ``name`` | name show in Homekit | * |
-| ``type`` | "switch" | * |
-| ``ip`` | Your AC Partner ip address for this accessory |  |
-| ``token`` | Your AC Partner token for this accessory |  |
-| ``interval`` | Send interval(default: 1000) |   |
-| ``data`` | Follow ``Config Example``, must include ``on`` and ``off`` | * |
-
-### Config Example
-
-Basic setting
+| ``deviceIp`` | IP address of this accessory |  |
+| ``data`` | IR code send by this accessory, must include ``on`` and ``off`` | * |
 
 ```Json
-"platforms": [
-        {
-            "platform": "XiaoMiAcPartner",
-            "ip": "your_ac_partner_token",
-            "token": "your_ac_partner_token",
-            "accessories":[
+"accessories":[
                 {
-                    "name": "Ac Partner",
-                    "type": "climate"
-                }
-            ]
-        }
-    ]
-```
-
-You can also write like this
-
-```Json
-"platforms": [
-        {
-            "platform": "XiaoMiAcPartner",
-            "accessories":[
-                {
-                    "name": "Ac Partner",
-                    "type": "climate",
-                    "ip": "your_ac_partner_token",
-                    "token": "your_ac_partner_token"
-                }
-            ]
-        }
-    ]
-```
-
-Add AC and Learn switch
-
-```Json
-"platforms": [
-        {
-            "platform": "XiaoMiAcPartner",
-            "ip": "AC_Partner_1",
-            "token": "AC_Partner_1_token",
-            "accessories":[
-                {
-                    "name": "learn",
-                    "type": "learnIR"
-                },{
-                    "name": "Ac Partner",
-                    "type": "climate",
-                    "ip":"AC_Partner_2",
-                    "token":"AC_Partner_2_token"
-                }
-            ]
-        }
-    ]
-```
-
-Add AC and IR switch
-
-```Json
-"platforms": [
-        {
-            "platform": "XiaoMiAcPartner",
-            "ip": "AC_Partner_1",
-            "token": "AC_Partner_1_token",
-            "accessories":[
-                {
-                    "name": "test",
+                    "name": "ir_switch",
                     "type": "switch",
                     "data":{
                         "on": "FE018254234ON",
                         "off": "FE019205313OFF"
                     }
-                },{
-                    "name": "Ac Partner",
-                    "type": "climate",
-                    "ip":"AC_Partner_2",
-                    "token":"AC_Partner_2_token"
                 }
             ]
-        }
-    ]
 ```
 
-Add AC and switchMulti
+*   switchRepeat(IR switch)
+
+Send multi IR code in one switch
+
+| parameter | description | required |
+| --- | --- | --- |
+| ``name`` | name show in Homekit | * |
+| ``type`` | "switchRepeat" | * |
+| ``deviceIp`` | IP address of this accessory |  |
+| ``sendInterval`` | Send interval(default: 1000ms) |   |
+| ``data`` | IR code send by this accessory, must include ``on`` and ``off`` | * |
 
 ```Json
-"platforms": [
-        {
-            "platform": "XiaoMiAcPartner",
-            "ip": "AC_Partner_1",
-            "token": "AC_Partner_1_token",
-            "accessories":[
+"accessories":[
                 {
-                    "name": "test",
-                    "type": "switchMulti",
-                    "interval": 1500,
+                    "name": "repeat_switch",
+                    "type": "switchRepeat",
                     "data":{
                         "on": [
                             "FE.....",
@@ -252,64 +223,133 @@ Add AC and switchMulti
                             "FE......"
                         ]
                     }
-                },{
-                    "name": "Ac Partner",
+                }
+            ]
+```
+
+### Config Example
+
+Single AC Partner
+
+```Json
+"platforms": [
+        {
+            "platform": "XiaoMiAcPartner",
+            "devices":{
+                "192.168.31.120":"your_token_here"
+            }
+            "accessories":[
+                {
+                    "name": "AC Partner",
+                    "type": "climate"
+                }
+            ]
+        }
+    ]
+```
+Multi AC Partners
+
+```Json
+"platforms": [
+        {
+            "platform": "XiaoMiAcPartner",
+            "devices":{
+                "192.168.31.120":"your_token_here",
+                "192.168.31.121":"your_token_here"
+            }
+            "accessories":[
+                {
+                    "name": "AC Partner 1",
                     "type": "climate",
-                    "ip":"AC_Partner_2",
-                    "token":"AC_Partner_2_token"
+                    "deviceIp":"192.168.31.120"
+                },
+                {
+                    "name": "AC Partner 2",
+                    "type": "climate",
+                    "deviceIp":"192.168.31.121"
                 }
             ]
         }
     ]
 ```
 
-Use outer Temperature Sensor
+AC and IR learn switch
 
 ```Json
 "platforms": [
         {
             "platform": "XiaoMiAcPartner",
-            "ip": "your_ac_partner_token",
-            "token": "your_ac_partner_token",
+            "devices":{
+                "192.168.31.120":"your_token_here"
+            }
             "accessories":[
                 {
-                    "name": "Ac Partner",
-                    "type": "climate",
-                    "sensorSid": "lumi.158d000156e667"
+                    "name": "AC Partner",
+                    "type": "climate"
+                },
+                {
+                    "name": "learnir_switch",
+                    "type": "learnIR"
                 }
             ]
         }
     ]
 ```
 
-Using customize AC command or IR command.
-
-Most AC command start with "01" and most IR command start with "FE"
+AC and IR switch
 
 ```Json
 "platforms": [
         {
             "platform": "XiaoMiAcPartner",
-            "ip": "your_ac_partner_token",
-            "token": "your_ac_partner_token",
+            "devices":{
+                "192.168.31.120":"your_token_here"
+            }
             "accessories":[
                 {
-                    "name": "Ac Partner",
-                    "type": "climate",
-                    "customize": {
-                        "off": "off signal (required)",
-                        "on": "(optional)",
-                        "auto": "auto mode signal (optional)",
-                        "heat":{
-                            "30": "（optional）",
-                            "29": "",
-                            "17": ""
-                        },
-                        "cool":{
-                            "30": "(required)",
-                            "29": "",
-                            "17": ""
-                        }
+                    "name": "AC Partner",
+                    "type": "climate"
+                },
+                {
+                    "name": "ir_switch",
+                    "type": "switch",
+                    "data":{
+                        "on": "FE018254234ON",
+                        "off": "FE019205313OFF"
+                    }
+                }
+            ]
+        }
+    ]
+```
+
+AC and Repeat IR switch
+
+```Json
+"platforms": [
+        {
+            "platform": "XiaoMiAcPartner",
+            "devices":{
+                "192.168.31.120":"your_token_here"
+            }
+            "accessories":[
+                {
+                    "name": "AC Partner",
+                    "type": "climate"
+                },
+                {
+                    "name": "ir_switch",
+                    "type": "switch",
+                    "data":{
+                        "on": [
+                            "FE.....",
+                            "FE......",
+                            "FE......"
+                        ],
+                        "off": [
+                            "FE.....",
+                            "FE......"
+                        ]
                     }
                 }
             ]
@@ -319,9 +359,12 @@ Most AC command start with "01" and most IR command start with "FE"
 
 ### Changelog
 
+0.6.1
+
+Reconstruct almost every code
+
 0.5.6
 
-修复了一个导致Climate无法工作的问题
 Fix a problem cause climate crash
 
 0.5.4
