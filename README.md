@@ -355,7 +355,7 @@ sudo npm install -g homebridge-mi-acpartner
             "platform": "XiaoMiAcPartner",
             "devices":{
                 "192.168.31.120":"your_token_here"
-            }
+            },
             "accessories":[
                 {
                     "name": "AC Partner",
