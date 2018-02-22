@@ -434,5 +434,3 @@ Auto mode support, "on" signal support, code reconstruction, presets reconstruct
 0.0.1
 
 ADD Basic File.
-
-
