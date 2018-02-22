@@ -28,7 +28,7 @@
   - 默认情况下，在17-30度之间调整空调温度
   - 更改空调模式：制冷，制热，自动模式
   - 改变风力和扫风状态。（请定义成``heaterCooler``）
-  - 使用红外功能学习红外码，并控制其他电器
+  - 使用红外功能学习红外码，并控制其他电器
 
 * 如果空调控制没有响应，可自定义你的空调码
 
@@ -81,7 +81,7 @@ sudo npm install -g homebridge-mi-acpartner
             "devices":{
                 "192.168.31.120":"your_token_here",
                 "192.168.31.121":"your_token_here",
-            }
+            },
             "accessories":[
 
             ]
@@ -108,8 +108,8 @@ sudo npm install -g homebridge-mi-acpartner
 | --- | --- | --- | --- | --- |
 | ``name`` | 显示在Homekit中的名字 | "AC Partner" | - | * |
 | ``type`` | 必须填写 | "climate" | - | * |
-| ``deviceIp`` | 空调伴侣的IP地址，使用单个空调伴侣无需填写 | "192.168.31.120" | 使用第一个填写的空调伴侣 |  |
-| ``customize`` | 自定义空调伴侣发送信号 | 参考下方的插件配置使用 |  |  |
+| ``deviceIp`` | 空调伴侣的IP地址，使用单个空调伴侣无需填写 | "192.168.31.120" | 使用第一个填写的空调伴侣 |  |
+| ``customize`` | 自定义空调伴侣发送信号 | 参考下方的插件配置使用 |  |  |
 | ``maxTemp`` | 调节温度上限 | 28 | 30 |  |
 | ``minTemp`` | 调节温度下限 | 16 | 17 |  |
 | ``syncInterval`` | 同步间隔（毫秒），设置为0会关闭同步 | 30000 | 60000 |  |
@@ -155,7 +155,7 @@ sudo npm install -g homebridge-mi-acpartner
 | --- | --- | --- | --- | --- |
 | ``name`` | 显示在Homekit中的名字 | "AcPartner" | - | * |
 | ``type`` | 必须填写 | "heaterCooler" | - | * |
-| ``deviceIp`` | 空调伴侣的IP地址，使用单个空调伴侣无需填写 | "192.168.31.120" | 使用第一个填写的空调伴侣 |  |
+| ``deviceIp`` | 空调伴侣的IP地址，使用单个空调伴侣无需填写 | "192.168.31.120" | 使用第一个填写的空调伴侣 |  |
 | ``maxTemp`` | 调节温度上限 | 28 | 30 |  |
 | ``minTemp`` | 调节温度下限 | 16 | 17 |  |
 | ``syncInterval`` | 同步间隔（毫秒），设置为0会关闭同步 | 30000 | 60000 |  |
@@ -181,7 +181,7 @@ sudo npm install -g homebridge-mi-acpartner
 | --- | --- | --- |
 | ``name`` | 显示在Homekit中的名字 | * |
 | ``type`` | "learnIR" | * |
-| ``deviceIp`` | 空调伴侣的IP地址，使用单个空调伴侣无需填写 |  |
+| ``deviceIp`` | 空调伴侣的IP地址，使用单个空调伴侣无需填写 |  |
 
 请注意空调码仍然需要自己抓包，且可以使用相同的方法抓到红外码
 
@@ -203,7 +203,7 @@ sudo npm install -g homebridge-mi-acpartner
 | --- | --- | --- |
 | ``name`` | 显示在Homekit中的名字 | * |
 | ``type`` | "switch" | * |
-| ``deviceIp`` | 空调伴侣的IP地址，使用单个空调伴侣无需填写 |  |
+| ``deviceIp`` | 空调伴侣的IP地址，使用单个空调伴侣无需填写 |  |
 | ``data`` | 发送的红外信号，必须要包含``on``和``off`` | * |
 
 ```Json
@@ -227,8 +227,8 @@ sudo npm install -g homebridge-mi-acpartner
 | --- | --- | --- |
 | ``name`` | 显示在Homekit中的名字 | * |
 | ``type`` | "switchRepeat" | * |
-| ``deviceIp`` | 空调伴侣的IP地址，使用单个空调伴侣无需填写 |   |
-| ``sendInterval`` | 发送间隔，单位为ms（默认为200ms） |   |
+| ``deviceIp`` | 空调伴侣的IP地址，使用单个空调伴侣无需填写 |   |
+| ``sendInterval`` | 发送间隔，单位为ms（默认为200ms） |   |
 | ``data`` | 发送的红外信号，必须要包含``on``和``off`` | * |
 
 ```Json
@@ -261,7 +261,7 @@ sudo npm install -g homebridge-mi-acpartner
             "platform": "XiaoMiAcPartner",
             "devices":{
                 "192.168.31.120":"your_token_here"
-            }
+            },
             "accessories":[
                 {
                     "name": "AC Partner",
@@ -280,7 +280,7 @@ sudo npm install -g homebridge-mi-acpartner
             "devices":{
                 "192.168.31.120":"your_token_here",
                 "192.168.31.121":"your_token_here"
-            }
+            },
             "accessories":[
                 {
                     "name": "AC Partner 1",
@@ -305,7 +305,7 @@ sudo npm install -g homebridge-mi-acpartner
             "platform": "XiaoMiAcPartner",
             "devices":{
                 "192.168.31.120":"your_token_here"
-            }
+            },
             "accessories":[
                 {
                     "name": "AC Partner",
@@ -328,7 +328,7 @@ sudo npm install -g homebridge-mi-acpartner
             "platform": "XiaoMiAcPartner",
             "devices":{
                 "192.168.31.120":"your_token_here"
-            }
+            },
             "accessories":[
                 {
                     "name": "AC Partner",
@@ -355,7 +355,7 @@ sudo npm install -g homebridge-mi-acpartner
             "platform": "XiaoMiAcPartner",
             "devices":{
                 "192.168.31.120":"your_token_here"
-            }
+            },
             "accessories":[
                 {
                     "name": "AC Partner",

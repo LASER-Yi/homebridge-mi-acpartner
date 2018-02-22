@@ -77,7 +77,7 @@ If ``customize`` not define, this plugin will auto generate AC code. Your AC may
             "devices":{
                 "192.168.31.120":"your_token_here",
                 "192.168.31.121":"your_token_here",
-            }
+            },
             "accessories":[
 
             ]
@@ -99,8 +99,8 @@ Recommand to this type to setup your AC
 | --- | --- | --- | --- | --- |
 | ``name`` | name show in Homekit | "AC Partner" | - | * |
 | ``type`` | - | “climate" | - | * |
-| ``deviceIp`` | IP address of this accessory | "192.168.31.120" | first IP address in "devices" |  |
-| ``customize`` | Customize your AC signal | Example below |  |  |
+| ``deviceIp`` | IP address of this accessory | "192.168.31.120" | first IP address in "devices" |  |
+| ``customize`` | Customize your AC signal | Example below |  |  |
 | ``maxTemp`` | Set max temperature | 28 | 30 |  |
 | ``minTemp`` | Set min temperature | 16 | 17 |  |
 | ``syncInterval`` | "Sync interval(ms). Set to '0' will turn off sync function | 30000 | 60000 |  |
@@ -143,7 +143,7 @@ You can directly change wind speed and swing mode in this type.
 | --- | --- | --- | --- | --- |
 | ``name`` | name show in Homekit | "AC Partner" | - | * |
 | ``type`` | - | “climate" | - | * |
-| ``deviceIp`` | IP address of this accessory | "192.168.31.120" | first IP address in "devices" |  |
+| ``deviceIp`` | IP address of this accessory | "192.168.31.120" | first IP address in "devices" |  |
 | ``maxTemp`` | Set max temperature | 28 | 30 |  |
 | ``minTemp`` | Set min temperature | 16 | 17 |  |
 | ``syncInterval`` | "Sync interval(ms). Set to '0' will turn off sync function | 30000 | 60000 |  |
@@ -169,7 +169,7 @@ When switch open, AC Partner will receive IR signal for 30 seconds, and log to c
 | --- | --- | --- |
 | ``name`` | name show in Homekit | * |
 | ``type`` | "learnIR" | * |
-| ``deviceIp`` | IP address of this accessory |  |
+| ``deviceIp`` | IP address of this accessory |  |
 
 Please note that there's different between AC code and IR code.
 
@@ -179,7 +179,7 @@ Please note that there's different between AC code and IR code.
 | --- | --- | --- |
 | ``name`` | name show in Homekit | * |
 | ``type`` | "switch" | * |
-| ``deviceIp`` | IP address of this accessory |  |
+| ``deviceIp`` | IP address of this accessory |  |
 | ``data`` | IR code send by this accessory, must include ``on`` and ``off`` | * |
 
 ```Json
@@ -203,7 +203,7 @@ Send multi IR code in one switch
 | --- | --- | --- |
 | ``name`` | name show in Homekit | * |
 | ``type`` | "switchRepeat" | * |
-| ``deviceIp`` | IP address of this accessory |  |
+| ``deviceIp`` | IP address of this accessory |  |
 | ``sendInterval`` | Send interval(default: 1000ms) |   |
 | ``data`` | IR code send by this accessory, must include ``on`` and ``off`` | * |
 
@@ -237,7 +237,7 @@ Single AC Partner
             "platform": "XiaoMiAcPartner",
             "devices":{
                 "192.168.31.120":"your_token_here"
-            }
+            },
             "accessories":[
                 {
                     "name": "AC Partner",
@@ -256,7 +256,7 @@ Multi AC Partners
             "devices":{
                 "192.168.31.120":"your_token_here",
                 "192.168.31.121":"your_token_here"
-            }
+            },
             "accessories":[
                 {
                     "name": "AC Partner 1",
@@ -281,7 +281,7 @@ AC and IR learn switch
             "platform": "XiaoMiAcPartner",
             "devices":{
                 "192.168.31.120":"your_token_here"
-            }
+            },
             "accessories":[
                 {
                     "name": "AC Partner",
@@ -304,7 +304,7 @@ AC and IR switch
             "platform": "XiaoMiAcPartner",
             "devices":{
                 "192.168.31.120":"your_token_here"
-            }
+            },
             "accessories":[
                 {
                     "name": "AC Partner",
@@ -331,7 +331,7 @@ AC and Repeat IR switch
             "platform": "XiaoMiAcPartner",
             "devices":{
                 "192.168.31.120":"your_token_here"
-            }
+            },
             "accessories":[
                 {
                     "name": "AC Partner",
