@@ -138,7 +138,7 @@ Most AC command start with "01" and most IR command start with "FE". If you cont
 *   heaterCooler（Beta）
 
 You can directly change wind speed and swing mode in this type.
-    
+
 | parameter | description | example | default | required |
 | --- | --- | --- | --- | --- |
 | ``name`` | name show in Homekit | "AC Partner" | - | * |
@@ -413,7 +413,7 @@ Remove Gateway temperature sensor support. Add automatic preset detection.
 
 0.2.5
 
-Outer temperature sensor support. 
+Outer temperature sensor support.
 
 0.2.3
 
