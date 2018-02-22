@@ -384,6 +384,10 @@ sudo npm install -g homebridge-mi-acpartner
 
 ### Changelog
 
+0.6.2
+
+修复了自定义空调码不工作的问题
+
 0.6.1
 
 重构几乎所有代码
