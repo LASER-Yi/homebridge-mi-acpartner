@@ -35,7 +35,7 @@ function XiaoMiAcPartner(log, config, api) {
     this.devices = [];
 
     //Config Reader
-    this.refreshInterval = config.refreshInterval || 10 * 60 * 1000;
+    this.refreshInterval = config["refreshInterval"] || 10 * 60 * 1000;
     if (!this.config['accessories']) {
         this.log.error("[ERROR]'accessories' not defined! Please check your 'config.json' file.");
         return;
