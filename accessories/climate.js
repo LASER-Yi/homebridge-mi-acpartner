@@ -179,8 +179,8 @@ class ClimateAccessory {
                 this.active = 0;
                 break;
         }
-        this._sendCmdAsync(() => {
-            callback();
+        this._sendCmdAsync((ret) => {
+            callback(ret);
         });
     }
     setTargetTemperature(TargetTemperature, callback) {
@@ -193,21 +193,21 @@ class ClimateAccessory {
             switch (this.autoStart) {
                 case "cool":
                     this.TargetHeatingCoolingState.updateValue(Characteristic.TargetHeatingCoolingState.COOL);
-                    this.model = 1;
+                    this.mode = 1;
                     break;
                 case "heat":
                     this.TargetHeatingCoolingState.updateValue(Characteristic.TargetHeatingCoolingState.HEAT);
-                    this.model = 0;
+                    this.mode = 0;
                     break;
                 case "auto":
                     this.TargetHeatingCoolingState.updateValue(Characteristic.TargetHeatingCoolingState.AUTO);
-                    this.model = 2;
+                    this.mode = 2;
                     break;
             }
         }
 
-        this._sendCmdAsync(() => {
-            callback();   
+        this._sendCmdAsync((ret) => {
+            callback(ret);
         });
     }
 }

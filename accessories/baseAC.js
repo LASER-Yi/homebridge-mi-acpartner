@@ -4,8 +4,8 @@ const util = require('util');
 const presetUtil = require("../lib/presetUtil");
 
 class baseAC {
-    constructor(config, platform) { }
-    
+    constructor(config, platform) {}
+
     /**Need _updateState() function in child object*/
     _sendCmd(code) {
         if (code.substr(0, 2) == "FE") {
@@ -81,13 +81,17 @@ class baseAC {
         this.log.debug("[%s]Syncing...", this.name);
 
         //Update CurrentTemperature
-        let p1 = this.outerSensor && this.platform.devices[this.deviceIndex].call('get_device_prop_exp', [[this.outerSensor, "temperature", "humidity"]])
+        let p1 = this.outerSensor && this.platform.devices[this.deviceIndex].call('get_device_prop_exp', [
+                [this.outerSensor, "temperature", "humidity"]
+            ])
             .then((senRet) => {
                 if (senRet[0][0] == null) {
-                    this.log.warn("[WARN]Invaild sensorSid!")
+                    throw (new Error("Error: Invaild sensorSid!"));
                 } else {
                     this.CurrentTemperature.updateValue(senRet[0][0] / 100.0);
                     this.CurrentRelativeHumidity.updateValue(senRet[0][1] / 100.0);
+                    this.log.debug("[SENSOR]Temperature -> %s", this.CurrentTemperature.value);
+                    this.log.debug("[SENSOR]RelativeHumidity -> %s", this.CurrentRelativeHumidity.value);
                 }
             }).catch((err) => {
                 this.log.warn("[WARN]Failed to update current temperature! " + err);
@@ -95,7 +99,8 @@ class baseAC {
 
         //Update AC state
         let p2 = this.platform.devices[this.deviceIndex].call('get_model_and_state', [])
-            .then(ret => {
+            .then((ret) => {
+                this.log.debug("Partner state----------------------");
                 let model = ret[0],
                     state = ret[1],
                     power = ret[2];
@@ -103,14 +108,22 @@ class baseAC {
                 if (this.model !== model) {
                     this.model = model;
                 }
+                this.log.debug("Model -> %s", this.model);
 
                 //Save active, mode, temperature parameter to global
-                this.active = state.substr(2, 1) - 0;
+                this.active = state.substr(2, 1);
                 this.mode = state.substr(3, 1);
                 this.temperature = parseInt(state.substr(6, 2), 16);
-                this.speed = state.substr(4, 1) - 0 + 1;
+                this.speed = state.substr(4, 1);
                 this.swing = 1 - state.substr(5, 1);
                 this.led = state.substr(8, 1);
+                this.log.debug("Active -> %s", this.active);
+                this.log.debug("Mode -> %s", this.mode);
+                this.log.debug("Temperature -> %s", this.temperature.toString(10));
+                this.log.debug("RotationSpeed -> %s", this.speed);
+                this.log.debug("SwingMode -> %s", this.swing);
+                this.log.debug("LED -> %s", this.led);
+                this.log.debug("-----------------------------------");
 
                 //Use independence function to update accessory state
                 this._updateState();
@@ -125,7 +138,7 @@ class baseAC {
         Promise.all([p1, p2])
             .then(() => {
                 this.platform._exitSyncState();
-                this.log.debug("[%s]Complete",this.name);
+                this.log.debug("[%s]Complete", this.name);
             });
     }
 }
