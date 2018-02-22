@@ -14,6 +14,31 @@
             },
             "accessories":[
                 {
+                    "name": "Ac Partner",
+                    "type": "heaterCooler",
+                    "sensorSid": "lumi.158d000156e667"
+                },
+                {
+                    "name": "Ac Partner 2",
+                    "type": "climate",
+                    "device": 1,
+                    "maxTemp": "30",
+                    "minTemp": "17",
+                    "customize": {
+                        "off": "You_AC_Signal_Here",
+                        "auto": "",
+                        "heat": {
+                            "30": "",
+                            "29": "",
+                            "17": ""
+                        },
+                        "cool": {
+                            "30": "",
+                            "29": "",
+                            "17": ""
+                        }
+                    }
+                },{
                     "name": "learn",
                     "type": "learnIR"
                 },{
@@ -24,36 +49,8 @@
                         "off": "FE01920531312"
                     }
                 },{
-                    "name": "test",
-                    "type": "switchRepeat",
-                    "data":"FE......"
-                },{
-                    "name": "Ac Partner",
-                    "type": "climate",
-                    "sensorSid": "lumi.158d000156e667"
-                },{
-                    "name": "Ac Partner 2",
-                    "type": "climate",
-                    "device": 1,
-                    "maxTemp": "30",
-                    "minTemp": "17",
-                    "customize": {
-                        "off": "You_AC_Signal_Here",
-                        "auto": "",
-                        "heat":{
-                            "30": "",
-                            "29": "",
-                            "17": ""
-                        },
-                        "cool":{
-                            "30": "",
-                            "29": "",
-                            "17": ""
-                        }
-                    }
-                },{
                     "name": "test_2",
-                    "type": "switchMulti",
+                    "type": "switchRepeat",
                     "data":{
                         "on": [
                             "FE.....",

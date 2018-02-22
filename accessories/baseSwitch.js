@@ -2,8 +2,8 @@ const base = require('./base');
 const util = require('util');
 
 class baseSwitch {
-    constructor(config, platform) { }
-    
+    constructor(config, platform) {}
+
     _switchRevertState() {
         /**Revert last state */
         setTimeout(() => {
