@@ -49,7 +49,10 @@ class baseAC {
             //customize
             code = this.customiUtil();
         }
-        if (code == null) callback();
+        if (code == null) {
+            callback();
+            return;
+        }
 
         //Start send code
         let command;
