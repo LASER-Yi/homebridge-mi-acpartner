@@ -24,7 +24,7 @@ AC Partner v2 & AC Partner v1
   - Use AC signal or IR signal to control your AC
   - Change temperature between 17 - 30(default state)
   - HEAT mode, COOL mode, AUTO mode support
-  - Wind Speed, Swing Mode control support~~(set type to 'heaterCooler')~~
+  - Wind Speed, Swing Mode control support ~~(set type to 'heaterCooler')~~
   - Customize IR Signal to control other appliances
 
 * Customize your AC's Signal if your AC doesn't response your command
@@ -96,7 +96,7 @@ Recommand to this type to setup your AC
 **Change wind speed, swing mode and LED state in Mijia App, these info will automatic sync back to this plugin.**
 
 | parameter | description | example | default | required |
-| --- | --- | --- |
+| --- | --- | --- | --- | --- |
 | ``name`` | name show in Homekit | "AC Partner" | - | * |
 | ``type`` | - | “climate" | - | * |
 | ``deviceIp`` | IP address of this accessory | "192.168.31.120" | first IP address in "devices" |  |
@@ -140,7 +140,7 @@ Most AC command start with "01" and most IR command start with "FE". If you cont
 You can directly change wind speed and swing mode in this type.
     
 | parameter | description | example | default | required |
-| --- | --- | --- |
+| --- | --- | --- | --- | --- |
 | ``name`` | name show in Homekit | "AC Partner" | - | * |
 | ``type`` | - | “climate" | - | * |
 | ``deviceIp`` | IP address of this accessory | "192.168.31.120" | first IP address in "devices" |  |
