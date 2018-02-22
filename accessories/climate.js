@@ -121,7 +121,6 @@ class ClimateAccessory {
         this.TargetTemperature.updateValue(this.temperature);
     }
     customiUtil() {
-        if (!this.customi) return null;
         let code = null;
         //Note: Some AC need 'on' signal to active. Add later.
 

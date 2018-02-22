@@ -47,7 +47,7 @@ class baseAC {
             code = presetUtil(this.model, this.active, this.mode, this.temperature, this.swing, this.speed, this.led);
         } else {
             //customize
-            code = customiUtil();
+            code = this.customiUtil();
         }
         if (code == null) callback();
 
