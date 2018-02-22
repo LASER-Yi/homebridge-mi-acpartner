@@ -127,7 +127,7 @@ class ClimateAccessory {
         switch (this.TargetHeatingCoolingState.value) {
             case Characteristic.TargetHeatingCoolingState.HEAT:
                 //HEAT
-                if (!this.customi.heat || !this.customi.heat[this.TargetTemperature]) {
+                if (!this.customi.heat || !this.customi.heat[this.TargetTemperature.value]) {
                     this.log.warn("[WARN]'HEAT' signal not define");
                 } else {
                     code = this.customi.heat[this.TargetTemperature.value];
