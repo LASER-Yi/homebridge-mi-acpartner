@@ -107,7 +107,7 @@ Recommand to this type to setup your AC
 | ``autoStart`` | when AC turn off, change temperature will set to this mode. If you set this to "off", change temperature will not turn on AC. | "heat" | "cool" |  |
 | ``sensorSid`` | Your Temperature Sensor Series ID, that sensor **must** connected to AC Partner. You can get this in Mijia App | "lumi.158d000156e667" |  |  |
 
-If your AC doesn't response your command, you can use this [method](https://github.com/aholstenson/miio/blob/master/docs/protocol.md#)to get your AC Code and fill into config.json file.
+If your AC doesn't response your command, you can use this [method](https://github.com/aholstenson/miio/blob/master/docs/protocol.md#) to get your AC Code and fill into config.json file.
 
 Most AC command start with "01" and most IR command start with "FE". If you control your AC by using IR command, please turn off sync function.
 
@@ -204,7 +204,7 @@ Send multi IR code in one switch
 | ``name`` | name show in Homekit | * |
 | ``type`` | "switchRepeat" | * |
 | ``deviceIp`` | IP address of this accessory |  |
-| ``sendInterval`` | Send interval(default: 1000ms) |   |
+| ``sendInterval`` | Send interval(default: 1000ms) |   |
 | ``data`` | IR code send by this accessory, must include ``on`` and ``off`` | * |
 
 ```Json
