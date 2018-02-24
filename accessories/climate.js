@@ -32,6 +32,7 @@ class ClimateAccessory {
 
         //Characteristic
         this.TargetHeatingCoolingState;
+        this.CurrentHeatingCoolingState;
         this.TargetTemperature;
         this.CurrentTemperature;
         this.CurrentRelativeHumidity;
@@ -40,7 +41,7 @@ class ClimateAccessory {
         this.model;
         this.active;
         this.mode;
-        this.temperature;
+        this.temperature = (this.maxTemp + this.minTemp) / 2;
         this.speed;
         this.swing;
         this.led;
@@ -84,6 +85,9 @@ class ClimateAccessory {
             })
             .updateValue((this.maxTemp + this.minTemp) / 2);
 
+        this.CurrentHeatingCoolingState = this.climateService
+            .getCharacteristic(Characteristic.CurrentHeatingCoolingState);
+
         if (this.outerSensor) {
             this.CurrentRelativeHumidity = this.climateService
                 .addCharacteristic(Characteristic.CurrentRelativeHumidity)
@@ -100,25 +104,35 @@ class ClimateAccessory {
     _updateState() {
         //Update AC mode and active state
         let chara_mode;
+        let current_mode;
         if (this.active == 1) {
             switch (this.mode) {
                 case 0:
                     //HEAT
                     chara_mode = Characteristic.TargetHeatingCoolingState.HEAT;
+                    current_mode = Characteristic.CurrentHeatingCoolingState.HEAT;
                     break;
                 case 1:
                     //COOL
                     chara_mode = Characteristic.TargetHeatingCoolingState.COOL;
+                    current_mode = Characteristic.CurrentHeatingCoolingState.COOL;
                     break;
                 case 2:
                     //AUTO
                     chara_mode = Characteristic.TargetHeatingCoolingState.AUTO;
+                    if (this.temperature >= this.CurrentTemperature.value) {
+                        current_mode = Characteristic.CurrentHeatingCoolingState.HEAT;
+                    } else {
+                        current_mode = Characteristic.CurrentHeatingCoolingState.COOL;
+                    }
                     break;
             }
         } else {
             //OFF
             chara_mode = Characteristic.TargetHeatingCoolingState.OFF;
+            current_mode = Characteristic.CurrentHeatingCoolingState.OFF;
         }
+        this.CurrentHeatingCoolingState.updateValue(current_mode);
         this.TargetHeatingCoolingState.updateValue(chara_mode);
         //Update TargetTemperature
         this.TargetTemperature.updateValue(this.temperature);

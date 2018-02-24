@@ -44,7 +44,7 @@ class baseAC {
 
         if (!this.customi) {
             //presets
-            code = presetUtil(this.model, this.active, this.mode, this.temperature, this.swing, this.speed, this.led);
+            code = presetUtil(this,this.model, this.active, this.mode, this.temperature, this.swing, this.speed, this.led);
         } else {
             //customize
             code = this.customiUtil();
@@ -72,6 +72,10 @@ class baseAC {
                 callback(err);
             }).then(() => {
                 this.platform._exitSyncState();
+                //After sending the code, sync AC state again after 100ms.
+                setTimeout(() => {
+                    this._stateSync();
+                }, 100);
             });
     }
     _stateSync() {
@@ -111,7 +115,7 @@ class baseAC {
                 if (this.model !== model) {
                     this.model = model;
                 }
-                this.log.debug("Model -> %s", this.model);
+                this.log.debug("Model -> %s", this.model.substr(0, 2) + this.model.substr(8, 8));
 
                 //Save all parameter to global
                 this.active = state.substr(2, 1);
@@ -122,7 +126,7 @@ class baseAC {
                 this.led = state.substr(8, 1);
                 this.log.debug("Active -> %s", this.active);
                 this.log.debug("Mode -> %s", this.mode);
-                this.log.debug("Temperature -> %s", this.temperature.toString(10));
+                this.log.debug("Temperature -> %s", this.temperature);
                 this.log.debug("RotationSpeed -> %s", this.speed);
                 this.log.debug("SwingMode -> %s", this.swing);
                 this.log.debug("LED -> %s", this.led);
@@ -143,7 +147,7 @@ class baseAC {
                 this.platform._exitSyncState();
                 this.log.debug("[%s]Complete", this.name);
             }).catch((err) => {
-                this.log.error("[%s]Sync failed!"+err,this.name);
+                this.log.error("[%s]Sync failed!" + err, this.name);
             })
     }
 }

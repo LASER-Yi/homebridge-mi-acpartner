@@ -2,42 +2,74 @@
     "default": {
         "description": "The Default Replacement of AC Partner",
         "defaultMain": "AC model(10)+po+mo+wi+sw+tt+li+model(-1)",
-        "po": {
-            "off": "0",
-            "on": "1"
+        "power": {
+            "0": "off",
+            "1": "on"
         },
-        "mo": {
-            "heater": "0",
-            "cooler": "1",
-            "auto": "2"
+        "mode": {
+            "0": "heat",
+            "1": "cool",
+            "2": "auto"
         },
-        "wi": {
-            "1": "0",
-            "2": "1",
-            "3": "2",
-            "auto": "3"
+        "wing": {
+            "0": "low",
+            "1": "middle",
+            "2": "high",
+            "3": "auto"
         },
-        "sw": {
-            "on": "0",
-            "off": "1"
+        "swing": {
+            "0": "on",
+            "1": "off"
         },
-        "tt": "1",
-        "li": {
-            "off": "0",
-            "on": "a"
+        "tempera": "1",
+        "light": {
+            "0": "on",
+            "a": "off"
         }
 
     },
+    "extra": {
+        "description_00": "this is the min value of temperature",
+        "_t0t": {
+            "off_fix": "0",
+            "cool": "1",
+            "heat": "1",
+            "auto_fix": "A"
+        },
+        "_t6t": {
+            "cool": "7",
+            "heat": "A",
+            "auto_fix": "F"
+        },
+        "description_01": "string replace",
+        "_pmp": {
+            "off": "00",
+            "cool": "90",
+            "heat": "C0",
+            "auto": "80"
+        },
+        "_wbw": {
+            "low": 1,
+            "middle": 3,
+            "high": 5,
+            "auto": 0
+        },
+        "description_02": "auto -(+1)-> low -(+2)-> middle -(+2)-> high",
+        "_wtw": 0,
+        "description_03": "below -> (auto -(+1)-> low -(+2)-> middle -(+2)-> high)",
+        "_w4tw": {
+            "cool": "4",
+            "heat": "7",
+            "auto": "C"
+        }
+    },
     "0100010727": {
         "des": "gree_2",
-        "main": "0100010727pomowiswttli100190t0t205002102000t6t0190t0t207002000000t4wt0",
-        "EXTRA_VALUE": ["t0t", "t6t", "t4wt"],
-        "t0t": "1",
-        "t6t": "7",
-        "t4wt": "4"
+        "main": "00_wtw_pmp_t0t205002102000_t6t0_wtw_pmp_t0t2070020000_wbw0_w4tw0",
+        "extra_value": ["_pmp","_wtw","_wbw","_t0t","_t6t","_w4tw"]
     },
     "0100004795": {
         "des": "gree_8",
-        "main": "0100004795pomowiswtt0100090900005002"
+        "main": "00090900005002"
     }
 }
