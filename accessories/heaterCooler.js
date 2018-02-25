@@ -1,7 +1,7 @@
 const util = require('util');
 const baseAC = require('./baseAC');
 
-var Service, Characteristic, Accessory;
+let Service, Characteristic, Accessory;
 
 class HeaterCoolerAccessory {
     constructor(config, platform) {
@@ -11,8 +11,8 @@ class HeaterCoolerAccessory {
         Characteristic = platform.Characteristic;
 
         //Config
-        this.maxTemp = parseInt(config.maxTemp) || 30;
-        this.minTemp = parseInt(config.minTemp) || 17;
+        this.maxTemp = parseInt(config.maxTemp, 10) || 30;
+        this.minTemp = parseInt(config.minTemp, 10) || 17;
         this.autoStart = config.autoStart || "cool";
         this.outerSensor = config.sensorSid;
         //Sync
@@ -100,7 +100,8 @@ class HeaterCoolerAccessory {
             .on('set', this._setRotationSpeed.bind(this));
 
         this.CurrentHeaterCoolerState = this.hcService
-            .getCharacteristic(Characteristic.CurrentHeaterCoolerState);
+            .getCharacteristic(Characteristic.CurrentHeaterCoolerState)
+            .on('set', this._setCurrentHeaterCoolerState.bind(this));
 
         this.CurrentTemperature = this.hcService
             .getCharacteristic(Characteristic.CurrentTemperature)
@@ -125,58 +126,101 @@ class HeaterCoolerAccessory {
         this.services.push(this.hcService);
     }
     _setCActive(Active, callback) {
-        this.active = (Active == Characteristic.Active.ACTIVE ? 1 : 0);
+        this.active = (Active === Characteristic.Active.ACTIVE ? 1 : 0);
         this._sendCmdAsync(() => {
             callback();
         });
     }
-    _setTargetHeaterCoolerState(TargetHeaterCoolerState, callback) {
+    _setTargetHeaterCoolerState(TargetHeaterCoolerState, callback, context) {
         //this.CurrentHeaterCoolerState.updateValue(TargetHeaterCoolerState);
-        switch (TargetHeaterCoolerState) {
-            case Characteristic.TargetHeaterCoolerState.HEAT:
-                this.mode = 0;
-                break;
-            case Characteristic.TargetHeaterCoolerState.COOL:
-                this.mode = 1;
-                break;
-            case Characteristic.TargetHeaterCoolerState.AUTO:
-                this.mode = 2;
-                break;
-        }
-        this._sendCmdAsync(() => {
+        if (context) {
+            switch (TargetHeaterCoolerState) {
+                case Characteristic.TargetHeaterCoolerState.HEAT:
+                    this.mode = 0;
+                    break;
+                case Characteristic.TargetHeaterCoolerState.COOL:
+                    this.mode = 1;
+                    break;
+                case Characteristic.TargetHeaterCoolerState.AUTO:
+                    this.mode = 2;
+                    break;
+                default:
+                    break;
+            }
+            this._sendCmdAsync((ret) => {
+                callback(ret);
+            });
+        } else {
             callback();
-        });
+        }
     }
-
-    _setCoolingThresholdTemperature(CoolingThresholdTemperature, callback) {
+    _setCurrentHeaterCoolerState(CurrentHeaterCoolerState, callback) {
+        callback();
+    }
+    _setCoolingThresholdTemperature(CoolingThresholdTemperature, callback, context) {
         if (!this.outerSensor) {
             this.CurrentTemperature.updateValue(CoolingThresholdTemperature);
         }
         this.temperature = CoolingThresholdTemperature;
+        if (context && this.active === "0") {
+            switch (this.autoStart) {
+                case "cool":
+                    this.mode = 1;
+                    this.active = 1;
+                    break;
+                case "heat":
+                    this.mode = 0;
+                    this.active = 1;
+                    break;
+                case "auto":
+                    this.mode = 2;
+                    this.active = 1;
+                    break;
+                default:
+                    break;
+            }
+            this._updateState();
+        }
 
-        this._sendCmdAsync(() => {
-            callback();
+        this._sendCmdAsync((ret) => {
+            callback(ret);
         });
     }
-
-    _setHeatingThresholdTemperature(HeatingThresholdTemperature, callback) {
+    _setHeatingThresholdTemperature(HeatingThresholdTemperature, callback, context) {
         if (!this.outerSensor) {
             this.CurrentTemperature.updateValue(HeatingThresholdTemperature);
         }
         this.temperature = HeatingThresholdTemperature;
+        if (context && this.active === "0") {
+            switch (this.autoStart) {
+                case "cool":
+                    this.mode = 1;
+                    this.active = 1;
+                    break;
+                case "heat":
+                    this.mode = 0;
+                    this.active = 1;
+                    break;
+                case "auto":
+                    this.mode = 2;
+                    this.active = 1;
+                    break;
+                default:
+                    break;
+            }
+            this._updateState();
+        }
 
-        this._sendCmdAsync(() => {
-            callback();
+        this._sendCmdAsync((ret) => {
+            callback(ret);
         });
     }
-
     _setSwingMode(SwingMode, callback) {
-        this.swing = (SwingMode == Characteristic.SwingMode.SWING_ENABLE ? 1 : 0);
+        this.swing = (SwingMode === Characteristic.SwingMode.SWING_ENABLE ? 1 : 0);
         this._sendCmdAsync(() => {
             callback();
         });
     }
-
     _setRotationSpeed(RotationSpeed, callback) {
         this.speed = RotationSpeed;
         this._sendCmdAsync(() => {
@@ -184,35 +228,47 @@ class HeaterCoolerAccessory {
         });
     }
     _updateState() {
+        //Update Mode and Temperature
+        let target_mode;
+        let current_mode;
+        switch (this.mode) {
+            case "0":
+                //HEAT
+                target_mode = Characteristic.TargetHeaterCoolerState.HEAT;
+                current_mode = Characteristic.CurrentHeaterCoolerState.HEATING;
+                this.HeatingThresholdTemperature.updateValue(this.temperature);
+                break;
+            case "1":
+                //COOL
+                target_mode = Characteristic.TargetHeaterCoolerState.COOL;
+                current_mode = Characteristic.CurrentHeaterCoolerState.COOLING;
+                this.CoolingThresholdTemperature.updateValue(this.temperature);
+                break;
+            default:
+                //AUTO and others
+                target_mode = Characteristic.TargetHeaterCoolerState.AUTO;
+                if (this.temperature >= this.CurrentTemperature.value) {
+                    current_mode = Characteristic.CurrentHeaterCoolerState.HEATING;
+                    this.HeatingThresholdTemperature.updateValue(this.temperature);
+                    this.CoolingThresholdTemperature.updateValue(this.maxTemp);
+                } else {
+                    current_mode = Characteristic.CurrentHeaterCoolerState.COOLING;
+                    this.HeatingThresholdTemperature.updateValue(this.minTemp);
+                    this.CoolingThresholdTemperature.updateValue(this.temperature);
+                }
+                break;
+        }
         //Update Active
-        if (this.active == 1) {
+        if (this.active === "1") {
             this.CActive.updateValue(Characteristic.Active.ACTIVE);
         } else {
             this.CActive.updateValue(Characteristic.Active.INACTIVE);
+            current_mode = Characteristic.CurrentHeaterCoolerState.INACTIVE;
         }
-        //Update Mode and Temperature
-        let chara_mode;
-        switch (this.mode) {
-            case 0:
-                //HEAT
-                chara_mode = Characteristic.TargetHeaterCoolerState.HEAT;
-                this.HeatingThresholdTemperature.updateValue(this.temperature);
-                break;
-            case 1:
-                //COOL
-                chara_mode = Characteristic.TargetHeaterCoolerState.COOL;
-                this.CoolingThresholdTemperature.updateValue(this.temperature);
-                break;
-            case 2:
-                //AUTO
-                chara_mode = Characteristic.TargetHeaterCoolerState.AUTO;
-                this.HeatingThresholdTemperature.updateValue(this.temperature + 2);
-                this.CoolingThresholdTemperature.updateValue(this.temperature - 2);
-                break;
-        }
-        this.TargetHeaterCoolerState.updateValue(chara_mode);
+        this.TargetHeaterCoolerState.setValue(target_mode);
+        this.CurrentHeaterCoolerState.setValue(current_mode);
         //Update SwingMode
-        this.SwingMode.updateValue(this.swing == 1 ? Characteristic.SwingMode.SWING_ENABLE : Characteristic.SwingMode.SWING_DISABLED);
+        this.SwingMode.updateValue(this.swing === 1 ? Characteristic.SwingMode.SWING_ENABLE : Characteristic.SwingMode.SWING_DISABLED);
         //Update RotationSpeed
         this.RotationSpeed.updateValue(this.speed);
     }

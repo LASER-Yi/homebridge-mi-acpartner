@@ -4,30 +4,30 @@ const util = require('util');
 const presetUtil = require("../lib/presetUtil");
 
 class baseAC {
-    constructor(config, platform) {}
-
-    /**Need _updateState() function in child object*/
+    //need _updateState() function in child object
     _sendCmd(code) {
-        if (code.substr(0, 2) == "FE") {
-            this.log.debug("[DEBUG]Sending IR code: " + code);
-            code_comm = 'send_ir_code';
+        let codeCommand;
+        if (code.substr(0, 2) === "FE") {
+            this.log.debug("[DEBUG]Sending IR code: %s", code);
+            codeCommand = 'send_ir_code';
         } else {
-            this.log.debug("[DEBUG]Sending AC code: " + code);
-            code_comm = 'send_cmd';
+            this.log.debug("[DEBUG]Sending AC code: %s", code);
+            codeCommand = 'send_cmd';
         }
-        this.platform.devices[this.deviceIndex].call(code_comm, [code])
+        this.platform.devices[this.deviceIndex].call(codeCommand, [code])
             .then((data) => {
-                if (data[0] == "ok") {
+                if (data[0] === "ok") {
                     this.log.debug("[DEBUG]Success");
                 } else {
                     this.log.debug("[DEBUG]Failed!(Maybe invaild code?)");
                 }
-            }).catch((err) => {
-                this.log.error("[%s]Send code failed! " + err, this.name);
+            })
+            .catch((err) => {
+                this.log.error("[%s]Send code failed! %s", this.name, err);
             })
     }
     _sendCmdAsync(callback) {
-        if (this.model == null) {
+        if (this.model === null) {
             this.log.warn("[%s]Waiting for sync state, please try again after sync complete");
             callback();
             return;
@@ -44,55 +44,61 @@ class baseAC {
 
         if (!this.customi) {
             //presets
-            code = presetUtil(this,this.model, this.active, this.mode, this.temperature, this.swing, this.speed, this.led);
+            code = presetUtil(this.model, this.active, this.mode, this.temperature, this.swing, this.speed, this.led);
         } else {
             //customize
             code = this.customiUtil();
         }
-        if (code == null) {
+        if (code === null) {
             callback();
             return;
         }
 
         //Start send code
         let command;
-        if (code.substr(0, 2) == "FE") {
-            this.log.debug("[DEBUG]Sending IR code: " + code);
+        if (code.substr(0, 2) === "FE") {
+            this.log.debug("[DEBUG]Sending IR code: %s", code);
             command = 'send_ir_code';
         } else {
-            this.log.debug("[DEBUG]Sending AC code: " + code);
+            this.log.debug("[DEBUG]Sending AC code: %s", code);
             command = 'send_cmd';
         }
         this.platform.devices[this.deviceIndex].call(command, [code])
             .then((data) => {
-                if (data[0] == "ok") this.log.debug("[DEBUG]Success");
+                if (data[0] === "ok") {
+                    this.log.debug("[DEBUG]Success")
+                }
                 callback();
-            }).catch((err) => {
-                this.log.error("[%s]Send code failed! " + err, this.name);
+            })
+            .catch((err) => {
+                this.log.error("[%s]Send code failed! %s", this.name, err);
                 callback(err);
-            }).then(() => {
+            })
+            .then(() => {
                 this.platform._exitSyncState();
                 //After sending the code, sync AC state again after 100ms.
-                setTimeout(() => {
-                    this._stateSync();
-                }, 100);
+                if (this.syncInterval > 0) {
+                    setTimeout(() => {
+                        this._stateSync();
+                    }, 100);
+                }
             });
     }
     _stateSync() {
         if (!this.platform._enterSyncState()) {
             this.platform.syncLockEvent.once("lockDrop", (() => {
-                this.setSwitchState(value, callback);
+                this._stateSync();
             }));
             return;
         }
         this.log.debug("[%s]Syncing...", this.name);
 
         //Update CurrentTemperature
-        let p1 = this.outerSensor && this.platform.devices[this.deviceIndex].call('get_device_prop_exp', [
-                [this.outerSensor, "temperature", "humidity"]
-            ])
+        const p1 = this.outerSensor && this.platform.devices[this.deviceIndex].call('get_device_prop_exp', [
+            [this.outerSensor, "temperature", "humidity"]
+        ])
             .then((senRet) => {
-                if (senRet[0][0] == null) {
+                if (senRet[0][0] === null) {
                     throw (new Error("Error: Invaild sensorSid!"));
                 } else {
                     this.CurrentTemperature.updateValue(senRet[0][0] / 100.0);
@@ -100,15 +106,16 @@ class baseAC {
                     this.log.debug("[SENSOR]Temperature -> %s", this.CurrentTemperature.value);
                     this.log.debug("[SENSOR]RelativeHumidity -> %s", this.CurrentRelativeHumidity.value);
                 }
-            }).catch((err) => {
-                this.log.warn("[WARN]Failed to update current temperature! " + err);
+            })
+            .catch((err) => {
+                this.log.warn("[WARN]Failed to update current temperature! %s", err);
             });
 
         //Update AC state
-        let p2 = this.platform.devices[this.deviceIndex].call('get_model_and_state', [])
+        const p2 = this.platform.devices[this.deviceIndex].call('get_model_and_state', [])
             .then((ret) => {
                 this.log.debug("Partner state----------------------");
-                let model = ret[0],
+                const model = ret[0],
                     state = ret[1],
                     power = ret[2];
 
@@ -135,19 +142,24 @@ class baseAC {
                 //Use independence function to update accessory state
                 this._updateState();
 
-                if (this.outerSensor == null) {
+                if (!this.outerSensor === null) {
                     this.CurrentTemperature.updateValue(this.temperature);
                 }
-            }).catch((err) => {
-                this.log.error("[ERROR]Failed to update AC state! " + err);
+            })
+            .catch((err) => {
+                this.log.error("[ERROR]Failed to update AC state! %s", err);
             });
 
         Promise.all([p1, p2])
             .then(() => {
                 this.platform._exitSyncState();
                 this.log.debug("[%s]Complete", this.name);
-            }).catch((err) => {
-                this.log.error("[%s]Sync failed!" + err, this.name);
+            })
+            .catch((err) => {
+                this.log.error("[%s]Sync failed! %s", this.name, err);
+            })
+            .then(() => {
+                this.platform._exitSyncState();
             })
     }
 }

@@ -1,7 +1,7 @@
 const util = require('util');
 const baseSwitch = require('./baseSwitch');
 
-var Service, Characteristic, Accessory;
+let Service, Characteristic, Accessory;
 
 class SwitchAccessory {
     constructor(config, platform) {
@@ -11,7 +11,8 @@ class SwitchAccessory {
         Characteristic = platform.Characteristic;
 
         //Config reader
-        this.onCode = this.offCode = undefined;
+        this.onCode;
+        this.offCode;
         //Characteristic
         this.activeState = null;
         this.onState = Characteristic.On.NO;
@@ -43,10 +44,6 @@ class SwitchAccessory {
 
         this.services.push(this.switchService);
     }
-
-    getServices() {
-        return this.services;
-    }
     setSwitchState(value, callback) {
         if (!this.platform._enterSyncState()) {
             this.platform.syncLockEvent.once("lockDrop", (() => {
@@ -55,7 +52,7 @@ class SwitchAccessory {
             return;
         }
         this.onState = value;
-        let code = this.onState ? this.onCode : this.offCode;
+        const code = this.onState ? this.onCode : this.offCode;
 
         this.log.debug("[%s]Sending IR code: %s", this.name, code);
         this.platform.devices[this.deviceIndex].call('send_ir_code', [code])
@@ -63,12 +60,14 @@ class SwitchAccessory {
                 this._switchUpdateState();
                 this.log.debug("[%s]Result: %s", this.name, ret);
                 callback();
-            }).catch((err) => {
+            })
+            .catch((err) => {
                 this._switchRevertState();
-                this.log.error("[%s]Failed! " + err, this.name);
+                this.log.error("[%s]Failed! %s", this.name, err);
                 callback(err);
-            }).then(() => {
-                /**Callback and exit sync state */
+            })
+            .then(() => {
+                //Callback and exit sync state
                 this.platform._exitSyncState();
             });
     }

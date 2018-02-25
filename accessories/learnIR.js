@@ -2,7 +2,7 @@ const util = require('util');
 
 const baseSwitch = require('./baseSwitch');
 
-var Service, Characteristic, Accessory;
+let Service, Characteristic, Accessory;
 
 class LearnIRAccessory {
     constructor(config, platform) {
@@ -17,7 +17,7 @@ class LearnIRAccessory {
         this.lastState = this.onState;
 
         //value
-        this.lastIRCode = undefined;
+        this.lastIRCode;
         this.closeTimer;
 
         this._setCharacteristic();
@@ -63,7 +63,7 @@ class LearnIRAccessory {
                     }, 30 * 1000);
                 })
                 .catch((err) => {
-                    this.log.error("[ERROR]Start failed! " + err);
+                    this.log.error("[ERROR]Start failed! %s", err);
                     this._switchRevertState();
                 })
                 .then(() => {
@@ -77,8 +77,9 @@ class LearnIRAccessory {
                     this.log("[%s]End IR learn", this.name);
                     this._switchUpdateState();
                     clearTimeout(this.closeTimer);
-                }).catch((err) => {
-                    this.log.error("[ERROR]End failed! " + err);
+                })
+                .catch((err) => {
+                    this.log.error("[ERROR]End failed! %s", err);
                     this._switchRevertState();
                 })
                 .then(() => {
@@ -87,16 +88,16 @@ class LearnIRAccessory {
                 });
         }
     }
-
     showIRCode() {
         this.platform.devices[this.deviceIndex].call('get_ir_learn_result', [])
             .then((ret) => {
-                let code = ret[0];
-                if (code != '(null)' && code !== this.lastIRCode) {
+                const code = ret[0];
+                if (code !== '(null)' && code !== this.lastIRCode) {
                     this.lastIRCode = code;
                     this.log("[%s]IR code: %s", this.name, code);
                 }
-            }).catch((err) => this.log.error("[ERROR]Learn Switch error! " + err));
+            })
+            .catch((err) => this.log.error("[ERROR]Learn Switch error! %s", err));
     }
 }
 util.inherits(LearnIRAccessory, baseSwitch);

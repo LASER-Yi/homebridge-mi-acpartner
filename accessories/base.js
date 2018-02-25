@@ -1,6 +1,4 @@
 class Base {
-    constructor(config, platform) {}
-
     init(config, platform) {
         this.platform = platform;
         this.log = platform.log;

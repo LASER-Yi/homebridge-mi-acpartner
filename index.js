@@ -7,7 +7,7 @@ const SwitchRepeatAccessory = require('./accessories/switchRepeat');
 const LearnIRAccessory = require('./accessories/learnIR');
 const HeaterCoolerAccessory = require('./accessories/heaterCooler');
 
-var PlatformAccessory, Accessory, Service, Characteristic, UUIDGen;
+let PlatformAccessory, Accessory, Service, Characteristic, UUIDGen;
 
 module.exports = function (homebridge) {
     PlatformAccessory = homebridge.platformAccessory;
@@ -20,7 +20,7 @@ module.exports = function (homebridge) {
 }
 
 function XiaoMiAcPartner(log, config, api) {
-    if (null == config) return;
+    if (config === null) return;
 
     this.log = log;
     this.config = config;
@@ -64,7 +64,7 @@ function XiaoMiAcPartner(log, config, api) {
 XiaoMiAcPartner.prototype = {
     accessories: function (callback) {
         /**Start register accessories */
-        var accessories = [];
+        let accessories = [];
 
         this.config['accessories'].forEach(element => {
             if (undefined != element['type'] || undefined != element['name']) {

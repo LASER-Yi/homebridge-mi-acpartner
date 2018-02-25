@@ -1,7 +1,7 @@
 const util = require('util');
 const baseSwitch = require('./baseSwitch');
 
-var Service, Characteristic, Accessory;
+let Service, Characteristic, Accessory;
 
 class SwitchRepeatAccessory {
     constructor(config, platform) {
@@ -27,7 +27,6 @@ class SwitchRepeatAccessory {
         }
         this._setCharacteristic();
     }
-
     _setCharacteristic() {
         this.services = [];
 
@@ -46,7 +45,6 @@ class SwitchRepeatAccessory {
 
         this.services.push(this.switchService);
     }
-
     setSwitchState(value, callback) {
         //Judge code define
         if (!this.platform._enterSyncState()) {
@@ -73,13 +71,13 @@ class SwitchRepeatAccessory {
             }
         }, this.sendInterval);
     }
-
     _sendCmd(code) {
         this.platform.devices[this.deviceIndex].call('send_ir_code', [code])
             .then((ret) => {
                 this.log.debug("[%s]Return result: %s", this.name, ret);
-            }).catch((err) => {
-                this.log.error("[ERROR]Send failed! " + err);
+            })
+            .catch((err) => {
+                this.log.error("[ERROR]Send failed! $s", err);
             });
     }
 }
