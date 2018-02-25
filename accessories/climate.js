@@ -65,7 +65,12 @@ class ClimateAccessory {
 
         this.TargetHeatingCoolingState = this.climateService
             .getCharacteristic(Characteristic.TargetHeatingCoolingState)
-            .on('set', this.setTargetHeatingCoolingState.bind(this));
+            .on('set', this.setTargetHeatingCoolingState.bind(this))
+            .on('get', this.getTargetHeatingCoolingState.bind(this));
+
+        this.CurrentHeatingCoolingState = this.climateService
+            .getCharacteristic(Characteristic.CurrentHeatingCoolingState)
+            .on('get', this.getCurrentHeatingCoolingState.bind(this));
 
         this.TargetTemperature = this.climateService
             .getCharacteristic(Characteristic.TargetTemperature)
@@ -85,9 +90,6 @@ class ClimateAccessory {
             })
             .updateValue((this.maxTemp + this.minTemp) / 2);
 
-        this.CurrentHeatingCoolingState = this.climateService
-            .getCharacteristic(Characteristic.CurrentHeatingCoolingState);
-
         if (this.outerSensor) {
             this.CurrentRelativeHumidity = this.climateService
                 .addCharacteristic(Characteristic.CurrentRelativeHumidity)
@@ -102,8 +104,8 @@ class ClimateAccessory {
         this.services.push(this.climateService);
     }
     _updateState() {
-        //Update AC mode and active state
-        let chara_mode;
+        //Update AC mode and active state, unable to work just now
+        /*let chara_mode;
         let current_mode;
         if (this.active == 1) {
             switch (this.mode) {
@@ -133,7 +135,7 @@ class ClimateAccessory {
             current_mode = Characteristic.CurrentHeatingCoolingState.OFF;
         }
         this.CurrentHeatingCoolingState.updateValue(current_mode);
-        this.TargetHeatingCoolingState.updateValue(chara_mode);
+        this.TargetHeatingCoolingState.updateValue(chara_mode);*/
         //Update TargetTemperature
         this.TargetTemperature.updateValue(this.temperature);
     }
@@ -205,7 +207,7 @@ class ClimateAccessory {
             this.CurrentTemperature.updateValue(TargetTemperature);
         }
         this.temperature = TargetTemperature;
-        if (this.active == 0) {
+        if (this.active === 0) {
             switch (this.autoStart) {
                 case "cool":
                     this.TargetHeatingCoolingState.updateValue(Characteristic.TargetHeatingCoolingState.COOL);
@@ -225,6 +227,44 @@ class ClimateAccessory {
         this._sendCmdAsync((ret) => {
             callback(ret);
         });
+    }
+    getTargetHeatingCoolingState(callback) {
+        let state = Characteristic.TargetHeatingCoolingState.OFF;
+        if (this.active) {
+            switch (this.mode) {
+                case "1":
+                    state = Characteristic.TargetHeatingCoolingState.COOL;
+                    break;
+                case "0":
+                    state = Characteristic.TargetHeatingCoolingState.HEAT;
+                    break;
+                case "2":
+                    state = Characteristic.TargetHeatingCoolingState.AUTO;
+                    break;
+            }
+        }
+        callback(null, state);
+    }
+    getCurrentHeatingCoolingState(callback) {
+        let state = Characteristic.CurrentHeatingCoolingState.OFF;
+        if (this.active) {
+            switch (this.mode) {
+                case "1":
+                    state = Characteristic.CurrentHeatingCoolingState.COOL;
+                    break;
+                case "0":
+                    state = Characteristic.CurrentHeatingCoolingState.HEAT;
+                    break;
+                case "2":
+                    if (this.temperature >= this.CurrentTemperature.value) {
+                        state = Characteristic.CurrentHeatingCoolingState.HEAT;
+                    } else {
+                        state = Characteristic.CurrentHeatingCoolingState.COOL;
+                    }
+                    break;
+            }
+        }
+        callback(null, state);
     }
 }
 
