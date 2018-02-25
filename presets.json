@@ -55,7 +55,7 @@
             "auto": 0
         },
         "description_02": "auto -(+1)-> low -(+2)-> middle -(+2)-> high",
-        "_wtw": 0,
+        "_wtw": 4,
         "description_03": "below -> (auto -(+1)-> low -(+2)-> middle -(+2)-> high)",
         "_w4tw": {
             "cool": "4",
