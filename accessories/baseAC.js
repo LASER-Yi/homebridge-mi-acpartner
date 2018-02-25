@@ -84,6 +84,30 @@ class baseAC {
                 }
             });
     }
+    _fastSync() {
+        //this function will sync state pre 5 sec. And will end fast sync in 1 min
+        if (this.syncInterval <= 0) return;
+        if (this.fastSyncTimer) {
+            //Clear last fastSync timer
+            clearInterval(this.fastSyncTimer);
+            clearTimeout(this.fastSyncEnd);
+        }
+        //Clear normal syncState timer
+        clearInterval(this.syncTimer);
+        this.log.debug("[DEBUG]Enter fastSync");
+        setImmediate(() => this._stateSync());
+        this.fastSyncTimer = setInterval(() => {
+            this._stateSync();
+        }, 2 * 1000);
+        this.fastSyncEnd = setTimeout(() => {
+            clearInterval(this.fastSyncTimer);
+            this.log.debug("[DEBUG]Exit fastSync");
+            //Resume normal sync interval
+            this.syncTimer = setInterval(() => {
+                this._stateSync();
+            }, this.syncInterval);
+        }, 30 * 1000);
+    }
     _stateSync() {
         if (!this.platform._enterSyncState()) {
             this.platform.syncLockEvent.once("lockDrop", (() => {
@@ -95,8 +119,8 @@ class baseAC {
 
         //Update CurrentTemperature
         const p1 = this.outerSensor && this.platform.devices[this.deviceIndex].call('get_device_prop_exp', [
-            [this.outerSensor, "temperature", "humidity"]
-        ])
+                [this.outerSensor, "temperature", "humidity"]
+            ])
             .then((senRet) => {
                 if (senRet[0][0] === null) {
                     throw (new Error("Error: Invaild sensorSid!"));
@@ -152,7 +176,6 @@ class baseAC {
 
         Promise.all([p1, p2])
             .then(() => {
-                this.platform._exitSyncState();
                 this.log.debug("[%s]Complete", this.name);
             })
             .catch((err) => {

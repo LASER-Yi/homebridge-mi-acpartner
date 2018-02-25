@@ -13,12 +13,13 @@ class HeaterCoolerAccessory {
         //Config
         this.maxTemp = parseInt(config.maxTemp, 10) || 30;
         this.minTemp = parseInt(config.minTemp, 10) || 17;
+        this.syncInterval = parseInt(config.syncInterval, 10) || 60 * 1000;
         this.autoStart = config.autoStart || "cool";
         this.outerSensor = config.sensorSid;
+
         //Sync
         setImmediate(() => this._stateSync());
-        if (config.syncInterval > 0) {
-            this.syncInterval = config.syncInterval || 60 * 1000;
+        if (this.syncInterval > 0) {
             this.syncTimer = setInterval(() => {
                 this._stateSync();
             }, this.syncInterval);
@@ -64,7 +65,8 @@ class HeaterCoolerAccessory {
 
         this.TargetHeaterCoolerState = this.hcService
             .getCharacteristic(Characteristic.TargetHeaterCoolerState)
-            .on('set', this._setTargetHeaterCoolerState.bind(this));
+            .on('set', this._setTargetHeaterCoolerState.bind(this))
+            .on('get', this._getTargetHeaterCoolerState.bind(this));
 
         this.CoolingThresholdTemperature = this.hcService
             .addCharacteristic(Characteristic.CoolingThresholdTemperature)
@@ -130,6 +132,22 @@ class HeaterCoolerAccessory {
         this._sendCmdAsync(() => {
             callback();
         });
+    }
+    _getTargetHeaterCoolerState(callback) {
+        this._fastSync();
+        let state;
+        switch (this.mode) {
+            case "0":
+                state = Characteristic.TargetHeaterCoolerState.HEAT;
+                break;
+            case "1":
+                state = Characteristic.TargetHeaterCoolerState.COOL;
+                break;
+            default:
+                state = Characteristic.TargetHeaterCoolerState.AUTO;
+                break;
+        }
+        callback(null, state);
     }
     _setTargetHeaterCoolerState(TargetHeaterCoolerState, callback, context) {
         //this.CurrentHeaterCoolerState.updateValue(TargetHeaterCoolerState);

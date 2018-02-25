@@ -13,12 +13,13 @@ class ClimateAccessory {
         //Config
         this.maxTemp = parseInt(config.maxTemp, 10) || 30;
         this.minTemp = parseInt(config.minTemp, 10) || 17;
+        this.syncInterval = parseInt(config.syncInterval, 10) || 60 * 1000;
         this.autoStart = config.autoStart || "auto";
         this.outerSensor = config.sensorSid;
+        
         //Sync
         setImmediate(() => this._stateSync());
-        if (config.syncInterval > 0) {
-            this.syncInterval = config.syncInterval || 60 * 1000;
+        if (this.syncInterval > 0) {
             this.syncTimer = setInterval(() => {
                 this._stateSync();
             }, this.syncInterval);
@@ -65,7 +66,8 @@ class ClimateAccessory {
 
         this.TargetHeatingCoolingState = this.climateService
             .getCharacteristic(Characteristic.TargetHeatingCoolingState)
-            .on('set', this.setTargetHeatingCoolingState.bind(this));
+            .on('set', this.setTargetHeatingCoolingState.bind(this))
+            .on('get', this.getTargetHeatingCoolingState.bind(this));
 
         this.CurrentHeatingCoolingState = this.climateService
             .getCharacteristic(Characteristic.CurrentHeatingCoolingState)
@@ -179,6 +181,22 @@ class ClimateAccessory {
                 break;
         }
         return code;
+    }
+    getTargetHeatingCoolingState(callback) {
+        this._fastSync();
+        let state = Characteristic.TargetHeatingCoolingState.OFF;
+        switch (this.mode) {
+            case "0":
+                state = Characteristic.TargetHeatingCoolingState.HEAT;
+                break;
+            case "1":
+                state = Characteristic.TargetHeatingCoolingState.COOL;
+                break;
+            case "2":
+                state = Characteristic.TargetHeatingCoolingState.AUTO;
+                break;
+        }
+        callback(null, state);
     }
     setTargetHeatingCoolingState(TargetHeatingCoolingState, callback, context) {
         //Note: Some AC need 'on' signal to active. Add later.
