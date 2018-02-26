@@ -5,6 +5,7 @@ class Base {
         this.config = config;
         this.name = config['name'];
         //Search device position
+        this.deviceIndex = 0;
         if (config['deviceIp']) {
             let index = 0;
             for (var elem in platform.config.devices) {
@@ -14,9 +15,6 @@ class Base {
                 }
                 index++;
             }
-        } else {
-            //Or use default value 0
-            this.deviceIndex = 0;
         }
     }
     getServices() {

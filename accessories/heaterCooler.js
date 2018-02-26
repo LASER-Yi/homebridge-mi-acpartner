@@ -14,7 +14,7 @@ class HeaterCoolerAccessory {
         this.maxTemp = parseInt(config.maxTemp, 10) || 30;
         this.minTemp = parseInt(config.minTemp, 10) || 17;
         this.syncInterval = parseInt(config.syncInterval, 10) || 60 * 1000;
-        this.autoStart = config.autoStart || "cool";
+        this.autoStart = config.autoStart || "auto";
         this.outerSensor = config.sensorSid;
 
         //Sync

@@ -41,6 +41,10 @@ function XiaoMiAcPartner(log, config, api) {
         return;
     }
 
+    //Global command syncLock
+    this.syncCounter = 0;
+    this.syncLockEvent = new events.EventEmitter();
+
     //Connection util init;
     if (config.devices) {
         this.conUtil = new connectUtil(config.devices, log, this);
@@ -51,10 +55,6 @@ function XiaoMiAcPartner(log, config, api) {
         this.log.error("[ERROR]'devices' not defined! Please check your 'config.json' file.");
         return;
     }
-
-    //Global command syncLock
-    this.syncCounter = 0;
-    this.syncLockEvent = new events.EventEmitter();
 
     if (api) {
         this.api = api;
@@ -97,13 +97,13 @@ XiaoMiAcPartner.prototype = {
             return false;
         } else {
             this.syncCounter++;
-            //this.log.debug("[DEBUG]Enter SyncState #%s", this.syncCounter);
+            this.log.debug("[DEBUG]Enter SyncState #%s", this.syncCounter);
             return true;
         }
     },
     _exitSyncState: function () {
         this.syncLockEvent.emit("lockDrop");
-        //this.log.debug("[DEBUG]Exit SyncState #%s", this.syncCounter);
+        this.log.debug("[DEBUG]Exit SyncState #%s", this.syncCounter);
         if (this.syncCounter > 0) {
             this.syncCounter--;
         } else {
