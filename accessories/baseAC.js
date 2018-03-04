@@ -85,7 +85,7 @@ class baseAC {
             });
     }
     _fastSync() {
-        //this function will sync state pre 5 sec. And will end fast sync in 1 min
+        //this function will sync state pre 5 sec. And will end fast sync in 30 sec
         if (this.syncInterval <= 0) return;
         if (this.fastSyncTimer) {
             //Clear last fastSync timer

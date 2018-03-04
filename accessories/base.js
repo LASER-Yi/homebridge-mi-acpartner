@@ -21,6 +21,7 @@ class Base {
         return this.services;
     }
     identify(callback) {
+        this.log("[INFO]%s indetify!!!", this.name);
         callback();
     }
 }

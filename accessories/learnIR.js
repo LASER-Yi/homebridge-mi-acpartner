@@ -94,7 +94,9 @@ class LearnIRAccessory {
                 const code = ret[0];
                 if (code !== '(null)' && code !== this.lastIRCode) {
                     this.lastIRCode = code;
-                    this.log("[%s]IR code: %s", this.name, code);
+                    //Recovert the return IR code to new code
+                    let _code = code.substr(0, 14) + "94701FFF96FF" + code.substr(26);
+                    this.log("[%s]IR code: %s", this.name, _code);
                 }
             })
             .catch((err) => this.log.error("[ERROR]Learn Switch error! %s", err));
