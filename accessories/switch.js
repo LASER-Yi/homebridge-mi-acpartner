@@ -45,6 +45,10 @@ class SwitchAccessory {
         this.services.push(this.switchService);
     }
     setSwitchState(value, callback) {
+        if (!this.onCode || !this.offCode) {
+            this.log.error("[ERROR]IR code no defined!");
+            return;
+        }
         if (!this.platform._enterSyncState()) {
             this.platform.syncLockEvent.once("lockDrop", (() => {
                 this.setSwitchState(value, callback);

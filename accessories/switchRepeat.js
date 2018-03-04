@@ -47,6 +47,10 @@ class SwitchRepeatAccessory {
     }
     setSwitchState(value, callback) {
         //Judge code define
+        if (!this.config.data || !this.config.data.on || !this.config.data.off) {
+            this.log.error("[ERROR]IR code no defined!");
+            return;
+        }
         if (!this.platform._enterSyncState()) {
             this.platform.syncLockEvent.once("lockDrop", (() => {
                 this.setSwitchState(value, callback);
