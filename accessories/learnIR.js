@@ -60,6 +60,7 @@ class LearnIRAccessory {
                     }, 500);
                     setTimeout(() => {
                         clearInterval(this.closeTimer);
+                        this.activeState.updateValue(Characteristic.On.NO);
                     }, 30 * 1000);
                 })
                 .catch((err) => {
@@ -76,13 +77,13 @@ class LearnIRAccessory {
                 .then(() => {
                     this.log("[%s]End IR learn", this.name);
                     this._switchUpdateState();
-                    clearTimeout(this.closeTimer);
                 })
                 .catch((err) => {
                     this.log.error("[ERROR]End failed! %s", err);
                     this._switchRevertState();
                 })
                 .then(() => {
+                    clearInterval(this.closeTimer);
                     this.platform._exitSyncState();
                     callback();
                 });
@@ -96,7 +97,7 @@ class LearnIRAccessory {
                     this.lastIRCode = code;
                     //Recovert the return IR code to new code
                     let _code = code.substr(0, 14) + "94701FFF96FF" + code.substr(26);
-                    this.log("[%s]IR code: %s", this.name, _code);
+                    this.log("[%s]IR Code -> %s", this.name, _code);
                 }
             })
             .catch((err) => this.log.error("[ERROR]Learn Switch error! %s", err));
