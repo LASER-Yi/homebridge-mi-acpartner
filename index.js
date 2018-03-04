@@ -1,5 +1,6 @@
 const events = require('events');
 const connectUtil = require('./lib/connectUtil');
+const packageFile = require('./package.json');
 
 const ClimateAccessory = require('./accessories/climate');
 const SwitchAccessory = require('./accessories/switch');
@@ -59,6 +60,12 @@ function XiaoMiAcPartner(log, config, api) {
     if (api) {
         this.api = api;
     }
+    this.log.info("--------------------------------------------------------------");
+    this.log.info("Initialing XiaoMiAcPartner...");
+    this.log.info("Current version -> %s", packageFile.version);
+    this.log.info("GitHub: https://github.com/LASER-Yi/homebridge-mi-acpartner");
+    this.log.info("QQ Group: 107927710");
+    this.log.info("--------------------------------------------------------------");
 }
 
 XiaoMiAcPartner.prototype = {
