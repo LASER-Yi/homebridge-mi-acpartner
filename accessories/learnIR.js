@@ -97,7 +97,9 @@ class LearnIRAccessory {
                     this.lastIRCode = code;
                     //Recovert the return IR code to new code
                     let _code = code.substr(0, 14) + "94701FFF96FF" + code.substr(26);
-                    this.log("[%s]IR Code -> %s", this.name, _code);
+                    this.log("[%s]IR Code: %s", this.name, _code);
+                    //When got result, turn off the switch on homekit
+                    this.activeState.setValue(Characteristic.On.NO);
                 }
             })
             .catch((err) => this.log.error("[ERROR]Learn Switch error! %s", err));
