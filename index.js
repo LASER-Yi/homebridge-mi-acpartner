@@ -47,7 +47,7 @@ function XiaoMiAcPartner(log, config, api) {
 
     //Connection util init;
     if (config.devices) {
-        this.conUtil = new connectUtil(config.devices, log, this);
+        this.conUtil = new connectUtil(config.devices, this);
         setInterval((() => {
             this.conUtil.refresh();
         }), this.refreshInterval);
