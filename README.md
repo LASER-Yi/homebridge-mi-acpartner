@@ -61,6 +61,8 @@ sudo npm install -g homebridge-mi-acpartner
     格力：2，8
     大部分空调的1号预设
 
+如果格力2空调只有自动和关机响应，请尝试多次调节温度已使空调响应
+
 你可以在米家App中更改预设信息
 
 如果没有定义``customize``，插件会使用自动生成的空调码，空调可能不会响应。
@@ -383,6 +385,12 @@ sudo npm install -g homebridge-mi-acpartner
 
 
 ### Changelog
+
+0.6.3
+
+修复了空调伴侣信息同步到插件后显示不正确的问题
+
+给格力2更换了预设信息
 
 0.6.1
 
