@@ -76,7 +76,7 @@ XiaoMiAcPartner.prototype = {
         this.config['accessories'].forEach(element => {
             if (undefined != element['type'] || undefined != element['name']) {
                 //Register
-                this.log("[INFO]Register %s -> type:%s", element['name'], element['type']);
+                this.log("[INIT]Accessory %s -> type: %s", element['name'], element['type']);
                 switch (element['type']) {
                     case "switch":
                         accessories.push(new SwitchAccessory(element, this));
@@ -96,7 +96,7 @@ XiaoMiAcPartner.prototype = {
                 }
             }
         });
-        this.log("[INFO]Register complete");
+        this.log("[INIT]Register complete");
         callback(accessories);
     },
     _enterSyncState: function () {
