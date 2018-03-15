@@ -10,6 +10,8 @@
 
 **注意：此插件于0.6.0版本后修改了配置文件，请根据本文修改你的配置文件使插件正常工作。**
 
+**若要查看抓包教程，请访问此项目Github的[Wiki页面](https://github.com/LASER-Yi/homebridge-mi-acpartner/wiki)**
+
 ### Support(支持)
 
 ![AcPartner](https://github.com/LASER-Yi/homebridge-mi-acpartner/raw/master/img/two.jpg)
