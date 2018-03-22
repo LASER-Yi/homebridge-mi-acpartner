@@ -121,7 +121,7 @@ sudo npm install -g homebridge-mi-acpartner
 | ``sensorSid`` | 填写你的温湿度传感器ID，此温湿度传感器**必须**绑定在空调伴侣下，可在米家空调伴侣中的**子设备信息**中查到 | "lumi.158d000156e667" |  |  |
 
 
-如果空调没有响应，可以使用此[方法](https://github.com/aholstenson/miio/blob/master/docs/protocol.md#)来获取你正使用的空调码，然后填入到config中。
+如果空调没有响应，可以使用此[方法](https://github.com/LASER-Yi/homebridge-mi-acpartner/wiki)来获取你正使用的空调码，然后填入到config中。
 
 大部分空调码以01开头，且能与空调伴侣同步信息；大部分红外码以FE开头，能否同步信息未知，所以在使用红外码控制空调时，请关闭插件的同步功能
 
