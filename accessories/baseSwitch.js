@@ -1,7 +1,9 @@
 const base = require('./base');
-const util = require('util');
 
-class baseSwitch {
+class baseSwitch extends base {
+    constructor(config, platform) {
+        super(config, platform);
+    }
     _switchRevertState() {
         //Revert last state
         setTimeout(() => {
@@ -14,5 +16,5 @@ class baseSwitch {
     }
 }
 
-util.inherits(baseSwitch, base);
+//util.inherits(baseSwitch, base);
 module.exports = baseSwitch;

@@ -1,9 +1,11 @@
 const base = require('./base');
-const util = require('util');
 
 const presetUtil = require("../lib/presetUtil");
 
-class baseAC {
+class baseAC extends base {
+    constructor(config, platform) {
+        super(config, platform);
+    }
     //need _updateState() function in child object
     _sendCmd(code) {
         let codeCommand;
@@ -187,5 +189,5 @@ class baseAC {
     }
 }
 
-util.inherits(baseAC, base);
+//util.inherits(baseAC, base);
 module.exports = baseAC;

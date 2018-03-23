@@ -1,12 +1,10 @@
-const util = require('util');
-
 const baseSwitch = require('./baseSwitch');
 
 let Service, Characteristic, Accessory;
 
-class LearnIRAccessory {
+class LearnIRAccessory extends baseSwitch {
     constructor(config, platform) {
-        this.init(config, platform);
+        super(config, platform);
         Accessory = platform.Accessory;
         Service = platform.Service;
         Characteristic = platform.Characteristic;
@@ -105,5 +103,5 @@ class LearnIRAccessory {
             .catch((err) => this.log.error("[ERROR]Learn Switch error! %s", err));
     }
 }
-util.inherits(LearnIRAccessory, baseSwitch);
+//util.inherits(LearnIRAccessory, baseSwitch);
 module.exports = LearnIRAccessory;

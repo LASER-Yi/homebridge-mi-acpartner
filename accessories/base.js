@@ -1,5 +1,5 @@
 class Base {
-    init(config, platform) {
+    constructor(config, platform) {
         this.platform = platform;
         this.log = platform.log;
         this.config = config;

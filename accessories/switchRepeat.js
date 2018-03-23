@@ -1,11 +1,10 @@
-const util = require('util');
 const baseSwitch = require('./baseSwitch');
 
 let Service, Characteristic, Accessory;
 
-class SwitchRepeatAccessory {
+class SwitchRepeatAccessory extends baseSwitch {
     constructor(config, platform) {
-        this.init(config, platform);
+        super(config, platform);
         Accessory = platform.Accessory;
         Service = platform.Service;
         Characteristic = platform.Characteristic;
@@ -85,5 +84,5 @@ class SwitchRepeatAccessory {
             });
     }
 }
-util.inherits(SwitchRepeatAccessory, baseSwitch);
+//util.inherits(SwitchRepeatAccessory, baseSwitch);
 module.exports = SwitchRepeatAccessory;

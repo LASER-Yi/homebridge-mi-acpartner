@@ -1,11 +1,10 @@
-const util = require('util');
 const baseAC = require('./baseAC');
 
 let Service, Characteristic, Accessory;
 
-class HeaterCoolerAccessory {
+class HeaterCoolerAccessory extends baseAC {
     constructor(config, platform) {
-        this.init(config, platform);
+        super(config, platform);
         Accessory = platform.Accessory;
         Service = platform.Service;
         Characteristic = platform.Characteristic;
@@ -292,5 +291,5 @@ class HeaterCoolerAccessory {
     }
 }
 
-util.inherits(HeaterCoolerAccessory, baseAC);
+//util.inherits(HeaterCoolerAccessory, baseAC);
 module.exports = HeaterCoolerAccessory;
