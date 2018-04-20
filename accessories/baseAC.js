@@ -49,7 +49,7 @@ class baseAC extends base {
             code = presetUtil(this.model, this.active, this.mode, this.temperature, this.swing, this.speed, this.led);
         } else {
             //customize
-            code = this.customiUtil();
+            code = this.customiUtil(this.active, this.mode, this.temperature);
         }
         if (code === null) {
             callback();
@@ -88,7 +88,9 @@ class baseAC extends base {
     }
     _fastSync() {
         //this function will  start _stateSync every 5 sec. And will end in 30 sec
-        if (this.syncInterval <= 0) return;
+        if (this.syncInterval <= 0) {
+            return;
+        }
         if (this.fastSyncTimer) {
             //Clear last fastSync timer
             clearInterval(this.fastSyncTimer);
@@ -100,7 +102,7 @@ class baseAC extends base {
         setImmediate(() => this._stateSync());
         this.fastSyncTimer = setInterval(() => {
             this._stateSync();
-        }, 2 * 1000);
+        }, 5 * 1000);
         this.fastSyncEnd = setTimeout(() => {
             clearInterval(this.fastSyncTimer);
             this.log.debug("[DEBUG]Exit fastSync");
@@ -133,9 +135,7 @@ class baseAC extends base {
                     this.log.debug("[SENSOR]RelativeHumidity -> %s", this.CurrentRelativeHumidity.value);
                 }
             })
-            .catch((err) => {
-                this.log.warn("[WARN]Failed to update current temperature! %s", err);
-            });
+            
 
         //Update AC state
         const p2 = this.platform.devices[this.deviceIndex].call('get_model_and_state', [])
@@ -172,9 +172,7 @@ class baseAC extends base {
                     this.CurrentTemperature.updateValue(this.temperature);
                 }
             })
-            .catch((err) => {
-                this.log.error("[ERROR]Failed to update AC state! %s", err);
-            });
+
 
         Promise.all([p1, p2])
             .then(() => {

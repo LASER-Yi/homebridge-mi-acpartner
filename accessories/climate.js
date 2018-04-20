@@ -12,7 +12,11 @@ class ClimateAccessory extends baseAC {
         //Config
         this.maxTemp = parseInt(config.maxTemp, 10) || 30;
         this.minTemp = parseInt(config.minTemp, 10) || 17;
-        this.syncInterval = parseInt(config.syncInterval, 10) || 60 * 1000;
+        if (config.syncInterval !== undefined) {
+            this.syncInterval = parseInt(config.syncInterval, 10);
+        } else {
+            this.syncInterval = 60 * 1000;
+        }
         this.autoStart = config.autoStart || "auto";
         this.outerSensor = config.sensorSid;
         
@@ -22,6 +26,8 @@ class ClimateAccessory extends baseAC {
             this.syncTimer = setInterval(() => {
                 this._stateSync();
             }, this.syncInterval);
+        } else {
+            this.log.info("[INFO]Sync off");
         }
 
         //customize
@@ -139,46 +145,48 @@ class ClimateAccessory extends baseAC {
         //Update TargetTemperature
         this.TargetTemperature.updateValue(this.temperature);
     }
-    customiUtil() {
-        let code = null;
+    customiUtil(active, mode, temperature) {
+        var code = "";
+        let _temperature = parseInt(temperature, 10);
         //Note: Some AC need 'on' signal to active. Add later.
 
-        switch (this.TargetHeatingCoolingState.value) {
-            case Characteristic.TargetHeatingCoolingState.HEAT:
-                //HEAT
-                if (!this.customi.heat || !this.customi.heat[this.TargetTemperature.value]) {
-                    this.log.warn("[WARN]'HEAT' signal not define");
-                } else {
-                    code = this.customi.heat[this.TargetTemperature.value];
-                }
-                break;
-            case Characteristic.TargetHeatingCoolingState.COOL:
-                //COOL
-                if (!this.customi.cool || !this.customi.cool[this.TargetTemperature.value]) {
-                    this.log.warn("[WARN]'COOL' signal not define");
-                } else {
-                    code = this.customi.cool[this.TargetTemperature.value];
-                }
-                break;
-            case Characteristic.TargetHeatingCoolingState.AUTO:
-                //AUTO
-                if (!this.customi.auto) {
-                    this.log.warn("[WARN]'AUTO' signal not define");
-                } else {
-                    code = this.customi.auto;
-                }
-                break;
-            case Characteristic.TargetHeatingCoolingState.OFF:
-                //OFF
-                if (!this.customi.off) {
-                    this.log.warn("[WARN]'OFF' signal not define");
-                } else {
-                    code = this.customi.off;
-                }
-                break;
-            default:
-                break;
+        if (active === 0) {
+            if (this.customi.off !== undefined) {
+                code = this.customi.off;
+            } else {
+                this.log.warn("[WARN]'OFF' signal no define");
+            }
+        } else {
+            switch (mode) {
+                case 0:
+                    //heat
+                    if (!this.customi.heat || !this.customi.heat[_temperature]) {
+                        this.log.warn("[WARN]'HEAT' signal not define");
+                    } else {
+                        code = this.customi.heat[_temperature];
+                    }
+                    break;
+                case 1:
+                    //cool
+                    if (!this.customi.cool || !this.customi.cool[_temperature]) {
+                        this.log.warn("[WARN]'COOL' signal not define");
+                    } else {
+                        code = this.customi.cool[_temperature];
+                    }
+                    break;
+                case 2:
+                    //auto
+                    if (!this.customi.auto) {
+                        this.log.warn("[WARN]'AUTO' signal not define");
+                    } else {
+                        code = this.customi.auto;
+                    }
+                    break;
+                default:
+                    break;
+            }
         }
+
         return code;
     }
     getTargetHeatingCoolingState(callback) {
