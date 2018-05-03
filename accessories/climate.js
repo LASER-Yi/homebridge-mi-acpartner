@@ -190,18 +190,20 @@ class ClimateAccessory extends baseAC {
         return code;
     }
     getTargetHeatingCoolingState(callback) {
-        this._fastSync();
+        setImmediate(() => { this._fastSync(); });
         let state = Characteristic.TargetHeatingCoolingState.OFF;
-        switch (this.mode) {
-            case "0":
-                state = Characteristic.TargetHeatingCoolingState.HEAT;
-                break;
-            case "1":
-                state = Characteristic.TargetHeatingCoolingState.COOL;
-                break;
-            case "2":
-                state = Characteristic.TargetHeatingCoolingState.AUTO;
-                break;
+        if (this.active == '1') {
+            switch (this.mode) {
+                case "0":
+                    state = Characteristic.TargetHeatingCoolingState.HEAT;
+                    break;
+                case "1":
+                    state = Characteristic.TargetHeatingCoolingState.COOL;
+                    break;
+                case "2":
+                    state = Characteristic.TargetHeatingCoolingState.AUTO;
+                    break;
+            }
         }
         callback(null, state);
     }
