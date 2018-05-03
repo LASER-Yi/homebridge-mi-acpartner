@@ -3,8 +3,11 @@ const base = require('./base');
 const presetUtil = require("../lib/presetUtil");
 
 class baseAC extends base {
+
     constructor(config, platform) {
         super(config, platform);
+        this.lastSensorState = null;
+        this.lastPartnerState = null;
     }
     //need _updateState() function in child object
     _sendCmd(code) {
@@ -51,7 +54,7 @@ class baseAC extends base {
             //customize
             code = this.customiUtil(this.active, this.mode, this.temperature);
         }
-        if (code === null) {
+        if (code === null || code === "") {
             callback();
             return;
         }
@@ -126,13 +129,17 @@ class baseAC extends base {
                 [this.outerSensor, "temperature", "humidity"]
             ])
             .then((senRet) => {
-                if (senRet[0][0] === null) {
-                    throw (new Error("Error: Invaild sensorSid!"));
-                } else {
-                    this.CurrentTemperature.updateValue(senRet[0][0] / 100.0);
-                    this.CurrentRelativeHumidity.updateValue(senRet[0][1] / 100.0);
-                    this.log.debug("[SENSOR]Temperature -> %s", this.CurrentTemperature.value);
-                    this.log.debug("[SENSOR]RelativeHumidity -> %s", this.CurrentRelativeHumidity.value);
+                if (this.lastSensorState !== senRet[0]) {
+                    this.lastSensorState = senRet[0];
+
+                    if (senRet[0][0] === null) {
+                        throw (new Error("Error: Invaild sensorSid!"));
+                    } else {
+                        this.CurrentTemperature.updateValue(senRet[0][0] / 100.0);
+                        this.CurrentRelativeHumidity.updateValue(senRet[0][1] / 100.0);
+                        this.log.debug("[SENSOR]Temperature -> %s", this.CurrentTemperature.value);
+                        this.log.debug("[SENSOR]RelativeHumidity -> %s", this.CurrentRelativeHumidity.value);
+                    }
                 }
             })
             
@@ -140,36 +147,40 @@ class baseAC extends base {
         //Update AC state
         const p2 = this.platform.devices[this.deviceIndex].call('get_model_and_state', [])
             .then((ret) => {
-                this.log.debug("Partner state----------------------");
-                const model = ret[0],
-                    state = ret[1],
-                    power = ret[2];
+                if (this.lastPartnerState !== ret[1]) {
+                    this.lastPartnerState = ret[1];
 
-                if (this.model !== model) {
-                    this.model = model;
-                }
-                this.log.debug("Model -> %s", this.model.substr(0, 2) + this.model.substr(8, 8));
+                    this.log.debug("Update state----------------------");
+                    const model = ret[0],
+                        state = ret[1],
+                        power = ret[2];
 
-                //Save all parameter to global
-                this.active = state.substr(2, 1);
-                this.mode = state.substr(3, 1);
-                this.temperature = parseInt(state.substr(6, 2), 16);
-                this.speed = state.substr(4, 1);
-                this.swing = 1 - state.substr(5, 1);
-                this.led = state.substr(8, 1);
-                this.log.debug("Active -> %s", this.active);
-                this.log.debug("Mode -> %s", this.mode);
-                this.log.debug("Temperature -> %s", this.temperature);
-                this.log.debug("RotationSpeed -> %s", this.speed);
-                this.log.debug("SwingMode -> %s", this.swing);
-                this.log.debug("LED -> %s", this.led);
-                this.log.debug("-----------------------------------");
+                    if (this.model !== model) {
+                        this.model = model;
+                    }
+                    this.log.debug("Model -> %s", this.model.substr(0, 2) + this.model.substr(8, 8));
 
-                //Use independence function to update accessory state
-                this._updateState();
+                    //Save all parameter to global
+                    this.active = state.substr(2, 1);
+                    this.mode = state.substr(3, 1);
+                    this.temperature = parseInt(state.substr(6, 2), 16);
+                    this.speed = state.substr(4, 1);
+                    this.swing = 1 - state.substr(5, 1);
+                    this.led = state.substr(8, 1);
+                    this.log.debug("Active -> %s", this.active);
+                    this.log.debug("Mode -> %s", this.mode);
+                    this.log.debug("Temperature -> %s", this.temperature);
+                    this.log.debug("RotationSpeed -> %s", this.speed);
+                    this.log.debug("SwingMode -> %s", this.swing);
+                    this.log.debug("LED -> %s", this.led);
+                    this.log.debug("-----------------------------------");
 
-                if (!this.outerSensor === null) {
-                    this.CurrentTemperature.updateValue(this.temperature);
+                    //Use independence function to update accessory state
+                    this._updateState();
+
+                    if (this.outerSensor === undefined) {
+                        this.CurrentTemperature.updateValue(this.temperature);
+                    }
                 }
             })
 

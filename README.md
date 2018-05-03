@@ -84,7 +84,7 @@ sudo npm install -g homebridge-mi-acpartner
             "platform": "XiaoMiAcPartner",
             "devices":{
                 "192.168.31.120":"your_token_here",
-                "192.168.31.121":"your_token_here",
+                "192.168.31.121":"your_token_here"
             },
             "accessories":[
 
@@ -387,6 +387,16 @@ sudo npm install -g homebridge-mi-acpartner
 
 
 ### Changelog
+
+0.6.5
+
+FIX:
+* 修复了没有绑定温度传感器时，温度信息持续显示为0的问题；
+CHANGE:
+* 当空调伴侣的状态没有改变时，现在不会更新Homekit中的信息；
+KNOWN:
+* 关闭同步时，首次启动同步后和米家中有出入；
+
 
 0.6.3
 

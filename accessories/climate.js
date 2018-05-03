@@ -19,16 +19,6 @@ class ClimateAccessory extends baseAC {
         }
         this.autoStart = config.autoStart || "auto";
         this.outerSensor = config.sensorSid;
-        
-        //Sync
-        setImmediate(() => this._stateSync());
-        if (this.syncInterval > 0) {
-            this.syncTimer = setInterval(() => {
-                this._stateSync();
-            }, this.syncInterval);
-        } else {
-            this.log.info("[INFO]Sync off");
-        }
 
         //customize
         if (config.customize) {
@@ -53,6 +43,16 @@ class ClimateAccessory extends baseAC {
         this.led;
 
         this._setCharacteristic();
+
+        //Sync
+        this._stateSync();
+        if (this.syncInterval > 0) {
+            this.syncTimer = setInterval(() => {
+                this._stateSync();
+            }, this.syncInterval);
+        } else {
+            this.log.info("[INFO]Sync off");
+        }
     }
     _setCharacteristic() {
         this.services = [];
@@ -112,7 +112,7 @@ class ClimateAccessory extends baseAC {
         //Update AC mode and active state
         let target_mode;
         let current_mode;
-        if (this.active === "1") {
+        if (this.active == '1') {
             switch (this.mode) {
                 case "0":
                     //HEAT
@@ -237,7 +237,7 @@ class ClimateAccessory extends baseAC {
         callback();
     }
     setTargetTemperature(TargetTemperature, callback, context) {
-        //Note: 'autoStart' parameter need here; Add later.
+        //TODO: 'autoStart' parameter need here; Add later.
         if (!this.outerSensor) {
             this.CurrentTemperature.updateValue(TargetTemperature);
         }
