@@ -17,7 +17,7 @@ module.exports = function (homebridge) {
     Characteristic = homebridge.hap.Characteristic;
     UUIDGen = homebridge.hap.uuid;
 
-    homebridge.registerPlatform('homebridge-mi-acpartner', 'XiaoMiAcPartner', XiaoMiAcPartner, true);
+    homebridge.registerPlatform('homebridge-mi-acpartner', 'XiaoMiAcPartner', XiaoMiAcPartner, false);
 }
 
 function XiaoMiAcPartner(log, config, api) {
@@ -34,6 +34,7 @@ function XiaoMiAcPartner(log, config, api) {
 
     //Miio devices
     this.devices = [];
+    this.accessories = [];
 
     //Config
     if (config["refreshInterval"]) {
@@ -56,24 +57,46 @@ function XiaoMiAcPartner(log, config, api) {
 
     if (api) {
         this.api = api;
+        this.api.on('didFinishLaunching', () => {
+            //Connect devices
+            this.conUtil = new connectUtil(config.devices, this);
+            setInterval((() => {
+                this.conUtil.refresh();
+            }), this.refreshInterval);
+        })
+    } else {
+        this.log.error("[ERROR]Homebridge's version is too old, please upgrade it!");
+        return;
     }
 
-    this.log.info("XiaoMiAcPartner ----------------------------------------------");
-    this.log.info("Current version: %s", packageFile.version);
-    this.log.info("GitHub: https://github.com/LASER-Yi/homebridge-mi-acpartner");
-    this.log.info("QQ Group: 107927710");
-    this.log.info("--------------------------------------------------------------");
-
-    //Connect devices
-    this.conUtil = new connectUtil(config.devices, this);
-    setInterval((() => {
-        this.conUtil.refresh();
-    }), this.refreshInterval);
+    this.welcomeInfo();
 }
 
 XiaoMiAcPartner.prototype = {
-    accessories: function (callback) {
-        /**Start register accessories */
+    welcomeInfo: function () {  
+        this.log.info("XiaoMiAcPartner By LASER-Yi ------------------------");
+        this.log.info("Current version: %s", packageFile.version);
+        this.log.info("GitHub: https://github.com/LASER-Yi/homebridge-mi-acpartner");
+        this.log.info("QQ Group: 107927710");
+        this.log.info("----------------------------------------------------");
+    },
+    registerPlatformAccessories: function (accessories) {
+        this.log("Calling registerPlatformAccessories");
+        this.api.registerPlatformAccessories('homebridge-mi-acpartner', 'XiaoMiAcPartner', accessories);
+        accessories.forEach((accessory, index, arr) => {
+            this.log("[INFO]create accessory - UUID: " + accessory.UUID);
+        });
+    },
+    configureAccessory: function (accessory) {
+        this.log("Calling configureAccessory");
+    },
+    addAccessory: function (name, type) {
+        this.log("Calling addAccessory");
+
+        var uuid = UUIDGen.generate(name);
+    },
+    /*accessories: function (callback) {
+        //Start register accessories
         let accessories = [];
 
         this.config['accessories'].forEach(element => {
@@ -101,7 +124,7 @@ XiaoMiAcPartner.prototype = {
         });
         this.log("[INIT]Register complete");
         callback(accessories);
-    },
+    },*/
     _enterSyncState: function () {
         if (this.syncCounter >= 5) {
             return false;

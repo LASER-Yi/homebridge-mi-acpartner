@@ -179,9 +179,7 @@ class ClimateAccessory extends baseAC {
         return code;
     }
     getTargetHeatingCoolingState(callback) {
-        setImmediate(() => {
-            this._fastSync();
-        });
+        setImmediate(() => { this._fastSync(); });
         let state = Characteristic.TargetHeatingCoolingState.OFF;
         if (this.active == '1') {
             switch (this.mode) {

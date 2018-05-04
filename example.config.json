@@ -9,23 +9,23 @@
         {
             "platform": "XiaoMiAcPartner",
             "devices":{
-                "192.168.31.146":"your_token_here",
-                "192.168.31.201":"your_token_here"
+                "192.168.31.146":"acpartner_token_here",
+                "192.168.31.201":"acpartner_token_here"
             },
             "accessories":[
                 {
-                    "name": "Ac Partner",
+                    "name": "Bedroom AC Partner",
                     "type": "heaterCooler",
                     "sensorSid": "lumi.158d000156e667"
                 },
                 {
-                    "name": "Ac Partner 2",
+                    "name": "Living room AC Partner",
                     "type": "climate",
-                    "device": 1,
+                    "deviceIp": "192.168.31.201",
                     "maxTemp": "30",
                     "minTemp": "17",
                     "customize": {
-                        "off": "You_AC_Signal_Here",
+                        "off": "",
                         "auto": "",
                         "heat": {
                             "30": "",
@@ -42,14 +42,14 @@
                     "name": "learn",
                     "type": "learnIR"
                 },{
-                    "name": "test",
+                    "name": "TV",
                     "type": "switch",
                     "data":{
                         "on": "FE01825423434",
                         "off": "FE01920531312"
                     }
                 },{
-                    "name": "test_2",
+                    "name": "Automatic IR Switch",
                     "type": "switchRepeat",
                     "data":{
                         "on": [

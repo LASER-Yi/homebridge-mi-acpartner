@@ -6,6 +6,7 @@ class baseAC extends base {
 
     constructor(config, platform) {
         super(config, platform);
+        
         this.lastSensorState = null;
         this.lastPartnerState = null;
 

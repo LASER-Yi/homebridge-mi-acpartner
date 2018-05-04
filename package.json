@@ -13,7 +13,7 @@
     "mi",
     "ac partner"
   ],
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/LASER-Yi/homebridge-mi-acPartner/issues"
   },
