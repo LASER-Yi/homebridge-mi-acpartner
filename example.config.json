@@ -14,12 +14,12 @@
             },
             "accessories":[
                 {
-                    "name": "Bedroom AC Partner",
+                    "name": "Bedroom AC",
                     "type": "heaterCooler",
                     "sensorSid": "lumi.158d000156e667"
                 },
                 {
-                    "name": "Living room AC Partner",
+                    "name": "Living room AC",
                     "type": "climate",
                     "deviceIp": "192.168.31.201",
                     "maxTemp": "30",

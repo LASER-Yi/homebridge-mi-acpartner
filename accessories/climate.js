@@ -189,7 +189,7 @@ class ClimateAccessory extends baseAC {
                 case "1":
                     state = Characteristic.TargetHeatingCoolingState.COOL;
                     break;
-                case "2":
+                default:
                     state = Characteristic.TargetHeatingCoolingState.AUTO;
                     break;
             }
