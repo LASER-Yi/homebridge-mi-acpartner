@@ -9,17 +9,6 @@ class HeaterCoolerAccessory extends baseAC {
         Service = platform.Service;
         Characteristic = platform.Characteristic;
 
-        //Config
-        this.maxTemp = parseInt(config.maxTemp, 10) || 30;
-        this.minTemp = parseInt(config.minTemp, 10) || 17;
-        if (config.syncInterval !== undefined) {
-            this.syncInterval = parseInt(config.syncInterval, 10);
-        } else {
-            this.syncInterval = 60 * 1000;
-        }
-        this.autoStart = config.autoStart || "auto";
-        this.outerSensor = config.sensorSid;
-
         //Characteristic
         this.CActive;
         this.TargetHeaterCoolerState;
@@ -50,7 +39,7 @@ class HeaterCoolerAccessory extends baseAC {
                 this._stateSync();
             }, this.syncInterval);
         } else {
-            this.log.info("[INFO]Sync off");
+            this.log.warn("[WARN]Sync off");
         }
     }
     _setCharacteristic() {

@@ -25,6 +25,7 @@ class SwitchAccessory extends baseSwitch {
         }
         this._setCharacteristic();
     }
+
     _setCharacteristic() {
         this.services = [];
 
@@ -43,6 +44,7 @@ class SwitchAccessory extends baseSwitch {
 
         this.services.push(this.switchService);
     }
+    
     setSwitchState(value, callback) {
         if (!this.onCode || !this.offCode) {
             this.log.error("[ERROR]IR code no defined!");

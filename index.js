@@ -10,7 +10,7 @@ const HeaterCoolerAccessory = require('./accessories/heaterCooler');
 
 let PlatformAccessory, Accessory, Service, Characteristic, UUIDGen;
 
-module.exports = function (homebridge) {
+module.exports = function (homebridge) { 
     PlatformAccessory = homebridge.platformAccessory;
     Accessory = homebridge.hap.Accessory;
     Service = homebridge.hap.Service;
@@ -35,10 +35,18 @@ function XiaoMiAcPartner(log, config, api) {
     //Miio devices
     this.devices = [];
 
-    //Config Reader
-    this.refreshInterval = config["refreshInterval"] || 10 * 60 * 1000;
-    if (!this.config['accessories']) {
+    //Config
+    if (config["refreshInterval"]) {
+        this.refreshInterval = config["refreshInterval"];
+    } else {
+        this.refreshInterval = 10 * 60 * 1000;
+    }
+    if (!config['accessories']) {
         this.log.error("[ERROR]'accessories' not defined! Please check your 'config.json' file.");
+        return;
+    }
+    if (!config.devices) {
+        this.log.error("[ERROR]'devices' not defined! Please check your 'config.json' file.");
         return;
     }
 
@@ -46,26 +54,21 @@ function XiaoMiAcPartner(log, config, api) {
     this.syncCounter = 0;
     this.syncLockEvent = new events.EventEmitter();
 
-    //Connection util init;
-    if (config.devices) {
-        this.conUtil = new connectUtil(config.devices, this);
-        setInterval((() => {
-            this.conUtil.refresh();
-        }), this.refreshInterval);
-    } else {
-        this.log.error("[ERROR]'devices' not defined! Please check your 'config.json' file.");
-        return;
-    }
-
     if (api) {
         this.api = api;
     }
-    this.log.info("--------------------------------------------------------------");
-    this.log.info("Initialing XiaoMiAcPartner...");
+
+    this.log.info("XiaoMiAcPartner ----------------------------------------------");
     this.log.info("Current version: %s", packageFile.version);
     this.log.info("GitHub: https://github.com/LASER-Yi/homebridge-mi-acpartner");
     this.log.info("QQ Group: 107927710");
     this.log.info("--------------------------------------------------------------");
+
+    //Connect devices
+    this.conUtil = new connectUtil(config.devices, this);
+    setInterval((() => {
+        this.conUtil.refresh();
+    }), this.refreshInterval);
 }
 
 XiaoMiAcPartner.prototype = {
@@ -74,7 +77,7 @@ XiaoMiAcPartner.prototype = {
         let accessories = [];
 
         this.config['accessories'].forEach(element => {
-            if (undefined != element['type'] || undefined != element['name']) {
+            if (element['type'] !== undefined && element['name'] !== undefined) {
                 //Register
                 this.log("[INIT]Accessory %s -> type: %s", element['name'], element['type']);
                 switch (element['type']) {

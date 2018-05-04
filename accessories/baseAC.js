@@ -8,6 +8,17 @@ class baseAC extends base {
         super(config, platform);
         this.lastSensorState = null;
         this.lastPartnerState = null;
+
+        //Config
+        this.maxTemp = parseInt(config.maxTemp, 10) || 30;
+        this.minTemp = parseInt(config.minTemp, 10) || 17;
+        if (config.syncInterval !== undefined) {
+            this.syncInterval = parseInt(config.syncInterval, 10);
+        } else {
+            this.syncInterval = 60 * 1000;
+        }
+        this.autoStart = config.autoStart || "auto";
+        this.outerSensor = config.sensorSid;
     }
     //need _updateState() function in child object
     _sendCmd(code) {
