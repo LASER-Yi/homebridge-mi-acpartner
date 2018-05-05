@@ -34,7 +34,6 @@ function XiaoMiAcPartner(log, config, api) {
 
     //Miio devices
     this.devices = [];
-    this.accessories = [];
 
     //Config
     this.refreshInterval = config["refreshInterval"] !== undefined ? config["refreshInterval"] : 10 * 60 * 1000;
