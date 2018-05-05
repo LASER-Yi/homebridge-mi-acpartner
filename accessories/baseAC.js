@@ -14,17 +14,12 @@ class baseAC extends base {
         this.maxTemp = parseInt(config.maxTemp, 10) || 30;
         this.minTemp = parseInt(config.minTemp, 10) || 17;
         this.syncInterval = config.syncInterval !== undefined ? parseInt(config.syncInterval, 10) : 60 * 1000;
-        /*if (config.syncInterval !== undefined) {
-            this.syncInterval = parseInt(config.syncInterval, 10);
-        } else {
-            this.syncInterval = 60 * 1000;
-        }*/
         this.autoStart = config.autoStart || "cool";
         this.outerSensor = config.sensorSid;
 
         //Ready to Start
         platform.startEvent.once("start", () => {
-            this.log.debug("[%s]Starting", this.name);
+            this.log.debug("[%s]Started", this.name);
             this._startAcc();
         })
     }
@@ -147,7 +142,6 @@ class baseAC extends base {
             }));
             return;
         }
-        this.log.debug("[%s]Syncing...", this.name);
 
         //Update CurrentTemperature
         const p1 = this.outerSensor && this.platform.devices[this.deviceIndex].call('get_device_prop_exp', [
@@ -175,7 +169,8 @@ class baseAC extends base {
                 if (this.lastPartnerState !== ret[1]) {
                     this.lastPartnerState = ret[1];
 
-                    this.log.debug("Update state----------------------");
+                    this.log.debug("Update ---------------------------");
+                    this.log.debug("Accessory -> %s", this.name);
                     const model = ret[0],
                         state = ret[1],
                         power = ret[2];
@@ -211,9 +206,6 @@ class baseAC extends base {
 
 
         Promise.all([p1, p2])
-            .then(() => {
-                this.log.debug("[%s]Complete", this.name);
-            })
             .catch((err) => {
                 this.log.error("[%s]Sync failed! %s", this.name, err);
             })

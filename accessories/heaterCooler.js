@@ -31,16 +31,6 @@ class HeaterCoolerAccessory extends baseAC {
 
         //Add Characteristic
         this._setCharacteristic();
-
-        //Sync
-        this._stateSync();
-        if (this.syncInterval > 0) {
-            this.syncTimer = setInterval(() => {
-                this._stateSync();
-            }, this.syncInterval);
-        } else {
-            this.log.warn("[WARN]Sync off");
-        }
     }
     _setCharacteristic() {
         this.services = [];

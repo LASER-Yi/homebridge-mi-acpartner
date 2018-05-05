@@ -121,7 +121,6 @@ XiaoMiAcPartner.prototype = {
                 }
             }
         });
-        this.log("[INIT]Register complete");
         callback(accessories);
     },
     _enterSyncState: function () {
