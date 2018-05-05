@@ -39,10 +39,9 @@ class LearnIRAccessory extends baseSwitch {
         this.services.push(this.switchService);
     }
     setSwitchState(value, callback) {
-        if (!this.platform._enterSyncState()) {
-            this.platform.syncLockEvent.once("lockDrop", (() => {
-                this.setSwitchState(value, callback);
-            }));
+        if (!this.platform.syncLock._enterSyncState(() => {
+                this.setSwitchState(value,callback);
+            })) {
             return;
         }
         this.onState = value;
@@ -67,7 +66,7 @@ class LearnIRAccessory extends baseSwitch {
                 })
                 .then(() => {
                     callback();
-                    this.platform._exitSyncState();
+                    this.platform.syncLock._exitSyncState();
                 });
         } else {
             //Switch off
@@ -82,7 +81,7 @@ class LearnIRAccessory extends baseSwitch {
                 })
                 .then(() => {
                     clearInterval(this.closeTimer);
-                    this.platform._exitSyncState();
+                    this.platform.syncLock._exitSyncState();
                     callback();
                 });
         }

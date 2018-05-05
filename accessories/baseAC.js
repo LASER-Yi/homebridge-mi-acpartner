@@ -18,7 +18,7 @@ class baseAC extends base {
         this.outerSensor = config.sensorSid;
 
         //Ready to Start
-        platform.startEvent.once("start", () => {
+        platform.startEvent.once(this.deviceIndex, () => {
             this.log.debug("[%s]Started", this.name);
             this._startAcc();
         })
@@ -63,10 +63,9 @@ class baseAC extends base {
             callback();
             return;
         }
-        if (!this.platform._enterSyncState()) {
-            this.platform.syncLockEvent.once("lockDrop", (() => {
+        if (!this.platform.syncLock._enterSyncState(() => {
                 this._sendCmdAsync(callback);
-            }));
+            })) {
             return;
         }
 
@@ -106,7 +105,7 @@ class baseAC extends base {
                 callback(err);
             })
             .then(() => {
-                this.platform._exitSyncState();
+                this.platform.syncLock._exitSyncState();
             });
     }
     _fastSync() {
@@ -136,10 +135,9 @@ class baseAC extends base {
         }, 60 * 1000);
     }
     _stateSync() {
-        if (!this.platform._enterSyncState()) {
-            this.platform.syncLockEvent.once("lockDrop", (() => {
+        if (!this.platform.syncLock._enterSyncState(() => {
                 this._stateSync();
-            }));
+            })) {
             return;
         }
 
@@ -169,7 +167,7 @@ class baseAC extends base {
                 if (this.lastPartnerState !== ret[1]) {
                     this.lastPartnerState = ret[1];
 
-                    this.log.debug("Update ---------------------------");
+                    this.log.debug("Sync -----------------------------");
                     this.log.debug("Accessory -> %s", this.name);
                     const model = ret[0],
                         state = ret[1],
@@ -210,7 +208,7 @@ class baseAC extends base {
                 this.log.error("[%s]Sync failed! %s", this.name, err);
             })
             .then(() => {
-                this.platform._exitSyncState();
+                this.platform.syncLock._exitSyncState();
             })
     }
 }

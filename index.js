@@ -1,5 +1,6 @@
 const events = require('events');
 const connectUtil = require('./lib/connectUtil');
+const syncLockUtil = require('./lib/syncLockUtil');
 const packageFile = require('./package.json');
 
 const ClimateAccessory = require('./accessories/climate');
@@ -10,7 +11,7 @@ const HeaterCoolerAccessory = require('./accessories/heaterCooler');
 
 let PlatformAccessory, Accessory, Service, Characteristic, UUIDGen;
 
-module.exports = function (homebridge) { 
+module.exports = function (homebridge) {
     PlatformAccessory = homebridge.platformAccessory;
     Accessory = homebridge.hap.Accessory;
     Service = homebridge.hap.Service;
@@ -47,9 +48,8 @@ function XiaoMiAcPartner(log, config, api) {
         return;
     }
 
-    //Global command syncLock
-    this.syncCounter = 0;
-    this.syncLockEvent = new events.EventEmitter();
+    //New syncLock
+    this.syncLock = new syncLockUtil(this);
 
     //Accessory EventEmitter
     this.startEvent = new events.EventEmitter();
@@ -64,7 +64,6 @@ function XiaoMiAcPartner(log, config, api) {
         this.api = api;
         this.api.on("didFinishLaunching", () => {
             this.welcomeInfo();
-            this.startEvent.emit("start");
         })
     } else {
         this.log.error("[ERROR]Homebridge's version is too old, please upgrade it!");
@@ -118,27 +117,11 @@ XiaoMiAcPartner.prototype = {
                     case "climate":
                         accessories.push(new ClimateAccessory(element, this));
                         break;
+                    default:
+                        this.log.warn("[WARN]Wrong Type -> %s", element['type']);
                 }
             }
         });
         callback(accessories);
-    },
-    _enterSyncState: function () {
-        if (this.syncCounter >= 5) {
-            return false;
-        } else {
-            this.syncCounter++;
-            //this.log.debug("[DEBUG]Enter SyncState #%s", this.syncCounter);
-            return true;
-        }
-    },
-    _exitSyncState: function () {
-        this.syncLockEvent.emit("lockDrop");
-        //this.log.debug("[DEBUG]Exit SyncState #%s", this.syncCounter);
-        if (this.syncCounter > 0) {
-            this.syncCounter--;
-        } else {
-            this.syncCounter = 0;
-        }
     }
 }

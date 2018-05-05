@@ -50,10 +50,9 @@ class SwitchRepeatAccessory extends baseSwitch {
             this.log.error("[ERROR]IR code no defined!");
             return;
         }
-        if (!this.platform._enterSyncState()) {
-            this.platform.syncLockEvent.once("lockDrop", (() => {
+        if (!this.platform.syncLock._enterSyncState(() => {
                 this.setSwitchState(value, callback);
-            }));
+            })) {
             return;
         }
 
@@ -68,7 +67,7 @@ class SwitchRepeatAccessory extends baseSwitch {
                 //If send code fin, disable timer and callback;
                 setTimeout(() => {
                     clearInterval(this.codeTimer);
-                    this.platform._exitSyncState();
+                    this.platform.syncLock._exitSyncState();
                     callback();
                 }, this.sendInterval / 2);
             }

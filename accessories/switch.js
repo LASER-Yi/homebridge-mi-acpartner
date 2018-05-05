@@ -50,10 +50,9 @@ class SwitchAccessory extends baseSwitch {
             this.log.error("[ERROR]IR code no defined!");
             return;
         }
-        if (!this.platform._enterSyncState()) {
-            this.platform.syncLockEvent.once("lockDrop", (() => {
+        if (!this.platform.syncLock._enterSyncState(() => {
                 this.setSwitchState(value, callback);
-            }));
+            })) {
             return;
         }
         this.onState = value;
@@ -73,7 +72,7 @@ class SwitchAccessory extends baseSwitch {
             })
             .then(() => {
                 //Callback and exit sync state
-                this.platform._exitSyncState();
+                this.platform.syncLock._exitSyncState();
             });
     }
 }
