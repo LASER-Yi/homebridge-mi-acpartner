@@ -52,6 +52,13 @@ function XiaoMiAcPartner(log, config, api) {
     this.syncCounter = 0;
     this.syncLockEvent = new events.EventEmitter();
 
+    if (api) {
+        this.api = api;
+        this.api.on("didFinishLaunching", () => {
+            this.welcomeInfo();
+        })
+    }
+
     //Connect devices
     this.conUtil = new connectUtil(config.devices, this);
     setInterval((() => {
@@ -71,7 +78,7 @@ function XiaoMiAcPartner(log, config, api) {
 }
 
 XiaoMiAcPartner.prototype = {
-    welcomeInfo: function () {  
+    welcomeInfo: function () {
         this.log.info("XiaoMiAcPartner By LASER-Yi ------------------------");
         this.log.info("Current version: %s", packageFile.version);
         this.log.info("GitHub: https://github.com/LASER-Yi/homebridge-mi-acpartner");
@@ -100,7 +107,7 @@ XiaoMiAcPartner.prototype = {
         this.config['accessories'].forEach(element => {
             if (element['type'] !== undefined && element['name'] !== undefined) {
                 //Register
-                this.log("[INIT]Accessory %s -> type: %s", element['name'], element['type']);
+                this.log("[INIT]%s -> Type: %s", element['name'], element['type']);
                 switch (element['type']) {
                     case "switch":
                         accessories.push(new SwitchAccessory(element, this));
