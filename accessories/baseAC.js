@@ -19,6 +19,24 @@ class baseAC extends base {
         }
         this.autoStart = config.autoStart || "auto";
         this.outerSensor = config.sensorSid;
+
+        //Ready to Start
+        platform.startEvent.once("start", () => {
+            this.log.debug("[%s]Starting", this.name);
+            this._startAcc();
+        })
+    }
+
+    _startAcc() {
+        //Sync
+        this._stateSync();
+        if (this.syncInterval > 0) {
+            this.syncTimer = setInterval(() => {
+                this._stateSync();
+            }, this.syncInterval);
+        } else {
+            this.log.warn("[WARN]Sync off");
+        }
     }
     //need _updateState() function in child object
     _sendCmd(code) {
