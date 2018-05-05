@@ -56,13 +56,10 @@ function XiaoMiAcPartner(log, config, api) {
 
     if (api) {
         this.api = api;
+        this.api.on("didFinishLaunching", () => {
+            this.welcomeInfo();
+        })
     }
-
-    this.log.info("XiaoMiAcPartner ----------------------------------------------");
-    this.log.info("Current version: %s", packageFile.version);
-    this.log.info("GitHub: https://github.com/LASER-Yi/homebridge-mi-acpartner");
-    this.log.info("QQ Group: 107927710");
-    this.log.info("--------------------------------------------------------------");
 
     //Connect devices
     this.conUtil = new connectUtil(config.devices, this);
@@ -72,6 +69,13 @@ function XiaoMiAcPartner(log, config, api) {
 }
 
 XiaoMiAcPartner.prototype = {
+    welcomeInfo: function () {
+        this.log.info("XiaoMiAcPartner By LASER-Yi ----------------------------------");
+        this.log.info("Current version: %s", packageFile.version);
+        this.log.info("GitHub: https://github.com/LASER-Yi/homebridge-mi-acpartner");
+        this.log.info("QQ Group: 107927710");
+        this.log.info("--------------------------------------------------------------");
+    },
     accessories: function (callback) {
         /**Start register accessories */
         let accessories = [];
@@ -79,7 +83,7 @@ XiaoMiAcPartner.prototype = {
         this.config['accessories'].forEach(element => {
             if (element['type'] !== undefined && element['name'] !== undefined) {
                 //Register
-                this.log("[INIT]Accessory %s -> type: %s", element['name'], element['type']);
+                this.log("[INIT]%s -> Type: %s", element['name'], element['type']);
                 switch (element['type']) {
                     case "switch":
                         accessories.push(new SwitchAccessory(element, this));
