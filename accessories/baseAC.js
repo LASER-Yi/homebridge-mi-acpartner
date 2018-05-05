@@ -13,15 +13,16 @@ class baseAC extends base {
         //Config
         this.maxTemp = parseInt(config.maxTemp, 10) || 30;
         this.minTemp = parseInt(config.minTemp, 10) || 17;
-        if (config.syncInterval !== undefined) {
+        this.syncInterval = config.syncInterval !== undefined ? parseInt(config.syncInterval, 10) : 60 * 1000;
+        /*if (config.syncInterval !== undefined) {
             this.syncInterval = parseInt(config.syncInterval, 10);
         } else {
             this.syncInterval = 60 * 1000;
-        }
-        this.autoStart = config.autoStart || "auto";
+        }*/
+        this.autoStart = config.autoStart || "cool";
         this.outerSensor = config.sensorSid;
     }
-    //need _updateState() function in child object
+    //need _updateState() function in child class
     _sendCmd(code) {
         let codeCommand;
         if (code.substr(0, 2) === "FE") {
@@ -93,16 +94,10 @@ class baseAC extends base {
             })
             .then(() => {
                 this.platform._exitSyncState();
-                //After sending the code, sync AC state again after 100ms.
-                if (this.syncInterval > 0) {
-                    setTimeout(() => {
-                        this._stateSync();
-                    }, 100);
-                }
             });
     }
     _fastSync() {
-        //this function will  start _stateSync every 5 sec. And will end in 30 sec
+        //this function will  start _stateSync every 5 sec. And will end after 60 sec
         if (this.syncInterval <= 0) {
             return;
         }
@@ -125,7 +120,7 @@ class baseAC extends base {
             this.syncTimer = setInterval(() => {
                 this._stateSync();
             }, this.syncInterval);
-        }, 30 * 1000);
+        }, 60 * 1000);
     }
     _stateSync() {
         if (!this.platform._enterSyncState()) {

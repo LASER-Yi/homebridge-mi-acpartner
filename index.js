@@ -17,7 +17,7 @@ module.exports = function (homebridge) {
     Characteristic = homebridge.hap.Characteristic;
     UUIDGen = homebridge.hap.uuid;
 
-    homebridge.registerPlatform('homebridge-mi-acpartner', 'XiaoMiAcPartner', XiaoMiAcPartner, false);
+    homebridge.registerPlatform('homebridge-mi-acpartner', 'XiaoMiAcPartner', XiaoMiAcPartner, true);
 }
 
 function XiaoMiAcPartner(log, config, api) {
@@ -37,11 +37,8 @@ function XiaoMiAcPartner(log, config, api) {
     this.accessories = [];
 
     //Config
-    if (config["refreshInterval"]) {
-        this.refreshInterval = config["refreshInterval"];
-    } else {
-        this.refreshInterval = 10 * 60 * 1000;
-    }
+    this.refreshInterval = config["refreshInterval"] !== undefined ? config["refreshInterval"] : 10 * 60 * 1000;
+
     if (!config['accessories']) {
         this.log.error("[ERROR]'accessories' not defined! Please check your 'config.json' file.");
         return;
@@ -55,14 +52,15 @@ function XiaoMiAcPartner(log, config, api) {
     this.syncCounter = 0;
     this.syncLockEvent = new events.EventEmitter();
 
+    //Connect devices
+    this.conUtil = new connectUtil(config.devices, this);
+    setInterval((() => {
+        this.conUtil.refresh();
+    }), this.refreshInterval);
+
     if (api) {
         this.api = api;
         this.api.on('didFinishLaunching', () => {
-            //Connect devices
-            this.conUtil = new connectUtil(config.devices, this);
-            setInterval((() => {
-                this.conUtil.refresh();
-            }), this.refreshInterval);
         })
     } else {
         this.log.error("[ERROR]Homebridge's version is too old, please upgrade it!");
@@ -80,7 +78,7 @@ XiaoMiAcPartner.prototype = {
         this.log.info("QQ Group: 107927710");
         this.log.info("----------------------------------------------------");
     },
-    registerPlatformAccessories: function (accessories) {
+    /*registerPlatformAccessories: function (accessories) {
         this.log("Calling registerPlatformAccessories");
         this.api.registerPlatformAccessories('homebridge-mi-acpartner', 'XiaoMiAcPartner', accessories);
         accessories.forEach((accessory, index, arr) => {
@@ -94,8 +92,8 @@ XiaoMiAcPartner.prototype = {
         this.log("Calling addAccessory");
 
         var uuid = UUIDGen.generate(name);
-    },
-    /*accessories: function (callback) {
+    },*/
+    accessories: function (callback) {
         //Start register accessories
         let accessories = [];
 
@@ -124,7 +122,7 @@ XiaoMiAcPartner.prototype = {
         });
         this.log("[INIT]Register complete");
         callback(accessories);
-    },*/
+    },
     _enterSyncState: function () {
         if (this.syncCounter >= 5) {
             return false;
