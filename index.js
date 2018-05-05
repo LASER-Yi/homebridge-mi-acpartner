@@ -70,11 +70,11 @@ function XiaoMiAcPartner(log, config, api) {
 
 XiaoMiAcPartner.prototype = {
     welcomeInfo: function () {
-        this.log.info("XiaoMiAcPartner By LASER-Yi ----------------------------------");
+        this.log.info("XiaoMiAcPartner By LASER-Yi ------------------------");
         this.log.info("Current version: %s", packageFile.version);
         this.log.info("GitHub: https://github.com/LASER-Yi/homebridge-mi-acpartner");
         this.log.info("QQ Group: 107927710");
-        this.log.info("--------------------------------------------------------------");
+        this.log.info("----------------------------------------------------");
     },
     accessories: function (callback) {
         /**Start register accessories */
