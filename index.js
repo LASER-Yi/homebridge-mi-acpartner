@@ -52,12 +52,8 @@ function XiaoMiAcPartner(log, config, api) {
     this.syncCounter = 0;
     this.syncLockEvent = new events.EventEmitter();
 
-    if (api) {
-        this.api = api;
-        this.api.on("didFinishLaunching", () => {
-            this.welcomeInfo();
-        })
-    }
+    //Accessory EventEmitter
+    this.startEvent = new events.EventEmitter();
 
     //Connect devices
     this.conUtil = new connectUtil(config.devices, this);
@@ -67,14 +63,13 @@ function XiaoMiAcPartner(log, config, api) {
 
     if (api) {
         this.api = api;
-        this.api.on('didFinishLaunching', () => {
+        this.api.on("didFinishLaunching", () => {
+            this.welcomeInfo();
+            this.startEvent.emit("start");
         })
     } else {
         this.log.error("[ERROR]Homebridge's version is too old, please upgrade it!");
-        return;
     }
-
-    this.welcomeInfo();
 }
 
 XiaoMiAcPartner.prototype = {
