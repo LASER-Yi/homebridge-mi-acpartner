@@ -47,10 +47,17 @@
 
 2. 安装此插件
 
+稳定版本
+
 ```
 sudo npm install -g homebridge-mi-acpartner
 ```
 
+测试版本（可能落后稳定版本进度）
+
+```
+sudo npm i -g homebridge-mi-acpartner@beta
+```
 
 3. 在**config.json**中加入你的配置信息，请参考下方的``Config``和``Config Example``
 
