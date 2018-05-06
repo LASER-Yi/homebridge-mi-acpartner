@@ -82,8 +82,7 @@ class ClimateAccessory extends baseAC {
                     maxValue: 100,
                     minValue: 0,
                     minStep: 1
-                })
-                .updateValue(0);
+                });
         }
 
         this.services.push(this.climateService);

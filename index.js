@@ -3,11 +3,7 @@ const connectUtil = require('./lib/connectUtil');
 const syncLockUtil = require('./lib/syncLockUtil');
 const packageFile = require('./package.json');
 
-const ClimateAccessory = require('./accessories/climate');
-const SwitchAccessory = require('./accessories/switch');
-const SwitchRepeatAccessory = require('./accessories/switchRepeat');
-const LearnIRAccessory = require('./accessories/learnIR');
-const HeaterCoolerAccessory = require('./accessories/heaterCooler');
+const fs_Accessory = require('./accessories');
 
 let PlatformAccessory, Accessory, Service, Characteristic, UUIDGen;
 
@@ -41,12 +37,13 @@ function XiaoMiAcPartner(log, config, api) {
 
     if (!config['accessories']) {
         this.log.error("[ERROR]'accessories' not defined! Please check your 'config.json' file.");
-        return;
     }
     if (!config.devices) {
         this.log.error("[ERROR]'devices' not defined! Please check your 'config.json' file.");
         return;
     }
+
+    this.welcomeInfo();
 
     //New syncLock
     this.syncLock = new syncLockUtil(this);
@@ -63,7 +60,6 @@ function XiaoMiAcPartner(log, config, api) {
     if (api) {
         this.api = api;
         this.api.on("didFinishLaunching", () => {
-            this.welcomeInfo();
         })
     } else {
         this.log.error("[ERROR]Homebridge's version is too old, please upgrade it!");
@@ -72,7 +68,8 @@ function XiaoMiAcPartner(log, config, api) {
 
 XiaoMiAcPartner.prototype = {
     welcomeInfo: function () {
-        this.log.info("XiaoMiAcPartner By LASER-Yi ------------------------");
+        this.log.info("----------------------------------------------------");
+        this.log.info("XiaoMiAcPartner By LASER-Yi");
         this.log.info("Current version: %s", packageFile.version);
         this.log.info("GitHub: https://github.com/LASER-Yi/homebridge-mi-acpartner");
         this.log.info("QQ Group: 107927710");
@@ -103,19 +100,19 @@ XiaoMiAcPartner.prototype = {
                 this.log("[INIT]%s -> Type: %s", element['name'], element['type']);
                 switch (element['type']) {
                     case "switch":
-                        accessories.push(new SwitchAccessory(element, this));
+                        accessories.push(new fs_Accessory.SwitchAccessory(element, this));
                         break;
                     case "learnIR":
-                        accessories.push(new LearnIRAccessory(element, this));
+                        accessories.push(new fs_Accessory.LearnIRAccessory(element, this));
                         break;
                     case "switchRepeat":
-                        accessories.push(new SwitchRepeatAccessory(element, this));
+                        accessories.push(new fs_Accessory.SwitchRepeatAccessory(element, this));
                         break;
                     case "heaterCooler":
-                        accessories.push(new HeaterCoolerAccessory(element, this));
+                        accessories.push(new fs_Accessory.HeaterCoolerAccessory(element, this));
                         break;
                     case "climate":
-                        accessories.push(new ClimateAccessory(element, this));
+                        accessories.push(new fs_Accessory.ClimateAccessory(element, this));
                         break;
                     default:
                         this.log.warn("[WARN]Wrong Type -> %s", element['type']);

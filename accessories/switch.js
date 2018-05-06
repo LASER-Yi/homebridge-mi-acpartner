@@ -1,12 +1,10 @@
 const baseSwitch = require('./baseSwitch');
 
-let Service, Characteristic, Accessory;
+let Characteristic;
 
 class SwitchAccessory extends baseSwitch {
     constructor(config, platform) {
         super(config, platform);
-        Accessory = platform.Accessory;
-        Service = platform.Service;
         Characteristic = platform.Characteristic;
 
         //Config reader
@@ -25,55 +23,20 @@ class SwitchAccessory extends baseSwitch {
         }
         this._setCharacteristic();
     }
-
-    _setCharacteristic() {
-        this.services = [];
-
-        this.infoService = new Service.AccessoryInformation();
-        this.infoService
-            .setCharacteristic(Characteristic.Manufacturer, "XiaoMi")
-            .setCharacteristic(Characteristic.Model, "AC Partner IR Switch")
-            .setCharacteristic(Characteristic.SerialNumber, "Undefined");
-        this.services.push(this.infoService);
-
-        this.switchService = new Service.Switch(this.name);
-
-        this.activeState = this.switchService.getCharacteristic(Characteristic.On)
-            .on('set', this.setSwitchState.bind(this))
-            .updateValue(this.onState);
-
-        this.services.push(this.switchService);
-    }
     
     setSwitchState(value, callback) {
         if (!this.onCode || !this.offCode) {
-            this.log.error("[ERROR]IR code no defined!");
-            return;
-        }
-        if (!this.platform.syncLock._enterSyncState(() => {
-                this.setSwitchState(value, callback);
-            })) {
+            var err = new Error("IR code no defined!")
+            this.log.error("[ERROR]"+err);
+            callback(err);
             return;
         }
         this.onState = value;
         const code = this.onState ? this.onCode : this.offCode;
 
-        this.log.debug("[%s]Sending IR code: %s", this.name, code);
-        this.platform.devices[this.deviceIndex].call('send_ir_code', [code])
-            .then((ret) => {
-                this._switchUpdateState();
-                this.log.debug("[%s]Result: %s", this.name, ret);
-                callback();
-            })
-            .catch((err) => {
-                this._switchRevertState();
-                this.log.error("[%s]Failed! %s", this.name, err);
-                callback(err);
-            })
-            .then(() => {
-                //Callback and exit sync state
-                this.platform.syncLock._exitSyncState();
-            });
+        this._sendCode(code, (err) => {
+            callback(err);
+        })
     }
 }
 

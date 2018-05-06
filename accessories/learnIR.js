@@ -1,12 +1,10 @@
 const baseSwitch = require('./baseSwitch');
 
-let Service, Characteristic, Accessory;
+let Characteristic;
 
 class LearnIRAccessory extends baseSwitch {
     constructor(config, platform) {
         super(config, platform);
-        Accessory = platform.Accessory;
-        Service = platform.Service;
         Characteristic = platform.Characteristic;
 
         //Characteristic
@@ -20,25 +18,12 @@ class LearnIRAccessory extends baseSwitch {
 
         this._setCharacteristic();
     }
-    _setCharacteristic() {
-        this.services = [];
 
-        this.infoService = new Service.AccessoryInformation();
-        this.infoService
-            .setCharacteristic(Characteristic.Manufacturer, "XiaoMi")
-            .setCharacteristic(Characteristic.Model, "AC Partner Learn Switch")
-            .setCharacteristic(Characteristic.SerialNumber, "Undefined");
-        this.services.push(this.infoService);
-
-        this.switchService = new Service.Switch(this.name);
-
-        this.activeState = this.switchService.getCharacteristic(Characteristic.On)
-            .on('set', this.setSwitchState.bind(this))
-            .updateValue(this.onState);
-
-        this.services.push(this.switchService);
-    }
     setSwitchState(value, callback) {
+        if (!this.ReadyState) {
+            callback(new Error("Waiting for device state"));
+            return;
+        }
         if (!this.platform.syncLock._enterSyncState(() => {
                 this.setSwitchState(value,callback);
             })) {
@@ -50,8 +35,7 @@ class LearnIRAccessory extends baseSwitch {
             //Switch on
             this.platform.devices[this.deviceIndex].call('start_ir_learn', [30])
                 .then(() => {
-                    this._switchUpdateState();
-                    this.log("[%s]Start IR learn", this.name);
+                    this.log("[%s]Start learning", this.name);
                     this.closeTimer = setInterval(() => {
                         this.showIRCode();
                     }, 500);
@@ -59,30 +43,29 @@ class LearnIRAccessory extends baseSwitch {
                         clearInterval(this.closeTimer);
                         this.activeState.updateValue(Characteristic.On.NO);
                     }, 30 * 1000);
+                    callback();
                 })
                 .catch((err) => {
                     this.log.error("[ERROR]Start failed! %s", err);
-                    this._switchRevertState();
+                    callback(err);
                 })
                 .then(() => {
-                    callback();
                     this.platform.syncLock._exitSyncState();
                 });
         } else {
             //Switch off
             this.platform.devices[this.deviceIndex].call('end_ir_learn', [])
                 .then(() => {
-                    this.log("[%s]End IR learn", this.name);
-                    this._switchUpdateState();
+                    this.log("[%s]End learning", this.name);
+                    callback();
                 })
                 .catch((err) => {
                     this.log.error("[ERROR]End failed! %s", err);
-                    this._switchRevertState();
+                    callback(err);
                 })
                 .then(() => {
                     clearInterval(this.closeTimer);
                     this.platform.syncLock._exitSyncState();
-                    callback();
                 });
         }
     }

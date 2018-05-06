@@ -395,6 +395,13 @@ sudo npm i -g homebridge-mi-acpartner@beta
 
 ### Changelog
 
+0.7.0
+
+修改:
+
+* 更新miio版本到0.15.6
+* 现在仅在设备成功连接上后，配件才会开始正常
+
 0.6.5
 
 修复:

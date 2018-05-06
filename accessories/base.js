@@ -4,6 +4,7 @@ class Base {
         this.log = platform.log;
         this.config = config;
         this.name = config['name'];
+
         //Search device position
         this.deviceIndex = 0;
         if (config['deviceIp']) {
@@ -16,6 +17,16 @@ class Base {
                 index++;
             }
         }
+
+        //Device is not ready
+        this.ReadyState = false;
+        platform.startEvent.once(this.deviceIndex, () => {
+            this.log.debug("[%s]Ready", this.name);
+            this._startAcc();
+        })
+    }
+    _startAcc() {
+        this.ReadyState = true;
     }
     getServices() {
         return this.services;

@@ -16,15 +16,10 @@ class baseAC extends base {
         this.syncInterval = config.syncInterval !== undefined ? parseInt(config.syncInterval, 10) : 60 * 1000;
         this.autoStart = config.autoStart || "cool";
         this.outerSensor = config.sensorSid;
-
-        //Ready to Start
-        platform.startEvent.once(this.deviceIndex, () => {
-            this.log.debug("[%s]Started", this.name);
-            this._startAcc();
-        })
     }
 
     _startAcc() {
+        this.ReadyState = true;
         //Sync
         this._stateSync();
         if (this.syncInterval > 0) {
@@ -35,7 +30,7 @@ class baseAC extends base {
             this.log.warn("[WARN]Sync off");
         }
     }
-    //need _updateState() function in child class
+    //must have _updateState() function in child class
     _sendCmd(code) {
         let codeCommand;
         if (code.substr(0, 2) === "FE") {
@@ -58,9 +53,9 @@ class baseAC extends base {
             })
     }
     _sendCmdAsync(callback) {
-        if (this.model === null) {
+        if (this.model === null || !this.ReadyState) {
             this.log.warn("[%s]Waiting for sync state, please try again after sync complete");
-            callback();
+            callback(new Error("Waiting for device state"));
             return;
         }
         if (!this.platform.syncLock._enterSyncState(() => {
@@ -120,14 +115,13 @@ class baseAC extends base {
         }
         //Clear normal syncState timer
         clearInterval(this.syncTimer);
-        this.log.debug("[DEBUG]Enter fastSync");
+        this.log.debug("[DEBUG]FastSync...");
         setImmediate(() => this._stateSync());
         this.fastSyncTimer = setInterval(() => {
             this._stateSync();
         }, 5 * 1000);
         this.fastSyncEnd = setTimeout(() => {
             clearInterval(this.fastSyncTimer);
-            this.log.debug("[DEBUG]Exit fastSync");
             //Resume normal sync interval
             this.syncTimer = setInterval(() => {
                 this._stateSync();
@@ -135,6 +129,9 @@ class baseAC extends base {
         }, 60 * 1000);
     }
     _stateSync() {
+        if (!this.ReadyState) {
+            return;
+        }
         if (!this.platform.syncLock._enterSyncState(() => {
                 this._stateSync();
             })) {
