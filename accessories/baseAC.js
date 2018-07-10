@@ -75,7 +75,7 @@ class baseAC extends base {
             code = this.customiUtil(this.active, this.mode, this.temperature);
         }
         if (code === null || code === "") {
-            callback();
+            callback(new Error("Code undefined"));
             return;
         }
 

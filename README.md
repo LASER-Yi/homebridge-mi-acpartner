@@ -47,13 +47,13 @@
 
 2. 安装此插件
 
-稳定版本
+稳定版
 
 ```
 sudo npm install -g homebridge-mi-acpartner
 ```
 
-测试版本（可能落后稳定版本进度）
+测试版（可能落后稳定版进度）
 
 ```
 sudo npm i -g homebridge-mi-acpartner@beta
@@ -70,11 +70,11 @@ sudo npm i -g homebridge-mi-acpartner@beta
     格力：2，8
     大部分空调的1号预设
 
-如果格力2空调只有自动和关机响应，请尝试多次调节温度已使空调响应
+如果使用格力2的空调只有自动和关机响应，请尝试多次在制冷模式下调节温度让空调响应
 
 你可以在米家App中更改预设信息
 
-如果没有定义``customize``，插件会使用自动生成的空调码，空调可能不会响应。
+如果使用climate时没有定义``customize``，插件会使用自动生成的空调码，空调可能不会响应。
 
 ### Config（配置）
 
@@ -90,8 +90,8 @@ sudo npm i -g homebridge-mi-acpartner@beta
         {
             "platform": "XiaoMiAcPartner",
             "devices":{
-                "192.168.31.120":"your_token_here",
-                "192.168.31.121":"your_token_here"
+                "192.168.31.120":"acpartner_token_here",
+                "192.168.31.121":"acpartner_token_here"
             },
             "accessories":[
 
@@ -119,7 +119,7 @@ sudo npm i -g homebridge-mi-acpartner@beta
 | --- | --- | --- | --- | --- |
 | ``name`` | 显示在Homekit中的名字 | "AC Partner" | - | * |
 | ``type`` | 必须填写 | "climate" | - | * |
-| ``deviceIp`` | 空调伴侣的IP地址，使用单个空调伴侣无需填写 | "192.168.31.120" | 使用第一个填写的空调伴侣 |  |
+| ``deviceIp`` | 空调伴侣的IP地址，只有单个空调伴侣无需填写 | "192.168.31.120" | 使用第一个填写的空调伴侣 |  |
 | ``customize`` | 自定义空调伴侣发送信号 | 参考下方的插件配置使用 |  |  |
 | ``maxTemp`` | 调节温度上限 | 28 | 30 |  |
 | ``minTemp`` | 调节温度下限 | 16 | 17 |  |
@@ -166,7 +166,7 @@ sudo npm i -g homebridge-mi-acpartner@beta
 | --- | --- | --- | --- | --- |
 | ``name`` | 显示在Homekit中的名字 | "AcPartner" | - | * |
 | ``type`` | 必须填写 | "heaterCooler" | - | * |
-| ``deviceIp`` | 空调伴侣的IP地址，使用单个空调伴侣无需填写 | "192.168.31.120" | 使用第一个填写的空调伴侣 |  |
+| ``deviceIp`` | 空调伴侣的IP地址，只有单个空调伴侣无需填写 | "192.168.31.120" | 使用第一个填写的空调伴侣 |  |
 | ``maxTemp`` | 调节温度上限 | 28 | 30 |  |
 | ``minTemp`` | 调节温度下限 | 16 | 17 |  |
 | ``syncInterval`` | 同步间隔（毫秒），设置为0会关闭同步 | 30000 | 60000 |  |
@@ -192,7 +192,7 @@ sudo npm i -g homebridge-mi-acpartner@beta
 | --- | --- | --- |
 | ``name`` | 显示在Homekit中的名字 | * |
 | ``type`` | "learnIR" | * |
-| ``deviceIp`` | 空调伴侣的IP地址，使用单个空调伴侣无需填写 |  |
+| ``deviceIp`` | 空调伴侣的IP地址，只有单个空调伴侣无需填写 |  |
 
 请注意空调码仍然需要自己抓包，且可以使用相同的方法抓到红外码
 
@@ -214,7 +214,7 @@ sudo npm i -g homebridge-mi-acpartner@beta
 | --- | --- | --- |
 | ``name`` | 显示在Homekit中的名字 | * |
 | ``type`` | "switch" | * |
-| ``deviceIp`` | 空调伴侣的IP地址，使用单个空调伴侣无需填写 |  |
+| ``deviceIp`` | 空调伴侣的IP地址，只有单个空调伴侣无需填写 |  |
 | ``data`` | 发送的红外信号，必须要包含``on``和``off`` | * |
 
 ```Json
@@ -238,7 +238,7 @@ sudo npm i -g homebridge-mi-acpartner@beta
 | --- | --- | --- |
 | ``name`` | 显示在Homekit中的名字 | * |
 | ``type`` | "switchRepeat" | * |
-| ``deviceIp`` | 空调伴侣的IP地址，使用单个空调伴侣无需填写 |   |
+| ``deviceIp`` | 空调伴侣的IP地址，只有单个空调伴侣无需填写 |   |
 | ``sendInterval`` | 发送间隔，单位为ms（默认为200ms） |   |
 | ``data`` | 发送的红外信号，必须要包含``on``和``off`` | * |
 
@@ -400,7 +400,8 @@ sudo npm i -g homebridge-mi-acpartner@beta
 修改:
 
 * 更新miio版本到0.15.6
-* 现在仅在设备成功连接上后，配件才会开始正常
+* 现在仅在设备成功连接上后，配件才会开始工作
+* 现在调节温度时默认会启动制冷模式
 
 0.6.5
 
