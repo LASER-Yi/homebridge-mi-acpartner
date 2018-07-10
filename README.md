@@ -402,6 +402,11 @@ sudo npm i -g homebridge-mi-acpartner@beta
 * 更新miio版本到0.15.6
 * 现在仅在设备成功连接上后，配件才会开始工作
 * 现在调节温度时默认会启动制冷模式
+* 修改同步锁解决多设备之间互相干扰的问题
+
+修复:
+
+* lockDrop导致EventEmit溢出(#36)
 
 0.6.5
 
