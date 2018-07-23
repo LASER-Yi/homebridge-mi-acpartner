@@ -404,6 +404,7 @@ sudo npm i -g homebridge-mi-acpartner@beta
 修复:
 
 * 降级miio版本到0.14.1 (与Aqara冲突 #40)
+* 修复格力2导致的空调伴侣本身崩溃的问题
 
 0.7.0
 
