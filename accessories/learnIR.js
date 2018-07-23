@@ -15,9 +15,6 @@ class LearnIRAccessory extends baseSwitch {
         //value
         this.lastIRCode;
         this.closeTimer;
-        this.model = null;
-
-        this._getModel();
 
         this._setCharacteristic();
     }
