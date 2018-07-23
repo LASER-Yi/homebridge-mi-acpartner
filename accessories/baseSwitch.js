@@ -29,6 +29,13 @@ class baseSwitch extends base {
         this.services.push(this.switchService);
     }
 
+    _getModel() {
+        const p1 = this.platform.devices[this.deviceIndex].call('get_model', [])
+            .then((ret) => {
+                this.model = ret[0];
+            })
+    }
+
     _sendCode(code, callback) {
         if (!this.ReadyState) {
             callback(new Error("Waiting for device state"));

@@ -395,6 +395,16 @@ sudo npm i -g homebridge-mi-acpartner@beta
 
 ### Changelog
 
+0.7.1
+
+修改：
+
+* 使红外学习功能可用
+
+修复:
+
+* 降级miio版本到0.14.1 (与Aqara冲突 #40)
+
 0.7.0
 
 修改:
