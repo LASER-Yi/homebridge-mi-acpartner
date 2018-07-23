@@ -104,7 +104,7 @@ class baseAC extends base {
             });
     }
     _fastSync() {
-        //this function will  start _stateSync every 5 sec. And will end after 60 sec
+        //this function will  start _stateSync every 15 sec. And will end after 60 sec
         if (this.syncInterval <= 0) {
             return;
         }
@@ -119,7 +119,7 @@ class baseAC extends base {
         setImmediate(() => this._stateSync());
         this.fastSyncTimer = setInterval(() => {
             this._stateSync();
-        }, 5 * 1000);
+        }, 15 * 1000);
         this.fastSyncEnd = setTimeout(() => {
             clearInterval(this.fastSyncTimer);
             //Resume normal sync interval

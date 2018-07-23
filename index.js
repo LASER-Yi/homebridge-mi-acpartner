@@ -75,21 +75,6 @@ XiaoMiAcPartner.prototype = {
         this.log.info("QQ Group: 107927710");
         this.log.info("----------------------------------------------------");
     },
-    /*registerPlatformAccessories: function (accessories) {
-        this.log("Calling registerPlatformAccessories");
-        this.api.registerPlatformAccessories('homebridge-mi-acpartner', 'XiaoMiAcPartner', accessories);
-        accessories.forEach((accessory, index, arr) => {
-            this.log("[INFO]create accessory - UUID: " + accessory.UUID);
-        });
-    },
-    configureAccessory: function (accessory) {
-        this.log("Calling configureAccessory");
-    },
-    addAccessory: function (name, type) {
-        this.log("Calling addAccessory");
-
-        var uuid = UUIDGen.generate(name);
-    },*/
     accessories: function (callback) {
         //Start register accessories
         let accessories = [];

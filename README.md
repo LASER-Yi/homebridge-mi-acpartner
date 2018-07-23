@@ -399,7 +399,7 @@ sudo npm i -g homebridge-mi-acpartner@beta
 
 修改：
 
-* 使红外学习功能可用
+* 使红外学习功能可用(感谢[python-miio](https://github.com/rytilahti/python-miio))
 
 修复:
 
