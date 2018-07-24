@@ -56,13 +56,10 @@ class baseSwitch extends base {
         }
 
         var slot = Byte2Hex([121]);
-
         var command = code.slice(0, 2) + this.model.slice(4, 16) + "94701FFF" + slot + "FF" + code.slice(26, 32) + "27";
-
         var pre_sum = Hex2Byte(command);
 
         var sum = 0;
-
         pre_sum.forEach((value) => {
             sum += value;
         })

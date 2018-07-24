@@ -218,7 +218,6 @@ class ClimateAccessory extends baseAC {
         callback();
     }
     setTargetTemperature(TargetTemperature, callback, context) {
-        //TODO: 'autoStart' parameter need here; Add later.
         if (!this.outerSensor) {
             this.CurrentTemperature.updateValue(TargetTemperature);
         }

@@ -400,6 +400,7 @@ sudo npm i -g homebridge-mi-acpartner@beta
 修改：
 
 * 使红外学习功能可用(感谢[python-miio](https://github.com/rytilahti/python-miio) #20)
+* 给发送信号增加了1秒的延迟，避免同一时间发送太多信号使得空调伴侣崩溃(#40 #41)
 
 修复:
 

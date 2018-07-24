@@ -6,7 +6,7 @@ class baseAC extends base {
 
     constructor(config, platform) {
         super(config, platform);
-        
+
         this.lastSensorState = null;
         this.lastPartnerState = null;
 
@@ -16,6 +16,9 @@ class baseAC extends base {
         this.syncInterval = config.syncInterval !== undefined ? parseInt(config.syncInterval, 10) : 60 * 1000;
         this.autoStart = config.autoStart || "cool";
         this.outerSensor = config.sensorSid;
+
+        this.delay = 1 * 1000;
+        this.delayTimer = null;
     }
 
     _startAcc() {
@@ -31,25 +34,31 @@ class baseAC extends base {
         }
     }
     //must have _updateState() function in child class
-    _sendCmd(code) {
-        let codeCommand;
+    _sendCmd(code, callback) {
+        //Start send code
+        let command;
         if (code.substr(0, 2) === "FE") {
             this.log.debug("[DEBUG]Sending IR code: %s", code);
-            codeCommand = 'send_ir_code';
+            command = 'send_ir_code';
         } else {
             this.log.debug("[DEBUG]Sending AC code: %s", code);
-            codeCommand = 'send_cmd';
+            command = 'send_cmd';
         }
-        this.platform.devices[this.deviceIndex].call(codeCommand, [code])
+        const p1 = this.platform.devices[this.deviceIndex].call(command, [code])
             .then((data) => {
                 if (data[0] === "ok") {
-                    this.log.debug("[DEBUG]Success");
-                } else {
-                    this.log.debug("[DEBUG]Failed!(Maybe invaild code?)");
+                    this.log.debug("[DEBUG]Success")
                 }
-            })
+                callback();
+            });
+
+        Promise.all([p1])
             .catch((err) => {
                 this.log.error("[%s]Send code failed! %s", this.name, err);
+                callback(err);
+            })
+            .then(() => {
+                this.platform.syncLock._exitSyncState();
             })
     }
     _sendCmdAsync(callback) {
@@ -58,9 +67,10 @@ class baseAC extends base {
             callback(new Error("Waiting for device state"));
             return;
         }
+        /* Delay send data Here */
         if (!this.platform.syncLock._enterSyncState(() => {
-                this._sendCmdAsync(callback);
-            })) {
+            this._sendCmdAsync(callback);
+        })) {
             return;
         }
 
@@ -79,29 +89,10 @@ class baseAC extends base {
             return;
         }
 
-        //Start send code
-        let command;
-        if (code.substr(0, 2) === "FE") {
-            this.log.debug("[DEBUG]Sending IR code: %s", code);
-            command = 'send_ir_code';
-        } else {
-            this.log.debug("[DEBUG]Sending AC code: %s", code);
-            command = 'send_cmd';
-        }
-        this.platform.devices[this.deviceIndex].call(command, [code])
-            .then((data) => {
-                if (data[0] === "ok") {
-                    this.log.debug("[DEBUG]Success")
-                }
-                callback();
-            })
-            .catch((err) => {
-                this.log.error("[%s]Send code failed! %s", this.name, err);
-                callback(err);
-            })
-            .then(() => {
-                this.platform.syncLock._exitSyncState();
-            });
+        clearTimeout(this.delayTimer);
+        this.delayTimer = setTimeout(() => {
+            this._sendCmd(code, callback);
+        }, this.delay);
     }
     _fastSync() {
         //this function will  start _stateSync every 15 sec. And will end after 60 sec
@@ -119,7 +110,7 @@ class baseAC extends base {
         setImmediate(() => this._stateSync());
         this.fastSyncTimer = setInterval(() => {
             this._stateSync();
-        }, 15 * 1000);
+        }, 5 * 1000);
         this.fastSyncEnd = setTimeout(() => {
             clearInterval(this.fastSyncTimer);
             //Resume normal sync interval
@@ -133,15 +124,15 @@ class baseAC extends base {
             return;
         }
         if (!this.platform.syncLock._enterSyncState(() => {
-                this._stateSync();
-            })) {
+            this._stateSync();
+        })) {
             return;
         }
 
         //Update CurrentTemperature
         const p1 = this.outerSensor && this.platform.devices[this.deviceIndex].call('get_device_prop_exp', [
-                [this.outerSensor, "temperature", "humidity"]
-            ])
+            [this.outerSensor, "temperature", "humidity"]
+        ])
             .then((senRet) => {
                 if (this.lastSensorState !== senRet[0]) {
                     this.lastSensorState = senRet[0];
@@ -156,7 +147,7 @@ class baseAC extends base {
                     }
                 }
             })
-            
+
 
         //Update AC state
         const p2 = this.platform.devices[this.deviceIndex].call('get_model_and_state', [])
