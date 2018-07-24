@@ -35,7 +35,6 @@ class ClimateAccessory extends baseAC {
 
     }
     _setCharacteristic() {
-        this.services = [];
 
         this.serviceInfo = new Service.AccessoryInformation();
 

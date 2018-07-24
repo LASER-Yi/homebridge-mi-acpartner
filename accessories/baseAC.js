@@ -10,6 +10,8 @@ class baseAC extends base {
         this.lastSensorState = null;
         this.lastPartnerState = null;
 
+        this.services = [];
+
         //Config
         this.maxTemp = parseInt(config.maxTemp, 10) || 30;
         this.minTemp = parseInt(config.minTemp, 10) || 17;
@@ -17,8 +19,51 @@ class baseAC extends base {
         this.autoStart = config.autoStart || "cool";
         this.outerSensor = config.sensorSid;
 
+        this.breaker = config.breaker || false;
+
+        if (this.breaker == true) {
+            this.bState = false;
+
+            this.breakerService = new platform.Service.Switch(this.name + "_breaker");
+            this.breakerState = this.breakerService.getCharacteristic(platform.Characteristic.On)
+                .on('set', this.setBreakerState.bind(this))
+                .updateValue(this.bState);
+            
+            this.services.push(this.breakerService);
+        }
+
         this.delay = 1 * 1000;
         this.delayTimer = null;
+    }
+
+    setBreakerState(value, callback) {
+        if (!this.ReadyState) {
+            this.log.warn("[%s]Waiting for sync state, please try again after sync complete");
+            callback(new Error("Waiting for device state"));
+            return;
+        }
+        if (!this.platform.syncLock._enterSyncState(() => {
+            this.setBreakerState(value, callback);
+        })) {
+            return;
+        }
+        this.bState = !this.bState;
+        let command = this.bState ? "on" : "off";
+
+        const p1 = this.platform.devices[this.deviceIndex].call("toggle_plug", [command])
+            .then((data) => {
+                if (data[0] === "ok") {
+                    this.log.debug("[DEBUG]Success")
+                }
+                callback();
+            })
+            .catch((err) => {
+                this.log.error("[%s]Change breaker failed! %s", this.name, err);
+                callback(err);
+            })
+            .then(() => {
+                this.platform.syncLock._exitSyncState();
+            });
     }
 
     _startAcc() {
@@ -50,16 +95,15 @@ class baseAC extends base {
                     this.log.debug("[DEBUG]Success")
                 }
                 callback();
-            });
-
-        Promise.all([p1])
+            })
             .catch((err) => {
                 this.log.error("[%s]Send code failed! %s", this.name, err);
                 callback(err);
             })
             .then(() => {
                 this.platform.syncLock._exitSyncState();
-            })
+            });
+            
     }
     _sendCmdAsync(callback) {
         if (this.model === null || !this.ReadyState) {
@@ -67,7 +111,6 @@ class baseAC extends base {
             callback(new Error("Waiting for device state"));
             return;
         }
-        /* Delay send data Here */
         if (!this.platform.syncLock._enterSyncState(() => {
             this._sendCmdAsync(callback);
         })) {

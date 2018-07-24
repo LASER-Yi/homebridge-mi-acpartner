@@ -33,8 +33,6 @@ class HeaterCoolerAccessory extends baseAC {
         this._setCharacteristic();
     }
     _setCharacteristic() {
-        this.services = [];
-
         this.serviceInfo = new Service.AccessoryInformation();
         this.serviceInfo
             .setCharacteristic(Characteristic.Manufacturer, 'XiaoMi')

@@ -16,7 +16,7 @@
 
 ![AcPartner](https://github.com/LASER-Yi/homebridge-mi-acpartner/raw/master/img/two.jpg)
 
-空调伴侣2代 & 空调伴侣1代
+空调伴侣2代 & 空调伴侣1代 & 空调伴侣3代断路器功能
 
 如需要使用空调伴侣中的网关功能，请使用``YinHangCode``提供的[Homebridge-Mi-Aqara](https://github.com/YinHangCode/homebridge-mi-aqara)插件。
 
@@ -172,6 +172,7 @@ sudo npm i -g homebridge-mi-acpartner@beta
 | ``syncInterval`` | 同步间隔（毫秒），设置为0会关闭同步 | 30000 | 60000 |  |
 | ``autoStart`` | 关机状态下调节温度时启动的模式，设置成"off"不会启动空调 | "heat" | "cool" |  |
 | ``sensorSid`` | 填写你的温湿度传感器ID，此温湿度传感器**必须**绑定在空调伴侣下，可在米家空调伴侣中的**子设备信息**中查到 | "lumi.158d000156e667" |  |  |
+| ``breaker`` | 第三代空调伴侣断路器支持 | true | false |  |
 
 **注意：此方法不支持自定义空调码**
 
@@ -358,7 +359,7 @@ sudo npm i -g homebridge-mi-acpartner@beta
     ]
 ```
 
-空调和多重信号开关
+空调和多重红外开关
 
 ```Json
 "platforms": [
