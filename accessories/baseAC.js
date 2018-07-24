@@ -126,10 +126,10 @@ class baseAC extends base {
         } else {
             //customize
             code = this.customiUtil(this.active, this.mode, this.temperature);
-        }
-        if (code === null || code === "") {
-            callback(new Error("Code undefined"));
-            return;
+            if (code === null || code === "") {
+                this.log.warn("[WARN] Fallback to presets...");
+                code = presetUtil(this.model, this.active, this.mode, this.temperature, this.swing, this.speed, this.led);
+            }
         }
 
         clearTimeout(this.delayTimer);

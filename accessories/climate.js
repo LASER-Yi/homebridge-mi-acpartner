@@ -124,7 +124,7 @@ class ClimateAccessory extends baseAC {
         this.TargetTemperature.updateValue(this.temperature);
     }
     customiUtil(active, mode, temperature) {
-        var code = "";
+        let code = "";
         let _temperature = parseInt(temperature, 10);
         //Note: Some AC need 'on' signal to active. Add later.
 
@@ -152,15 +152,13 @@ class ClimateAccessory extends baseAC {
                         code = this.customi.cool[_temperature];
                     }
                     break;
-                case 2:
+                default:
                     //auto
                     if (!this.customi.auto) {
                         this.log.warn("[WARN]'AUTO' signal not define");
                     } else {
                         code = this.customi.auto;
                     }
-                    break;
-                default:
                     break;
             }
         }

@@ -402,11 +402,17 @@ sudo npm i -g homebridge-mi-acpartner@beta
 
 * 使红外学习功能可用(感谢[python-miio](https://github.com/rytilahti/python-miio) #20)
 * 给发送信号增加了1秒的延迟，避免同一时间发送太多信号使得空调伴侣崩溃(#40 #41)
+* 支持第三代空调伴侣断路器
 
 修复:
 
 * 降级miio版本到0.14.1 (与Aqara冲突 #40)
 * 修复格力2导致空调伴侣崩溃的问题 (#36 #33)
+* 自定义空调码导致无响应的问题 （#41 #35)
+
+BUG:
+
+* 暂时无法获取断路器状态
 
 0.7.0
 
