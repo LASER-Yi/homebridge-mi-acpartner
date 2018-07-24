@@ -91,13 +91,13 @@ class ClimateAccessory extends baseAC {
         let target_mode;
         let current_mode;
         if (this.active == '1') {
-            switch (this.mode) {
-                case "0":
+            switch (parseInt(this.mode,10)) {
+                case 0:
                     //HEAT
                     target_mode = Characteristic.TargetHeatingCoolingState.HEAT;
                     current_mode = Characteristic.CurrentHeatingCoolingState.HEAT;
                     break;
-                case "1":
+                case 1:
                     //COOL
                     target_mode = Characteristic.TargetHeatingCoolingState.COOL;
                     current_mode = Characteristic.CurrentHeatingCoolingState.COOL;
@@ -135,7 +135,7 @@ class ClimateAccessory extends baseAC {
                 this.log.warn("[WARN]'OFF' signal no define");
             }
         } else {
-            switch (mode) {
+            switch (parseInt(mode, 10)) {
                 case 0:
                     //heat
                     if (!this.customi.heat || !this.customi.heat[_temperature]) {

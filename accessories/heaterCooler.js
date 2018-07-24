@@ -231,14 +231,14 @@ class HeaterCoolerAccessory extends baseAC {
         //Update Mode and Temperature
         let target_mode;
         let current_mode;
-        switch (this.mode) {
-            case "0":
+        switch (parseInt(this.mode,10)) {
+            case 0:
                 //HEAT
                 target_mode = Characteristic.TargetHeaterCoolerState.HEAT;
                 current_mode = Characteristic.CurrentHeaterCoolerState.HEATING;
                 this.HeatingThresholdTemperature.updateValue(this.temperature);
                 break;
-            case "1":
+            case 1:
                 //COOL
                 target_mode = Characteristic.TargetHeaterCoolerState.COOL;
                 current_mode = Characteristic.CurrentHeaterCoolerState.COOLING;
