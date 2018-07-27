@@ -119,10 +119,10 @@ class HeaterCoolerAccessory extends baseAC {
         this._fastSync();
         let state;
         switch (this.mode) {
-            case "0":
+            case 0:
                 state = Characteristic.TargetHeaterCoolerState.HEAT;
                 break;
-            case "1":
+            case 1:
                 state = Characteristic.TargetHeaterCoolerState.COOL;
                 break;
             default:
@@ -162,7 +162,7 @@ class HeaterCoolerAccessory extends baseAC {
             this.CurrentTemperature.updateValue(CoolingThresholdTemperature);
         }
         this.temperature = CoolingThresholdTemperature;
-        if (context && this.active === "0") {
+        if (context && this.active == 0) {
             switch (this.autoStart) {
                 case "cool":
                     this.mode = 1;
@@ -191,7 +191,7 @@ class HeaterCoolerAccessory extends baseAC {
             this.CurrentTemperature.updateValue(HeatingThresholdTemperature);
         }
         this.temperature = HeatingThresholdTemperature;
-        if (context && this.active === "0") {
+        if (context && this.active == 0) {
             switch (this.autoStart) {
                 case "cool":
                     this.mode = 1;
@@ -231,7 +231,7 @@ class HeaterCoolerAccessory extends baseAC {
         //Update Mode and Temperature
         let target_mode;
         let current_mode;
-        switch (parseInt(this.mode,10)) {
+        switch (this.mode) {
             case 0:
                 //HEAT
                 target_mode = Characteristic.TargetHeaterCoolerState.HEAT;
@@ -259,7 +259,7 @@ class HeaterCoolerAccessory extends baseAC {
                 break;
         }
         //Update Active
-        if (this.active === "1") {
+        if (this.active == 1) {
             this.CActive.updateValue(Characteristic.Active.ACTIVE);
         } else {
             this.CActive.updateValue(Characteristic.Active.INACTIVE);

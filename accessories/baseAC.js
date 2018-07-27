@@ -28,7 +28,7 @@ class baseAC extends base {
             this.breakerState = this.breakerService.getCharacteristic(platform.Characteristic.On)
                 .on('set', this.setBreakerState.bind(this))
                 .updateValue(this.bState);
-            
+
             this.services.push(this.breakerService);
         }
 
@@ -103,7 +103,7 @@ class baseAC extends base {
             .then(() => {
                 this.platform.syncLock._exitSyncState();
             });
-            
+
     }
     _sendCmdAsync(callback) {
         if (this.model === null || !this.ReadyState) {
@@ -210,12 +210,12 @@ class baseAC extends base {
                     this.log.debug("Model -> %s", this.model.substr(0, 2) + this.model.substr(8, 8));
 
                     //Save all parameter to global
-                    this.active = state.substr(2, 1);
-                    this.mode = state.substr(3, 1);
+                    this.active = parseInt(state.substr(2, 1), 10);
+                    this.mode = parseInt(state.substr(3, 1), 10);
                     this.temperature = parseInt(state.substr(6, 2), 16);
-                    this.speed = state.substr(4, 1);
-                    this.swing = 1 - state.substr(5, 1);
-                    this.led = state.substr(8, 1);
+                    this.speed = parseInt(state.substr(4, 1), 10);
+                    this.swing = 1 - parseInt(state.substr(5, 1), 10);
+                    this.led = parseInt(state.substr(8, 1), 10);
                     this.log.debug("Active -> %s", this.active);
                     this.log.debug("Mode -> %s", this.mode);
                     this.log.debug("Temperature -> %s", this.temperature);

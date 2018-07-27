@@ -90,8 +90,8 @@ class ClimateAccessory extends baseAC {
         //Update AC mode and active state
         let target_mode;
         let current_mode;
-        if (this.active == '1') {
-            switch (parseInt(this.mode,10)) {
+        if (this.active == 1) {
+            switch (this.mode) {
                 case 0:
                     //HEAT
                     target_mode = Characteristic.TargetHeatingCoolingState.HEAT;
@@ -128,14 +128,14 @@ class ClimateAccessory extends baseAC {
         let _temperature = parseInt(temperature, 10);
         //Note: Some AC need 'on' signal to active. Add later.
 
-        if (active === 0) {
+        if (active == 0) {
             if (this.customi.off !== undefined) {
                 code = this.customi.off;
             } else {
                 this.log.warn("[WARN]'OFF' signal no define");
             }
         } else {
-            switch (parseInt(mode, 10)) {
+            switch (mode) {
                 case 0:
                     //heat
                     if (!this.customi.heat || !this.customi.heat[_temperature]) {
@@ -168,12 +168,12 @@ class ClimateAccessory extends baseAC {
     getTargetHeatingCoolingState(callback) {
         setImmediate(() => { this._fastSync(); });
         let state = Characteristic.TargetHeatingCoolingState.OFF;
-        if (this.active == '1') {
+        if (this.active == 1) {
             switch (this.mode) {
-                case "0":
+                case 0:
                     state = Characteristic.TargetHeatingCoolingState.HEAT;
                     break;
-                case "1":
+                case 1:
                     state = Characteristic.TargetHeatingCoolingState.COOL;
                     break;
                 default:
@@ -220,7 +220,7 @@ class ClimateAccessory extends baseAC {
         }
         this.temperature = TargetTemperature;
         //Update state for autoStart parameter.
-        if (context && this.active === "0") {
+        if (context && this.active == 0) {
             switch (this.autoStart) {
                 case "cool":
                     this.mode = 1;
@@ -237,7 +237,9 @@ class ClimateAccessory extends baseAC {
                 default:
                     break;
             }
-            this._updateState();
+            this._sendCmdAsync((ret) => {
+                callback(ret);
+            });
         }
         this._sendCmdAsync((ret) => {
             callback(ret);
