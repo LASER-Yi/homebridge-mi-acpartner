@@ -27,6 +27,7 @@ class baseAC extends base {
             this.breakerService = new platform.Service.Switch(this.name + "_breaker");
             this.breakerState = this.breakerService.getCharacteristic(platform.Characteristic.On)
                 .on('set', this.setBreakerState.bind(this))
+                .on('get', this.getBreakerState.bind(this))
                 .updateValue(this.bState);
 
             this.services.push(this.breakerService);
@@ -34,6 +35,26 @@ class baseAC extends base {
 
         this.delay = 1 * 1000;
         this.delayTimer = null;
+    }
+
+    getBreakerState(callback) {
+        const p1 = this.platform.devices[this.deviceIndex].call("get_device_prop", ["lumi.0", "plug_state"])
+            .then((data) => {
+                if (data.result) {
+                    let pstate = data.result[0];
+                    if (pstate == 'off') {
+                        callback(Characteristic.On.NO);
+                    } else {
+                        callback(Characteristic.On.YES);
+                    }
+                } else {
+                    throw new Error("Breaker not exist!");
+                }
+            })
+            .catch((err) => {
+                this.log.error("[%s]Update breaker state failed! %s", this.name, err);
+                callback(err);
+            })
     }
 
     setBreakerState(value, callback) {
@@ -59,7 +80,7 @@ class baseAC extends base {
                 callback();
             })
             .catch((err) => {
-                this.log.error("[%s]Change breaker failed! %s", this.name, err);
+                this.log.error("[%s]Change breaker state failed! %s", this.name, err);
                 callback(err);
             })
             .then(() => {
@@ -79,7 +100,7 @@ class baseAC extends base {
             this.log.warn("[WARN]Sync function is off");
         }
     }
-    
+
     //must have _updateState() function in child class
     _sendCmd(code, callback) {
         //Start send code
