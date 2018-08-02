@@ -30,34 +30,34 @@
     },
     "extra": {
         "description_00": "this is the min value of temperature",
-        "_t0t": {
+        "t0t": {
             "off_fix": "0",
             "cool": "1",
             "heat": "1",
             "auto_fix": "A"
         },
-        "_t6t": {
+        "t6t": {
             "cool": "7",
             "heat": "A",
             "auto_fix": "F"
         },
         "description_01": "string replace",
-        "_pmp": {
+        "pmp": {
             "off": "00",
             "cool": "90",
             "heat": "C0",
             "auto": "80"
         },
-        "_wbw": {
+        "wbw": {
             "low": 1,
             "middle": 3,
             "high": 5,
             "auto": 0
         },
         "description_02": "auto -(+1)-> low -(+2)-> middle -(+2)-> high",
-        "_wtw": 4,
+        "wtw": 4,
         "description_03": "below -> (auto -(+1)-> low -(+2)-> middle -(+2)-> high)",
-        "_w4tw": {
+        "w4tw": {
             "cool": "4",
             "heat": "7",
             "auto": "C"
@@ -65,11 +65,11 @@
     },
     "0100010727": {
         "des": "gree_2",
-        "main": "00_wtw_pmp_t0t205002102000_t6t0_wtw_pmp_t0t2070020000_wbw0_w4tw0",
-        "extra_value": ["_pmp","_wtw","_wbw","_t0t","_t6t","_w4tw"]
+        "main": "{po}{mo}{wi}{sw}{tt}{li}00_wtw_pmp_t0t205002102000_t6t0_wtw_pmp_t0t2070020000_wbw0_w4tw0",
+        "extra_value": ["pmp","wtw","wbw","t0t","t6t","w4tw"]
     },
     "0100004795": {
         "des": "gree_8",
-        "main": "00090900005002"
+        "main": "{po}{mo}{wi}{sw}{tt}{li}00090900005002"
     }
 }

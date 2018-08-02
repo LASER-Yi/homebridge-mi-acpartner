@@ -1,7 +1,7 @@
 # homebridge-mi-acpartner
 [![npm version](https://badge.fury.io/js/homebridge-mi-acpartner.svg)](https://badge.fury.io/js/homebridge-mi-acpartner)
 
-[English Version](https://github.com/LASER-Yi/homebridge-mi-acpartner/blob/master/doc/README_EN.md#) | 中文版
+[English Version](./doc/README_EN.md#) | 中文版
 
 
 小米空调伴侣的Homebridge插件
@@ -14,9 +14,12 @@
 
 ### Support(支持)
 
-![AcPartner](https://github.com/LASER-Yi/homebridge-mi-acpartner/raw/master/img/two.jpg)
+![AcPartner](./img/two.jpg)
 
-空调伴侣2代 & 空调伴侣1代 & 空调伴侣3代断路器功能
+| 空调伴侣型号 | 功能 |
+| --- | --- | --- |
+| 1代 & 2代 | 功能如下 |
+| 3代（升级版） | 断路器开闭 |
 
 如需要使用空调伴侣中的网关功能，请使用``YinHangCode``提供的[Homebridge-Mi-Aqara](https://github.com/YinHangCode/homebridge-mi-aqara)插件。
 
@@ -34,11 +37,11 @@
 
 * 如果空调控制没有响应，可自定义你的空调码
 
-* 在米家App和Homekit中同步信息 ~~(即将上线)~~
+* 同步米家App中的空调状态
 
-* 自动生成空调码(请查看预设栏)
+* 自动生成空调码(请查看预设)
 
-* 支持使用温湿度传感器显示温度和湿度 ~~(即将上线)~~
+* 使用温湿度传感器显示温度和湿度
 
 
 ### Installation（安装）
@@ -393,8 +396,63 @@ sudo npm i -g homebridge-mi-acpartner@beta
     ]
 ```
 
+### Contribute
+
+
+
+> #### 空调码分析，以格力2为例
+> {0100010727}{1}{1}{0}{1}{1e}{1} 100190E20500210200040190E20700200001020
+>
+> {空调型号(10)} {电源状态(1)} {模式(1)} {风力(1)} {扫风状态(1)} {设定温度(2,16进制)} {灯光状态(1)} {校验位(直到结束)}
+>
+> [空调状态] – 和你在米家中选择的预设有关
+>
+> (电源状态) – 0为关；1为开
+>
+> (模式) – 0为制热；1为制冷；2为自动；3为除湿（Homekit不支持）；4为松风（Homekit不支持）
+>
+> (风力) – 0为低挡位；1为中档位；2为高档位；3为自动
+>
+> (扫风状态) – 0为开；1为关
+>
+> (设定温度) – Hex，为16进制
+>
+> (灯光状态) - 0为开，a或者1为关
+
+
+
+**你可以以如下方式将码库增加到此插件中**
+
+\#1
+
+将空调设定为扫风和自动风，将抓到的空调码标注上温度和模式，发一个issue
+
+这种空调码被标注为基础支持，即只支持调节温度和模式
+
+\#2
+
+抓取下列空调码：
+
+* 每个模式不同风速空调码，如果没有发现具体规律可不用抓
+* 每个模式不同扫风状态空调码，如果没有发现具体规律可不用抓
+* 3种相同温度（如16，20，30）下不同的风速，扫风状态和模式
+
+找到这些空调码的规律，发一个issue
+
+这种空调码被标注为完全支持
+
+---
+
+以及，欢迎所有的Pull Requests
 
 ### Changelog
+
+0.7.2
+
+修改：
+
+* 现在可以获取到断路器状态
+* 增加了部分空调码的基础支持
 
 0.7.1
 

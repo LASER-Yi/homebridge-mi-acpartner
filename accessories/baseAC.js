@@ -38,8 +38,7 @@ class baseAC extends base {
 
     setBreakerState(value, callback) {
         if (!this.ReadyState) {
-            this.log.warn("[%s]Waiting for sync state, please try again after sync complete");
-            callback(new Error("Waiting for device state"));
+            callback(new Error("Waiting for device state, please try again after sync complete"));
             return;
         }
         if (!this.platform.syncLock._enterSyncState(() => {
@@ -54,6 +53,8 @@ class baseAC extends base {
             .then((data) => {
                 if (data[0] === "ok") {
                     this.log.debug("[DEBUG]Success")
+                } else {
+                    throw new Error("partner return " + data[0]);
                 }
                 callback();
             })
@@ -75,9 +76,10 @@ class baseAC extends base {
                 this._stateSync();
             }, this.syncInterval);
         } else {
-            this.log.warn("[WARN]Sync off");
+            this.log.warn("[WARN]Sync function is off");
         }
     }
+    
     //must have _updateState() function in child class
     _sendCmd(code, callback) {
         //Start send code
@@ -92,7 +94,9 @@ class baseAC extends base {
         const p1 = this.platform.devices[this.deviceIndex].call(command, [code])
             .then((data) => {
                 if (data[0] === "ok") {
-                    this.log.debug("[DEBUG]Success")
+                    this.log.debug("[DEBUG]Success");
+                } else {
+                    throw new Error("partner return " + data[0]);
                 }
                 callback();
             })
