@@ -1,6 +1,6 @@
 {
   "name": "homebridge-mi-acpartner",
-  "version": "0.7.2-1",
+  "version": "0.7.2-2",
   "description": "homebridge plugin for Xiaomi AC Partner",
   "main": "index.js",
   "repository": {
