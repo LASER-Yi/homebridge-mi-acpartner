@@ -1,7 +1,7 @@
 const base = require('./base');
 
 /* Can construct from AC or become individe device */
-class breaker extends base{
+class breaker extends base {
     constructor(config, platform, standalone) {
         super(config, platform);
 
@@ -15,7 +15,7 @@ class breaker extends base{
                 .setCharacteristic(Characteristic.Manufacturer, 'XiaoMi')
                 .setCharacteristic(Characteristic.Model, 'AC Partner Breaker')
                 .setCharacteristic(Characteristic.SerialNumber, "Undefined");
-            
+
             this.services.push(this.breakerInfo);
         } else {
             this.name += "_breaker";
@@ -37,17 +37,15 @@ class breaker extends base{
         }
         const p1 = this.platform.devices[this.deviceIndex].call("get_device_prop", ["lumi.0", "plug_state"])
             .then((data) => {
-                if (data[0] !== undefined) {
-                    let pstate = data[0];
-                    if (pstate == 'off') {
-                        callback(Characteristic.On.NO);
-                        this.bState = false;
-                    } else {
-                        callback(Characteristic.On.YES);
-                        this.bState = true;
-                    }
+                let pstate = data[0];
+                if (pstate == 'off') {
+                    callback(Characteristic.On.NO);
+                    this.bState = false;
+                } else if (pstate == 'on') {
+                    callback(Characteristic.On.YES);
+                    this.bState = true;
                 } else {
-                    throw new Error("Breaker not exist!");
+                    throw new Error("Breaker not exist!" + data[0]);
                 }
             })
             .catch((err) => {
