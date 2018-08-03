@@ -37,8 +37,8 @@ class breaker extends base{
         }
         const p1 = this.platform.devices[this.deviceIndex].call("get_device_prop", ["lumi.0", "plug_state"])
             .then((data) => {
-                if (data.result) {
-                    let pstate = data.result[0];
+                if (data[0] !== undefined) {
+                    let pstate = data[0];
                     if (pstate == 'off') {
                         callback(Characteristic.On.NO);
                         this.bState = false;

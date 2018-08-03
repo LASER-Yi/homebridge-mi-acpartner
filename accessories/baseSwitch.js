@@ -1,5 +1,5 @@
 const base = require('./base');
-const signal = require('../lib/signalUtil.js');
+const signal = require('../lib/signalUtil');
 
 let Service, Characteristic, Accessory;
 

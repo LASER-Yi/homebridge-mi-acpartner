@@ -129,6 +129,7 @@ sudo npm i -g homebridge-mi-acpartner@beta
 | ``syncInterval`` | 同步间隔（毫秒），设置为0会关闭同步 | 30000 | 60000 |  |
 | ``autoStart`` | 关机状态下调节温度时启动的模式，设置成"off"不会启动空调 | "heat" | "cool" |  |
 | ``sensorSid`` | 填写你的温湿度传感器ID，此温湿度传感器**必须**绑定在空调伴侣下，可在米家空调伴侣中的**子设备信息**中查到 | "lumi.158d000156e667" |  |  |
+| ``breaker`` | 第三代空调伴侣断路器支持 | true | false |  |
 
 
 如果空调没有响应，可以使用此[方法](https://github.com/LASER-Yi/homebridge-mi-acpartner/wiki)来获取你正使用的空调码，然后填入到config中。
@@ -177,7 +178,7 @@ sudo npm i -g homebridge-mi-acpartner@beta
 | ``sensorSid`` | 填写你的温湿度传感器ID，此温湿度传感器**必须**绑定在空调伴侣下，可在米家空调伴侣中的**子设备信息**中查到 | "lumi.158d000156e667" |  |  |
 | ``breaker`` | 第三代空调伴侣断路器支持 | true | false |  |
 
-**注意：此方法不支持自定义空调码**
+**此方法不支持自定义空调码**
 
 ```Json
 "accessories":[
@@ -190,15 +191,13 @@ sudo npm i -g homebridge-mi-acpartner@beta
 
 *   breaker (升级版空调伴侣断路器)
 
-此断路器也可以定义在空调的定义中
+**如没有特殊需求，请直接使用``climate``或``heaterCooler``的``breaker``参数定义**
 
 | 参数 | 说明 | 示例 | 默认 | 必须 |
 | --- | --- | --- | --- | --- |
 | ``name`` | 显示在Homekit中的名字 | "AcPartner_breaker" | - | * |
 | ``type`` | 必须填写 | "breaker" | - | * |
 | ``deviceIp`` | 空调伴侣的IP地址，只有单个空调伴侣无需填写 | "192.168.31.120" | 使用第一个填写的空调伴侣 |  |
-
-**如没有特殊需求，请直接使用``climate``或``heaterCooler``的``breaker``参数定义**
 
 ```Json
 "accessories":[

@@ -65,7 +65,7 @@
     },
     "0100010727": {
         "des": "gree_2",
-        "main": "{po}{mo}{wi}{sw}{tt}{li}00_wtw_pmp_t0t205002102000_t6t0_wtw_pmp_t0t2070020000_wbw0_w4tw0",
+        "main": "{po}{mo}{wi}{sw}{tt}{li}00{wtw}{pmp}{t0t}205002102000{t6t}0{wtw}{pmp}{t0t}2070020000{wbw}0{w4tw}0",
         "extra_value": ["pmp","wtw","wbw","t0t","t6t","w4tw"]
     },
     "0100004795": {
