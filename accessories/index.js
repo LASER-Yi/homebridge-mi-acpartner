@@ -3,6 +3,7 @@ const SwitchAccessory = require('./switch');
 const SwitchRepeatAccessory = require('./switchRepeat');
 const LearnIRAccessory = require('./learnIR');
 const HeaterCoolerAccessory = require('./heaterCooler');
+const BreakerAccessory = require('./breaker');
 
 module.exports = {
     ClimateAccessory,
@@ -10,4 +11,5 @@ module.exports = {
     SwitchRepeatAccessory,
     LearnIRAccessory,
     HeaterCoolerAccessory,
+    BreakerAccessory,
 }

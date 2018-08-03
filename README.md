@@ -188,6 +188,27 @@ sudo npm i -g homebridge-mi-acpartner@beta
             ]
 ```
 
+*   breaker (升级版空调伴侣断路器)
+
+此断路器也可以定义在空调的定义中
+
+| 参数 | 说明 | 示例 | 默认 | 必须 |
+| --- | --- | --- | --- | --- |
+| ``name`` | 显示在Homekit中的名字 | "AcPartner_breaker" | - | * |
+| ``type`` | 必须填写 | "breaker" | - | * |
+| ``deviceIp`` | 空调伴侣的IP地址，只有单个空调伴侣无需填写 | "192.168.31.120" | 使用第一个填写的空调伴侣 |  |
+
+**如没有特殊需求，请直接使用``climate``或``heaterCooler``的``breaker``参数定义**
+
+```Json
+"accessories":[
+                {
+                    "name": "AC Partner_breaker",
+                    "type": "breaker"
+                }
+            ]
+```
+
 *   learnIR (红外学习开关)
 
 打开开关后，使用遥控器向空调伴侣发送信号，30秒内接收到的红外信号会显示在日志中。

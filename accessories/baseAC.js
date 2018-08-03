@@ -2,6 +2,8 @@ const base = require('./base');
 
 const presetUtil = require("../lib/presetUtil");
 
+const breakerTemplate = require("./breaker");
+
 class baseAC extends base {
 
     constructor(config, platform) {
@@ -22,70 +24,12 @@ class baseAC extends base {
         this.breaker = config.breaker || false;
 
         if (this.breaker == true) {
-            this.bState = false;
-
-            this.breakerService = new platform.Service.Switch(this.name + "_breaker");
-            this.breakerState = this.breakerService.getCharacteristic(platform.Characteristic.On)
-                .on('set', this.setBreakerState.bind(this))
-                .on('get', this.getBreakerState.bind(this))
-                .updateValue(this.bState);
-
-            this.services.push(this.breakerService);
+            this.breakerAcc = new breakerTemplate(config, platform, false);
+            this.services.push(this.breakerAcc.services[0]);
         }
 
         this.delay = 1 * 1000;
         this.delayTimer = null;
-    }
-
-    getBreakerState(callback) {
-        const p1 = this.platform.devices[this.deviceIndex].call("get_device_prop", ["lumi.0", "plug_state"])
-            .then((data) => {
-                if (data.result) {
-                    let pstate = data.result[0];
-                    if (pstate == 'off') {
-                        callback(Characteristic.On.NO);
-                    } else {
-                        callback(Characteristic.On.YES);
-                    }
-                } else {
-                    throw new Error("Breaker not exist!");
-                }
-            })
-            .catch((err) => {
-                this.log.error("[%s]Update breaker state failed! %s", this.name, err);
-                callback(err);
-            })
-    }
-
-    setBreakerState(value, callback) {
-        if (!this.ReadyState) {
-            callback(new Error("Waiting for device state, please try again after sync complete"));
-            return;
-        }
-        if (!this.platform.syncLock._enterSyncState(() => {
-            this.setBreakerState(value, callback);
-        })) {
-            return;
-        }
-        this.bState = !this.bState;
-        let command = this.bState ? "on" : "off";
-
-        const p1 = this.platform.devices[this.deviceIndex].call("toggle_plug", [command])
-            .then((data) => {
-                if (data[0] === "ok") {
-                    this.log.debug("[DEBUG]Success")
-                } else {
-                    throw new Error("partner return " + data[0]);
-                }
-                callback();
-            })
-            .catch((err) => {
-                this.log.error("[%s]Change breaker state failed! %s", this.name, err);
-                callback(err);
-            })
-            .then(() => {
-                this.platform.syncLock._exitSyncState();
-            });
     }
 
     _startAcc() {

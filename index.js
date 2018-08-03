@@ -99,6 +99,8 @@ XiaoMiAcPartner.prototype = {
                     case "climate":
                         accessories.push(new fs_Accessory.ClimateAccessory(element, this));
                         break;
+                    case "breaker":
+                        accessories.push(new fs_Accessory.BreakerAccessory(element, this, true));
                     default:
                         this.log.warn("[WARN]Wrong Type -> %s", element['type']);
                 }
