@@ -12,9 +12,9 @@ class breaker extends base {
         if (standalone === true) {
             this.breakerInfo = new platform.Service.AccessoryInformation();
             this.breakerInfo
-                .setCharacteristic(Characteristic.Manufacturer, 'XiaoMi')
-                .setCharacteristic(Characteristic.Model, 'AC Partner Breaker')
-                .setCharacteristic(Characteristic.SerialNumber, "Undefined");
+                .setCharacteristic(platform.Characteristic.Manufacturer, 'XiaoMi')
+                .setCharacteristic(platform.Characteristic.Model, 'AC Partner Breaker')
+                .setCharacteristic(platform.Characteristic.SerialNumber, "Undefined");
 
             this.services.push(this.breakerInfo);
         } else {
@@ -39,10 +39,10 @@ class breaker extends base {
             .then((data) => {
                 let pstate = data[0];
                 if (pstate == 'off') {
-                    callback(Characteristic.On.NO);
+                    callback(platform.Characteristic.On.NO);
                     this.bState = false;
                 } else if (pstate == 'on') {
-                    callback(Characteristic.On.YES);
+                    callback(platform.Characteristic.On.YES);
                     this.bState = true;
                 } else {
                     throw new Error("Breaker not exist!" + data[0]);
