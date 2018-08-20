@@ -18,6 +18,8 @@ class Base {
             }
         }
 
+        this.services = [];
+
         //Device is not ready
         this.ReadyState = false;
         platform.startEvent.once(this.deviceIndex, () => {

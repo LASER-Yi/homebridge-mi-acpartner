@@ -8,8 +8,6 @@
 
 感谢[takatost](https://github.com/takatost/homebridge-mi-ac-partner)，[miio](https://github.com/aholstenson/miio)，[YinHangCode](https://github.com/YinHangCode/homebridge-mi-aqara)和所有测试开发人员提供支持。
 
-**注意：此插件于0.6.0版本后修改了配置文件，请根据本文修改你的配置文件使插件正常工作。**
-
 **若要查看抓包教程，请访问此项目Github的[Wiki页面](https://github.com/LASER-Yi/homebridge-mi-acpartner/wiki)**
 
 ### Support(支持)
@@ -20,6 +18,8 @@
 | --- | --- |
 | 1代 & 2代 | 功能如下 |
 | 3代（升级版） | 断路器开闭 |
+
+由于三代空调伴侣准备支持使用局域网通信协议进行空调控制，空调控制功能将会逐渐迁移到[Homebridge-Mi-Aqara](https://github.com/YinHangCode/homebridge-mi-aqara)插件中，此插件仅将继续维护红外开关功能
 
 如需要使用空调伴侣中的网关功能，请使用``YinHangCode``提供的[Homebridge-Mi-Aqara](https://github.com/YinHangCode/homebridge-mi-aqara)插件。
 
@@ -425,7 +425,7 @@ sudo npm i -g homebridge-mi-acpartner@beta
 >
 > {空调型号(10)} {电源状态(1)} {模式(1)} {风力(1)} {扫风状态(1)} {设定温度(2,16进制)} {灯光状态(1)} {校验位(直到结束)}
 >
-> [空调状态] – 和你在米家中选择的预设有关
+> (空调型号) – 和你在米家中选择的预设有关
 >
 > (电源状态) – 0为关；1为开
 >
@@ -437,7 +437,7 @@ sudo npm i -g homebridge-mi-acpartner@beta
 >
 > (设定温度) – Hex，为16进制
 >
-> (灯光状态) - 0为开，a或者1为关
+> (灯光状态) - 0为开，a或1为关
 
 
 
@@ -463,7 +463,7 @@ sudo npm i -g homebridge-mi-acpartner@beta
 
 ---
 
-以及，欢迎所有的Pull Requests
+以及欢迎所有的Pull Requests
 
 ### Changelog
 

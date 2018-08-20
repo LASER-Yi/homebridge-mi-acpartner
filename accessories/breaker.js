@@ -5,8 +5,6 @@ class breaker extends base {
     constructor(config, platform, standalone) {
         super(config, platform);
 
-        this.services = [];
-
         this.bState = false;
 
         if (standalone === true) {
@@ -35,14 +33,14 @@ class breaker extends base {
         })) {
             return;
         }
-        const p1 = this.platform.devices[this.deviceIndex].call("get_device_prop", ["lumi.0", "plug_state"])
+        this.platform.devices[this.deviceIndex].call("get_device_prop", ["lumi.0", "plug_state"])
             .then((data) => {
                 let pstate = data[0];
                 if (pstate == 'off') {
-                    callback(platform.Characteristic.On.NO);
+                    callback(this.platform.Characteristic.On.NO);
                     this.bState = false;
                 } else if (pstate == 'on') {
-                    callback(platform.Characteristic.On.YES);
+                    callback(this.platform.Characteristic.On.YES);
                     this.bState = true;
                 } else {
                     throw new Error("Breaker not exist!" + data[0]);
@@ -70,7 +68,7 @@ class breaker extends base {
         this.bState = !this.bState;
         let command = this.bState ? "on" : "off";
 
-        const p1 = this.platform.devices[this.deviceIndex].call("toggle_plug", [command])
+        this.platform.devices[this.deviceIndex].call("toggle_plug", [command])
             .then((data) => {
                 if (data[0] === "ok") {
                     this.log.debug("[DEBUG]Success")
