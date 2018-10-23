@@ -474,6 +474,10 @@ sudo npm i -g homebridge-mi-acpartner@beta
 * 现在可以获取到断路器状态
 * 增加了部分空调码的基础支持
 
+修复:
+
+* 控制到错误的空调伴侣
+
 0.7.1
 
 修改：
