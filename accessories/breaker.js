@@ -35,7 +35,7 @@ class breaker extends base {
         }
         this.platform.devices[this.deviceIndex].call("get_device_prop", ["lumi.0", "plug_state"])
             .then((data) => {
-                let pstate = data[0];
+                var pstate = data[0];
                 if (pstate == 'off') {
                     callback(this.platform.Characteristic.On.NO);
                     this.bState = false;
@@ -66,7 +66,7 @@ class breaker extends base {
             return;
         }
         this.bState = !this.bState;
-        let command = this.bState ? "on" : "off";
+        var command = this.bState ? "on" : "off";
 
         this.platform.devices[this.deviceIndex].call("toggle_plug", [command])
             .then((data) => {

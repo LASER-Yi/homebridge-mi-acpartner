@@ -48,7 +48,7 @@ class baseAC extends base {
     //must have _updateState() function in child class
     _sendCmd(code, callback) {
         //Start send code
-        let command;
+        var command;
         if (code.substr(0, 2) === "FE") {
             this.log.debug("[DEBUG]Sending IR code: %s", code);
             command = 'send_ir_code';
@@ -87,7 +87,7 @@ class baseAC extends base {
         }
 
         //Start generate code
-        let code;
+        var code;
 
         if (!this.customi) {
             //presets
@@ -142,7 +142,8 @@ class baseAC extends base {
         }
 
         //Update CurrentTemperature
-        const p1 = this.outerSensor && this.platform.devices[this.deviceIndex].call('get_device_prop_exp', [
+        const p1 = this.outerSensor && this.platform.devices[this.deviceIndex]
+            .call('get_device_prop_exp', [
             [this.outerSensor, "temperature", "humidity"]
         ])
             .then((senRet) => {
@@ -162,7 +163,8 @@ class baseAC extends base {
 
 
         //Update AC state
-        const p2 = this.platform.devices[this.deviceIndex].call('get_model_and_state', [])
+        const p2 = this.platform.devices[this.deviceIndex]
+            .call('get_model_and_state', [])
             .then((ret) => {
                 if (this.lastPartnerState !== ret[1]) {
                     this.lastPartnerState = ret[1];

@@ -117,7 +117,7 @@ class HeaterCoolerAccessory extends baseAC {
     }
     _getTargetHeaterCoolerState(callback) {
         this._fastSync();
-        let state;
+        var state;
         switch (this.mode) {
             case 0:
                 state = Characteristic.TargetHeaterCoolerState.HEAT;
@@ -229,8 +229,8 @@ class HeaterCoolerAccessory extends baseAC {
     }
     _updateState() {
         //Update Mode and Temperature
-        let target_mode;
-        let current_mode;
+        var target_mode;
+        var current_mode;
         switch (this.mode) {
             case 0:
                 //HEAT
