@@ -34,7 +34,7 @@ class XiaoMiAcPartner{
         this.devices = [];
 
         //Config
-        this.refreshInterval = (typeof config["refreshInterval"]) == "number" ? config["refreshInterval"] : 10 * 60 * 1000;
+        this.refreshInterval = (typeof config["refreshInterval"]) == "number" ? config["refreshInterval"] : 1 * 30 * 1000;
 
         if (!config['accessories']) {
             this.log.error("[ERROR]'accessories' not defined! Please check your 'config.json' file.");

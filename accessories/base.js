@@ -15,7 +15,7 @@ class Base {
 
         //Device is not ready
         this.ReadyState = false;
-        platform.startEvent.once(this.deviceIndex, () => {
+        platform.startEvent.once(this.deviceIndex + "_ready", () => {
             this.log.debug("[%s]Ready", this.name);
             this._startAcc();
         })
