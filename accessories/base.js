@@ -8,14 +8,7 @@ class Base {
         //Search device position
         this.deviceIndex = 0;
         if (config['deviceIp']) {
-            var index = 0;
-            for (var elem in platform.config.devices) {
-                if (elem == config['deviceIp']) {
-                    this.deviceIndex = index;
-                    break;
-                }
-                index++;
-            }
+            this.deviceIndex = this._getDeviceIndex(platform.config.devices, this.config['deviceIp']);
         }
 
         this.services = [];
@@ -27,6 +20,15 @@ class Base {
             this._startAcc();
         })
     }
+
+    _getDeviceIndex(devices, addr) {
+        Object.getOwnPropertyNames(devices).forEach((device, index) => {
+            if (device === addr) {
+                return index
+            }
+        })
+    }
+
     _startAcc() {
         this.ReadyState = true;
     }
