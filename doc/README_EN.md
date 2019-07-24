@@ -61,6 +61,8 @@ You can change your preset in MIJIA app.
 
 If ``customize`` not define, this plugin will auto generate AC code. Your AC may not response your command.
 
+Please, follow this link for find solution, capture signals and fill ``customize`` field: https://github.com/LASER-Yi/homebridge-mi-acpartner/issues/64
+
 ### Config
 
 **Global Config**
