@@ -61,6 +61,34 @@
             "cool": "4",
             "heat": "7",
             "auto": "C"
+        },
+        "description_04": "panasonic_2 extra value",
+        "p2mo": {
+            "cool": "3",
+            "heat": "4",
+            "auto": "0"
+        },
+        "p2wi": {
+            "low": "3",
+            "middle": "5",
+            "high": "7",
+            "auto": "A"
+        },
+        "p2suff": {
+            "off": 113,
+            "cool": {
+                "low": 0,
+                "middle": 32,
+                "high": 64,
+                "auto": 112
+            },
+            "heat":{
+                "low": 16,
+                "middle": 48,
+                "high": 80,
+                "auto": 128
+            },
+            "auto": 2
         }
     },
     "0100010727": {
@@ -71,5 +99,10 @@
     "0100004795": {
         "des": "gree_8",
         "main": "{po}{mo}{wi}{sw}{tt}{li}00090900005002"
+    },
+    "0100002587": {
+        "des": "panasonic_2",
+        "main": "{po}{mo}{wi}{sw}{tt}{po}1000220E004000000060220E00400{p2mo}{po}{p2tt}80{p2wi}F000006600000800006{p2suff}",
+        "extra_value": ["p2mo","p2tt","p2wi","p2suff"]
     }
 }
