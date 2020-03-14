@@ -8,7 +8,7 @@ class Base {
         //Search device position
         this.deviceIndex = 0;
         if (config['deviceIp']) {
-            this.deviceIndex = this._getDeviceIndex(platform.config.devices, this.config['deviceIp']);
+            this.deviceIndex = Object.keys(platform.config.devices).indexOf(this.config['deviceIp']);
         }
 
         this.services = [];
@@ -18,14 +18,6 @@ class Base {
         platform.startEvent.once(this.deviceIndex + "_ready", () => {
             this.log.debug("[%s]Ready", this.name);
             this._startAcc();
-        })
-    }
-
-    _getDeviceIndex(devices, addr) {
-        Object.getOwnPropertyNames(devices).forEach((device, index) => {
-            if (device === addr) {
-                return index
-            }
         })
     }
 
